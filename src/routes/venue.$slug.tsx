@@ -18,7 +18,7 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { SaveButton } from "@/components/site/SaveButton";
 import { getVenue } from "@/lib/directory.functions";
 import { VENUE_SLUG, countySlug } from "@/lib/taxonomy";
-import { canonical, clamp, pageMeta, reviewSchema } from "@/lib/seo";
+import { canonical, clamp, pageMeta, reviewSchema, sourcedReviewSchema } from "@/lib/seo";
 
 export const Route = createFileRoute("/venue/$slug")({
   loader: async ({ params }) => {
@@ -92,7 +92,7 @@ const FAQS = (name: string, capacity: string | null) => [
 ];
 
 function VenueProfile() {
-  const { venue, reviews, similar } = Route.useLoaderData();
+  const { venue, reviews, sourcedReviews, similar } = Route.useLoaderData();
   const gallery = (venue.gallery_images ?? []).slice(0, 12);
   const hero = venue.logo_image ?? gallery[0] ?? null;
   const faqs = FAQS(venue.name, venue.guest_capacity);
@@ -149,7 +149,14 @@ function VenueProfile() {
                 },
               }
             : {}),
-          ...(reviews.length ? { review: reviewSchema(reviews) } : {}),
+          ...(reviews.length || sourcedReviews.length
+            ? {
+                review: [...reviewSchema(reviews), ...sourcedReviewSchema(sourcedReviews)].slice(
+                  0,
+                  10,
+                ),
+              }
+            : {}),
         }}
       />
       <JsonLd
@@ -292,9 +299,18 @@ function VenueProfile() {
             </section>
           ) : null}
 
-          <section>
+          <section id="reviews" className="scroll-mt-24">
             <h2 className="text-3xl">Reviews</h2>
-            {reviews.length === 0 ? (
+            {venue.rating && venue.review_count ? (
+              <div className="mt-3 flex items-center gap-3">
+                <Stars rating={venue.rating} count={venue.review_count} />
+                <span className="text-sm text-muted-foreground">
+                  {venue.rating}/5 from {venue.review_count} couple reviews
+                </span>
+              </div>
+            ) : null}
+
+            {reviews.length === 0 && sourcedReviews.length === 0 ? (
               <p className="mt-3 text-muted-foreground">
                 No written reviews on Wedora yet
                 {venue.rating ? `, though this venue holds a ${venue.rating}/5 rating.` : "."}
@@ -310,9 +326,30 @@ function VenueProfile() {
                     <p className="mt-3 text-sm text-muted-foreground">{review.body}</p>
                   </li>
                 ))}
+                {sourcedReviews.map((review) => (
+                  <li key={review.id} className="rounded-xl border border-border bg-card p-5">
+                    <p className="font-medium">{review.title ?? "Review"}</p>
+                    <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <span>{review.author_name || "Verified couple"}</span>
+                      {review.rating ? <span>· {review.rating}/5</span> : null}
+                      {review.review_date ? (
+                        <span>
+                          ·{" "}
+                          {new Date(review.review_date).toLocaleDateString("en-IE", {
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </span>
+                      ) : null}
+                      {review.source_name ? <span>· via {review.source_name}</span> : null}
+                    </p>
+                    <p className="mt-3 text-sm text-muted-foreground">{review.body}</p>
+                  </li>
+                ))}
               </ul>
             )}
           </section>
+
 
           <section>
             <h2 className="text-3xl">Frequently asked questions</h2>

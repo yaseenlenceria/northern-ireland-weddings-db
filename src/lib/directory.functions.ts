@@ -137,13 +137,19 @@ export const getSupplier = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     if (!supplier) return null;
 
-    const [{ data: reviews }, { data: similar }] = await Promise.all([
+    const [{ data: reviews }, { data: sourced }, { data: similar }] = await Promise.all([
       sb
         .from("reviews")
         .select("id, author_name, rating, title, body, created_at")
         .eq("supplier_id", supplier.id)
         .eq("approved", true)
         .order("created_at", { ascending: false })
+        .limit(20),
+      sb
+        .from("imported_reviews")
+        .select("id, author_name, rating, title, body, review_date, source_name, source_url")
+        .eq("supplier_id", supplier.id)
+        .order("review_date", { ascending: false, nullsFirst: false })
         .limit(20),
       sb
         .from("suppliers")
@@ -157,9 +163,11 @@ export const getSupplier = createServerFn({ method: "GET" })
     return {
       supplier,
       reviews: reviews ?? [],
+      sourcedReviews: sourced ?? [],
       similar: (similar ?? []) as unknown as SupplierCardRow[],
     };
   });
+
 
 export const getVenue = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => z.object({ slug: z.string() }).parse(d))
@@ -173,13 +181,19 @@ export const getVenue = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     if (!venue) return null;
 
-    const [{ data: reviews }, { data: similar }] = await Promise.all([
+    const [{ data: reviews }, { data: sourced }, { data: similar }] = await Promise.all([
       sb
         .from("reviews")
         .select("id, author_name, rating, title, body, created_at")
         .eq("venue_id", venue.id)
         .eq("approved", true)
         .order("created_at", { ascending: false })
+        .limit(20),
+      sb
+        .from("imported_reviews")
+        .select("id, author_name, rating, title, body, review_date, source_name, source_url")
+        .eq("venue_id", venue.id)
+        .order("review_date", { ascending: false, nullsFirst: false })
         .limit(20),
       sb
         .from("venues")
@@ -189,8 +203,14 @@ export const getVenue = createServerFn({ method: "GET" })
         .limit(4),
     ]);
 
-    return { venue, reviews: reviews ?? [], similar: (similar ?? []) as unknown as VenueCardRow[] };
+    return {
+      venue,
+      reviews: reviews ?? [],
+      sourcedReviews: sourced ?? [],
+      similar: (similar ?? []) as unknown as VenueCardRow[],
+    };
   });
+
 
 export const getHomeData = createServerFn({ method: "GET" }).handler(async () => {
   const sb = publicClient();

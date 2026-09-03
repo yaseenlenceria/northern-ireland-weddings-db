@@ -106,6 +106,40 @@ export function reviewSchema(reviews: ReviewRow[]) {
     }));
 }
 
+export type SourcedReviewRow = {
+  id: string;
+  author_name: string | null;
+  rating: number | null;
+  title: string | null;
+  body: string;
+  review_date: string | null;
+  source_name: string | null;
+  source_url: string | null;
+};
+
+/** Review nodes for imported third-party reviews, attributed to their source. */
+export function sourcedReviewSchema(reviews: SourcedReviewRow[]) {
+  return reviews
+    .filter((r) => r.rating)
+    .slice(0, 10)
+    .map((r) => ({
+      "@type": "Review",
+      ...(r.title ? { name: r.title } : {}),
+      reviewBody: r.body,
+      ...(r.review_date ? { datePublished: r.review_date } : {}),
+      author: { "@type": "Person", name: r.author_name || "Verified couple" },
+      ...(r.source_name
+        ? { publisher: { "@type": "Organization", name: r.source_name } }
+        : {}),
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: r.rating,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }));
+}
+
 /** Average of stored review ratings. */
 export function averageRating(reviews: ReviewRow[]) {
   const scored = reviews.filter((r) => typeof r.rating === "number");

@@ -25,6 +25,7 @@ import {
   clamp,
   pageMeta,
   reviewSchema,
+  sourcedReviewSchema,
 } from "@/lib/seo";
 
 export const Route = createFileRoute("/supplier/$slug")({
@@ -101,13 +102,19 @@ const FAQS = (name: string) => [
 ];
 
 function SupplierProfile() {
-  const { supplier, reviews, similar } = Route.useLoaderData();
+  const { supplier, reviews, sourcedReviews, similar } = Route.useLoaderData();
   const category = CATEGORY_BY_KEY.get(supplier.categories?.[0] ?? "");
   const gallery = (supplier.gallery_images ?? []).slice(0, 9);
   const hero = supplier.logo_image ?? gallery[0] ?? null;
   const faqs = FAQS(supplier.name);
-  const avg = averageRating(reviews);
-  const ratingNode = aggregateRating(avg, reviews.length);
+  const allScored = [
+    ...reviews.filter((r) => typeof r.rating === "number").map((r) => r.rating as number),
+    ...sourcedReviews.filter((r) => typeof r.rating === "number").map((r) => r.rating as number),
+  ];
+  const avg = allScored.length
+    ? allScored.reduce((s, r) => s + r, 0) / allScored.length
+    : averageRating(reviews);
+  const ratingNode = aggregateRating(avg, allScored.length);
 
   return (
     <SiteLayout>
@@ -146,7 +153,14 @@ function SupplierProfile() {
               }
             : {}),
           ...(ratingNode ? { aggregateRating: ratingNode } : {}),
-          ...(reviews.length ? { review: reviewSchema(reviews) } : {}),
+          ...(reviews.length || sourcedReviews.length
+            ? {
+                review: [...reviewSchema(reviews), ...sourcedReviewSchema(sourcedReviews)].slice(
+                  0,
+                  10,
+                ),
+              }
+            : {}),
         }}
       />
       <JsonLd
@@ -287,9 +301,9 @@ function SupplierProfile() {
             </section>
           ) : null}
 
-          <section>
+          <section id="reviews" className="scroll-mt-24">
             <h2 className="text-3xl">Reviews</h2>
-            {reviews.length === 0 ? (
+            {reviews.length === 0 && sourcedReviews.length === 0 ? (
               <p className="mt-3 text-muted-foreground">
                 No reviews yet. If you booked {supplier.name}, sign in and be the first to write one.
               </p>
@@ -304,9 +318,30 @@ function SupplierProfile() {
                     <p className="mt-3 text-sm text-muted-foreground">{review.body}</p>
                   </li>
                 ))}
+                {sourcedReviews.map((review) => (
+                  <li key={review.id} className="rounded-xl border border-border bg-card p-5">
+                    <p className="font-medium">{review.title ?? "Review"}</p>
+                    <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <span>{review.author_name || "Verified couple"}</span>
+                      {review.rating ? <span>· {review.rating}/5</span> : null}
+                      {review.review_date ? (
+                        <span>
+                          ·{" "}
+                          {new Date(review.review_date).toLocaleDateString("en-IE", {
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </span>
+                      ) : null}
+                      {review.source_name ? <span>· via {review.source_name}</span> : null}
+                    </p>
+                    <p className="mt-3 text-sm text-muted-foreground">{review.body}</p>
+                  </li>
+                ))}
               </ul>
             )}
           </section>
+
 
           <section>
             <h2 className="text-3xl">Frequently asked questions</h2>
