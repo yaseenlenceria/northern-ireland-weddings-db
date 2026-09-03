@@ -155,7 +155,8 @@ function DirectoryPage() {
   const supplierRows = suppliers?.rows ?? [];
   const venueRows = venues?.rows ?? [];
   const listed = supplierRows.length + venueRows.length;
-  const hasNext = listed === PER_PAGE;
+  const lastPage = Math.max(1, Math.ceil(total / PER_PAGE));
+  const hasNext = page < lastPage;
   const baseSlug = target.category ? target.category.slug : VENUE_SLUG;
   const plural = target.category?.plural ?? "Wedding Venues";
   const singular = target.category?.label ?? "venue";
