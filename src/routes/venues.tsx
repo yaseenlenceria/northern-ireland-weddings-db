@@ -85,7 +85,7 @@ function VenuesPage() {
       to: ".",
       // Defaults are stripped so shared URLs stay clean.
       search: (prev) =>
-        cleanSearch({ q: term, county, capacity, page: 1, ...prev, page: 1, ...next }),
+        cleanSearch({ ...prev, page: 1, ...next }),
       resetScroll: false,
     });
 
