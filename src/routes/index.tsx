@@ -20,7 +20,7 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { getHomeData } from "@/lib/directory.functions";
 import { CATEGORIES, FEATURED_COUNTIES, VENUE_SLUG, countySlug } from "@/lib/taxonomy";
 import { GUIDES } from "@/lib/guides";
-import { SEO_YEAR, canonical, pageMeta } from "@/lib/seo";
+import { SEO_YEAR, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 import heroImage from "@/assets/hero-wedding-ireland.jpg";
 
 const TITLE = "Wedding Suppliers & Venues in Ireland | Wedora Ireland";
@@ -151,23 +151,25 @@ function HomePage() {
           "@graph": [
             {
               "@type": "WebSite",
-              "@id": "/#website",
+              "@id": absoluteUrl("/") + "#website",
+              url: absoluteUrl("/"),
               name: "Wedora Ireland",
               description: DESCRIPTION,
               inLanguage: "en-IE",
-              publisher: { "@id": "/#organization" },
+              publisher: { "@id": absoluteUrl("/") + "#organization" },
               potentialAction: {
                 "@type": "SearchAction",
                 target: {
                   "@type": "EntryPoint",
-                  urlTemplate: "/find-suppliers?q={search_term_string}",
+                  urlTemplate: `${absoluteUrl("/find-suppliers")}?q={search_term_string}`,
                 },
                 "query-input": "required name=search_term_string",
               },
             },
             {
               "@type": "Organization",
-              "@id": "/#organization",
+              "@id": absoluteUrl("/") + "#organization",
+              url: absoluteUrl("/"),
               name: "Wedora Ireland",
               description:
                 "Directory of wedding venues and suppliers across the Republic of Ireland.",

@@ -16,7 +16,7 @@ import {
   parseDirectorySlug,
 } from "@/lib/taxonomy";
 import { euro, priceGuide, weightedRating } from "@/lib/stats";
-import { SEO_YEAR, canonical, clamp, pageMeta } from "@/lib/seo";
+import { SEO_YEAR, absoluteUrl, canonical, clamp, pageMeta } from "@/lib/seo";
 
 const PER_PAGE = 24;
 const TOP_N = 10;
@@ -217,7 +217,7 @@ function DirectoryPage() {
               "@type": "ListItem",
               position: i + 1,
               name: item.name,
-              url: item.path,
+              url: absoluteUrl(item.path),
             })),
           }}
         />
