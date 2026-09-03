@@ -1,11 +1,20 @@
 /**
  * Shared SEO helpers.
  *
- * The project has no public domain yet, so canonical and og:url use relative
- * paths — crawlers resolve them against the serving host at request time.
+ * Canonical and og:url are absolute, built from the project's public domain,
+ * so crawlers and social scrapers resolve one authoritative URL per page.
  */
 
 export const SITE_NAME = "WedList Ireland";
+
+/** Public origin used for canonical, og:url and sitemap entries. */
+export const SITE_URL = "https://northern-ireland-weddings-db.lovable.app";
+
+/** Absolute URL for a site-relative path. */
+export const absoluteUrl = (path: string) =>
+  `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`.replace(/\/$/, "") || SITE_URL;
+
+
 
 /** Current year, used in "Top 10 ... (2026)" style titles. */
 export const SEO_YEAR = new Date().getFullYear();
@@ -36,7 +45,7 @@ export function pageMeta({
     { property: "og:description", content: desc },
     { property: "og:type", content: type },
     { property: "og:site_name", content: SITE_NAME },
-    { property: "og:url", content: path },
+    { property: "og:url", content: absoluteUrl(path) },
     { name: "twitter:card", content: "summary_large_image" },
   ];
   if (image && image.startsWith("https://")) {
@@ -49,7 +58,7 @@ export function pageMeta({
 
 /** Self-referencing canonical for a leaf route. */
 export function canonical(path: string) {
-  return [{ rel: "canonical", href: path }];
+  return [{ rel: "canonical", href: absoluteUrl(path) }];
 }
 
 /** Truncates copy to a safe meta-description length. */

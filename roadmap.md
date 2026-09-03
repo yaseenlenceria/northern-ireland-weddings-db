@@ -17,6 +17,10 @@
 - [ ] Planning tools (checklist, budget, guest list, timeline)
 - [ ] Wedding guides, real weddings, wedding fairs pages
 - [ ] Contact page
+- [x] Absolute canonicals + og:url on public domain
+- [x] /sitemap.xml server route (1,342 URLs: profiles, county/category pages, guides)
+- [x] Removed ?page=1&date= redirect on clean directory URLs
+- [ ] Homepage/site visual redesign (awaiting user taste picks)
 - [ ] SEO pass: titles, descriptions, OG, LocalBusiness/FAQ/Breadcrumb schema
 
 ## Notes
