@@ -1,27 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
-import type { Database } from "@/integrations/supabase/types";
-
-/** Publishable-key client for public directory reads. RLS applies as anon. */
-function publicClient() {
-  const supabaseUrl = process.env["SUPABASE_URL"];
-  const supabaseKey = process.env["SUPABASE_PUBLISHABLE_KEY"];
-
-  if (!supabaseUrl || !supabaseKey) {
-    const missing = [
-      ...(!supabaseUrl ? ["SUPABASE_URL"] : []),
-      ...(!supabaseKey ? ["SUPABASE_PUBLISHABLE_KEY"] : []),
-    ];
-    throw new Error(`Missing Supabase environment variable(s): ${missing.join(", ")}`);
-  }
-
-  return createClient<Database>(
-    supabaseUrl,
-    supabaseKey,
-    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-  );
-}
 
 export const SUPPLIER_CARD_FIELDS =
   "id, slug, name, categories, county, avg_price, avg_price_num, overview, logo_image, gallery_images, featured, service_areas";
@@ -65,10 +43,31 @@ export type VenueCardRow = {
   featured: boolean;
 };
 
+type ReviewRow = {
+  id: string;
+  author_name: string | null;
+  rating: number | null;
+  title: string | null;
+  body: string;
+  created_at?: string;
+  review_date?: string | null;
+  source_name?: string | null;
+  source_url?: string | null;
+};
+
 const emptyListResult = { rows: [], count: 0, page: 1, perPage: 24 };
 
 function logPublicDataError(scope: string, error: unknown) {
   console.error(`[Directory public data] ${scope} failed`, error);
+}
+
+async function db() {
+  const { sql } = await import("@/lib/postgres.server");
+  return sql();
+}
+
+function countValue(rows: { count: string | number }[]) {
+  return Number(rows[0]?.count ?? 0);
 }
 
 const listSuppliersSchema = z.object({
@@ -84,29 +83,28 @@ export const listSuppliers = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const perPage = Math.min(Math.max(data.perPage ?? 24, 1), 60);
     const page = Math.max(data.page ?? 1, 1);
-    const from = (page - 1) * perPage;
+    const offset = (page - 1) * perPage;
 
     try {
-      let query = publicClient()
-        .from("suppliers")
-        .select(SUPPLIER_CARD_FIELDS, { count: "estimated" })
-        .order("featured", { ascending: false })
-        .order("image_count", { ascending: false, nullsFirst: false })
-        .order("name", { ascending: true })
-        .range(from, from + perPage - 1);
-
-      if (data.category) query = query.contains("categories", [data.category]);
-      if (data.county) query = query.eq("county", data.county);
-      if (data.q) query = query.ilike("name", `%${data.q}%`);
-
-      const { data: rows, count, error } = await query;
-      if (error) throw new Error(error.message);
-      return {
-        rows: (rows ?? []) as unknown as SupplierCardRow[],
-        count: count ?? 0,
-        page,
-        perPage,
-      };
+      const sql = await db();
+      const rows = (await sql<SupplierCardRow[]>`
+        SELECT id, slug, name, categories, county, avg_price, avg_price_num, overview,
+               logo_image, gallery_images, featured, service_areas
+        FROM suppliers
+        WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
+          AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+          AND (${data.q ?? null}::text IS NULL OR name ILIKE ${`%${data.q ?? ""}%`})
+        ORDER BY featured DESC, image_count DESC NULLS LAST, name ASC
+        LIMIT ${perPage} OFFSET ${offset}
+      `) as SupplierCardRow[];
+      const count = countValue(await sql<{ count: string }[]>`
+        SELECT count(*)::text AS count
+        FROM suppliers
+        WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
+          AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+          AND (${data.q ?? null}::text IS NULL OR name ILIKE ${`%${data.q ?? ""}%`})
+      `);
+      return { rows, count, page, perPage };
     } catch (error) {
       logPublicDataError("listSuppliers", error);
       return { ...emptyListResult, page, perPage };
@@ -127,25 +125,31 @@ export const listVenues = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const perPage = Math.min(Math.max(data.perPage ?? 24, 1), 60);
     const page = Math.max(data.page ?? 1, 1);
-    const from = (page - 1) * perPage;
+    const offset = (page - 1) * perPage;
 
     try {
-      let query = publicClient()
-        .from("venues")
-        .select(VENUE_CARD_FIELDS, { count: "estimated" })
-        .order("featured", { ascending: false })
-        .order("rating", { ascending: false, nullsFirst: false })
-        .order("name", { ascending: true })
-        .range(from, from + perPage - 1);
-
-      if (data.county) query = query.eq("county", data.county);
-      if (data.q) query = query.ilike("name", `%${data.q}%`);
-      if (data.minCapacity) query = query.gte("capacity_max", data.minCapacity);
-      if (data.venueType) query = query.contains("venue_types", [data.venueType]);
-
-      const { data: rows, count, error } = await query;
-      if (error) throw new Error(error.message);
-      return { rows: (rows ?? []) as unknown as VenueCardRow[], count: count ?? 0, page, perPage };
+      const sql = await db();
+      const rows = (await sql<VenueCardRow[]>`
+        SELECT id, slug, name, county, badge, guest_capacity, capacity_min, capacity_max,
+               per_person_price, per_person_price_num, rating, review_count, overview,
+               logo_image, gallery_images, venue_types, styles, featured
+        FROM venues
+        WHERE (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+          AND (${data.q ?? null}::text IS NULL OR name ILIKE ${`%${data.q ?? ""}%`})
+          AND (${data.minCapacity ?? null}::integer IS NULL OR capacity_max >= ${data.minCapacity ?? 0})
+          AND (${data.venueType ?? null}::text IS NULL OR venue_types @> ARRAY[${data.venueType ?? ""}]::text[])
+        ORDER BY featured DESC, rating DESC NULLS LAST, name ASC
+        LIMIT ${perPage} OFFSET ${offset}
+      `) as VenueCardRow[];
+      const count = countValue(await sql<{ count: string }[]>`
+        SELECT count(*)::text AS count
+        FROM venues
+        WHERE (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+          AND (${data.q ?? null}::text IS NULL OR name ILIKE ${`%${data.q ?? ""}%`})
+          AND (${data.minCapacity ?? null}::integer IS NULL OR capacity_max >= ${data.minCapacity ?? 0})
+          AND (${data.venueType ?? null}::text IS NULL OR venue_types @> ARRAY[${data.venueType ?? ""}]::text[])
+      `);
+      return { rows, count, page, perPage };
     } catch (error) {
       logPublicDataError("listVenues", error);
       return { ...emptyListResult, page, perPage };
@@ -156,127 +160,117 @@ export const getSupplier = createServerFn({ method: "GET" })
   .validator((d: unknown) => z.object({ slug: z.string() }).parse(d))
   .handler(async ({ data }) => {
     try {
-      const sb = publicClient();
-      const { data: supplier, error } = await sb
-        .from("suppliers")
-        .select("*")
-        .eq("slug", data.slug)
-        .maybeSingle();
-      if (error) throw new Error(error.message);
+      const sql = await db();
+      const suppliers = await sql`
+        SELECT *
+        FROM suppliers
+        WHERE slug = ${data.slug}
+        LIMIT 1
+      `;
+      const supplier = suppliers[0];
       if (!supplier) return null;
 
-      const [{ data: reviews }, { data: sourced }, { data: similar }] = await Promise.all([
-        sb
-          .from("reviews")
-          .select("id, author_name, rating, title, body, created_at")
-          .eq("supplier_id", supplier.id)
-          .eq("approved", true)
-          .order("created_at", { ascending: false })
-          .limit(20),
-        sb
-          .from("imported_reviews")
-          .select("id, author_name, rating, title, body, review_date, source_name, source_url")
-          .eq("supplier_id", supplier.id)
-          .order("review_date", { ascending: false, nullsFirst: false })
-          .limit(20),
-        sb
-          .from("suppliers")
-          .select(SUPPLIER_CARD_FIELDS)
-          .contains("categories", [supplier.categories?.[0] ?? ""])
-          .eq("county", supplier.county ?? "")
-          .neq("id", supplier.id)
-          .limit(4),
+      const [sourced, similar] = await Promise.all([
+        sql<ReviewRow[]>`
+          SELECT id, author_name, rating, title, body, review_date, source_name, source_url
+          FROM imported_reviews
+          WHERE supplier_id = ${supplier.id}
+          ORDER BY review_date DESC NULLS LAST, created_at DESC
+          LIMIT 20
+        `,
+        sql<SupplierCardRow[]>`
+          SELECT id, slug, name, categories, county, avg_price, avg_price_num, overview,
+                 logo_image, gallery_images, featured, service_areas
+          FROM suppliers
+          WHERE id <> ${supplier.id}
+            AND county IS NOT DISTINCT FROM ${supplier.county}
+            AND categories && ${supplier.categories ?? []}::text[]
+          ORDER BY featured DESC, image_count DESC NULLS LAST, name ASC
+          LIMIT 4
+        `,
       ]);
 
-      return {
-        supplier,
-        reviews: reviews ?? [],
-        sourcedReviews: sourced ?? [],
-        similar: (similar ?? []) as unknown as SupplierCardRow[],
-      };
+      return { supplier, reviews: [] as ReviewRow[], sourcedReviews: sourced, similar };
     } catch (error) {
       logPublicDataError("getSupplier", error);
       return null;
     }
   });
 
-
 export const getVenue = createServerFn({ method: "GET" })
   .validator((d: unknown) => z.object({ slug: z.string() }).parse(d))
   .handler(async ({ data }) => {
     try {
-      const sb = publicClient();
-      const { data: venue, error } = await sb
-        .from("venues")
-        .select("*")
-        .eq("slug", data.slug)
-        .maybeSingle();
-      if (error) throw new Error(error.message);
+      const sql = await db();
+      const venues = await sql`
+        SELECT *
+        FROM venues
+        WHERE slug = ${data.slug}
+        LIMIT 1
+      `;
+      const venue = venues[0];
       if (!venue) return null;
 
-      const [{ data: reviews }, { data: sourced }, { data: similar }] = await Promise.all([
-        sb
-          .from("reviews")
-          .select("id, author_name, rating, title, body, created_at")
-          .eq("venue_id", venue.id)
-          .eq("approved", true)
-          .order("created_at", { ascending: false })
-          .limit(20),
-        sb
-          .from("imported_reviews")
-          .select("id, author_name, rating, title, body, review_date, source_name, source_url")
-          .eq("venue_id", venue.id)
-          .order("review_date", { ascending: false, nullsFirst: false })
-          .limit(20),
-        sb
-          .from("venues")
-          .select(VENUE_CARD_FIELDS)
-          .eq("county", venue.county ?? "")
-          .neq("id", venue.id)
-          .limit(4),
+      const [sourced, similar] = await Promise.all([
+        sql<ReviewRow[]>`
+          SELECT id, author_name, rating, title, body, review_date, source_name, source_url
+          FROM imported_reviews
+          WHERE venue_id = ${venue.id}
+          ORDER BY review_date DESC NULLS LAST, created_at DESC
+          LIMIT 20
+        `,
+        sql<VenueCardRow[]>`
+          SELECT id, slug, name, county, badge, guest_capacity, capacity_min, capacity_max,
+                 per_person_price, per_person_price_num, rating, review_count, overview,
+                 logo_image, gallery_images, venue_types, styles, featured
+          FROM venues
+          WHERE id <> ${venue.id}
+            AND county IS NOT DISTINCT FROM ${venue.county}
+          ORDER BY featured DESC, rating DESC NULLS LAST, name ASC
+          LIMIT 4
+        `,
       ]);
 
-      return {
-        venue,
-        reviews: reviews ?? [],
-        sourcedReviews: sourced ?? [],
-        similar: (similar ?? []) as unknown as VenueCardRow[],
-      };
+      return { venue, reviews: [] as ReviewRow[], sourcedReviews: sourced, similar };
     } catch (error) {
       logPublicDataError("getVenue", error);
       return null;
     }
   });
 
-
 export const getHomeData = createServerFn({ method: "GET" }).handler(async () => {
   try {
-    const sb = publicClient();
+    const sql = await db();
     const [suppliers, venues, supplierCount, venueCount, fairCount] = await Promise.all([
-      sb
-        .from("suppliers")
-        .select(SUPPLIER_CARD_FIELDS)
-        .not("logo_image", "is", null)
-        .order("image_count", { ascending: false, nullsFirst: false })
-        .limit(8),
-      sb
-        .from("venues")
-        .select(VENUE_CARD_FIELDS)
-        .not("logo_image", "is", null)
-        .order("rating", { ascending: false, nullsFirst: false })
-        .limit(6),
-      sb.from("suppliers").select("id", { count: "exact", head: true }),
-      sb.from("venues").select("id", { count: "exact", head: true }),
-      sb.from("wedding_fairs").select("id", { count: "exact", head: true }),
+      sql<SupplierCardRow[]>`
+        SELECT id, slug, name, categories, county, avg_price, avg_price_num, overview,
+               logo_image, gallery_images, featured, service_areas
+        FROM suppliers
+        WHERE logo_image IS NOT NULL
+        ORDER BY image_count DESC NULLS LAST, featured DESC, name ASC
+        LIMIT 8
+      `,
+      sql<VenueCardRow[]>`
+        SELECT id, slug, name, county, badge, guest_capacity, capacity_min, capacity_max,
+               per_person_price, per_person_price_num, rating, review_count, overview,
+               logo_image, gallery_images, venue_types, styles, featured
+        FROM venues
+        WHERE logo_image IS NOT NULL
+        ORDER BY rating DESC NULLS LAST, image_count DESC NULLS LAST, name ASC
+        LIMIT 6
+      `,
+      sql<{ count: string }[]>`SELECT count(*)::text AS count FROM suppliers`,
+      sql<{ count: string }[]>`SELECT count(*)::text AS count FROM venues`,
+      sql<{ count: string }[]>`SELECT count(*)::text AS count FROM wedding_fairs`,
     ]);
 
     return {
-      suppliers: (suppliers.data ?? []) as unknown as SupplierCardRow[],
-      venues: (venues.data ?? []) as unknown as VenueCardRow[],
+      suppliers,
+      venues,
       counts: {
-        suppliers: supplierCount.count ?? 0,
-        venues: venueCount.count ?? 0,
-        fairs: fairCount.count ?? 0,
+        suppliers: countValue(supplierCount),
+        venues: countValue(venueCount),
+        fairs: countValue(fairCount),
       },
     };
   } catch (error) {
@@ -291,12 +285,12 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
 
 export const listFairs = createServerFn({ method: "GET" }).handler(async () => {
   try {
-    const { data, error } = await publicClient()
-      .from("wedding_fairs")
-      .select("*")
-      .order("name", { ascending: true });
-    if (error) throw new Error(error.message);
-    return data ?? [];
+    const sql = await db();
+    return await sql`
+      SELECT *
+      FROM wedding_fairs
+      ORDER BY name ASC
+    `;
   } catch (error) {
     logPublicDataError("listFairs", error);
     return [];
@@ -309,47 +303,37 @@ const directoryStatsSchema = z.object({
   county: z.string().optional(),
 });
 
-/**
- * Real price and rating spread for a directory page, used for the visible
- * price guide and the FAQ answers. Only stored values are returned — nothing
- * is estimated.
- */
 export const getDirectoryStats = createServerFn({ method: "GET" })
   .validator((d: unknown) => directoryStatsSchema.parse(d))
   .handler(async ({ data }) => {
     try {
-      const sb = publicClient();
+      const sql = await db();
 
       if (data.kind === "venues") {
-        let q = sb
-          .from("venues")
-          .select("per_person_price_num, capacity_max, rating, review_count")
-          .limit(1000);
-        if (data.county) q = q.eq("county", data.county);
-        const { data: rows, error } = await q;
-        if (error) throw new Error(error.message);
+        const rows = await sql<{ per_person_price_num: number | null; capacity_max: number | null; rating: number | null; review_count: number | null }[]>`
+          SELECT per_person_price_num, capacity_max, rating, review_count
+          FROM venues
+          WHERE (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+          LIMIT 1000
+        `;
         return {
-          prices: (rows ?? [])
-            .map((r) => r.per_person_price_num)
-            .filter((n): n is number => typeof n === "number" && n > 0),
-          capacities: (rows ?? [])
-            .map((r) => r.capacity_max)
-            .filter((n): n is number => typeof n === "number" && n > 0),
-          rated: (rows ?? [])
+          prices: rows.map((r) => r.per_person_price_num).filter((n): n is number => typeof n === "number" && n > 0),
+          capacities: rows.map((r) => r.capacity_max).filter((n): n is number => typeof n === "number" && n > 0),
+          rated: rows
             .filter((r) => r.rating && r.review_count)
             .map((r) => ({ rating: r.rating as number, count: r.review_count as number })),
         };
       }
 
-      let q = sb.from("suppliers").select("avg_price_num").limit(1000);
-      if (data.category) q = q.contains("categories", [data.category]);
-      if (data.county) q = q.eq("county", data.county);
-      const { data: rows, error } = await q;
-      if (error) throw new Error(error.message);
+      const rows = await sql<{ avg_price_num: number | null }[]>`
+        SELECT avg_price_num
+        FROM suppliers
+        WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
+          AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+        LIMIT 1000
+      `;
       return {
-        prices: (rows ?? [])
-          .map((r) => r.avg_price_num)
-          .filter((n): n is number => typeof n === "number" && n > 0),
+        prices: rows.map((r) => r.avg_price_num).filter((n): n is number => typeof n === "number" && n > 0),
         capacities: [] as number[],
         rated: [] as { rating: number; count: number }[],
       };
@@ -367,12 +351,12 @@ export const getCountyStats = createServerFn({ method: "GET" })
   .validator((d: unknown) => z.object({ county: z.string() }).parse(d))
   .handler(async ({ data }) => {
     try {
-      const sb = publicClient();
+      const sql = await db();
       const [suppliers, venues] = await Promise.all([
-        sb.from("suppliers").select("id", { count: "exact", head: true }).eq("county", data.county),
-        sb.from("venues").select("id", { count: "exact", head: true }).eq("county", data.county),
+        sql<{ count: string }[]>`SELECT count(*)::text AS count FROM suppliers WHERE county = ${data.county}`,
+        sql<{ count: string }[]>`SELECT count(*)::text AS count FROM venues WHERE county = ${data.county}`,
       ]);
-      return { suppliers: suppliers.count ?? 0, venues: venues.count ?? 0 };
+      return { suppliers: countValue(suppliers), venues: countValue(venues) };
     } catch (error) {
       logPublicDataError("getCountyStats", error);
       return { suppliers: 0, venues: 0 };

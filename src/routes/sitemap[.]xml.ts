@@ -24,33 +24,6 @@ const STATIC_PATHS: SitemapEntry[] = [
   { path: "/contact", changefreq: "yearly", priority: "0.4" },
 ];
 
-function publicClientFetch(key: string) {
-  return (input: RequestInfo | URL, init?: RequestInit) => {
-    const headers = new Headers(init?.headers);
-    // Opaque sb_ keys are not JWTs; send apikey without the default bearer.
-    if (key.startsWith("sb_") && headers.get("Authorization") === `Bearer ${key}`) {
-      headers.delete("Authorization");
-    }
-    headers.set("apikey", key);
-    return fetch(input, { ...init, headers });
-  };
-}
-
-function getSupabaseEnv() {
-  const url = process.env["SUPABASE_URL"];
-  const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
-
-  if (!url || !key) {
-    const missing = [
-      ...(!url ? ["SUPABASE_URL"] : []),
-      ...(!key ? ["SUPABASE_PUBLISHABLE_KEY"] : []),
-    ];
-    throw new Error(`Missing Supabase environment variable(s): ${missing.join(", ")}`);
-  }
-
-  return { url, key };
-}
-
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
@@ -65,48 +38,32 @@ export const Route = createFileRoute("/sitemap.xml")({
         const venueCounties = new Set<string>();
 
         try {
-          const { createClient } = await import("@supabase/supabase-js");
-          const { url, key } = getSupabaseEnv();
-          const supabase = createClient(url, key, {
-            auth: { persistSession: false, autoRefreshToken: false },
-            global: { fetch: publicClientFetch(key) },
-          });
+          const { sql: getSql } = await import("@/lib/postgres.server");
+          const sql = getSql();
 
-          const pageSize = 1000;
-
-          // Supplier profiles.
-          for (let offset = 0; ; offset += pageSize) {
-            const { data, error } = await supabase
-              .from("suppliers")
-              .select("slug, county, categories")
-              .order("slug")
-              .range(offset, offset + pageSize - 1);
-            if (error) throw error;
-            for (const row of data) {
-              entries.push({ path: `/supplier/${row.slug}`, changefreq: "monthly", priority: "0.7" });
-              for (const cat of row.categories ?? []) {
-                if (!row.county) continue;
-                const set = supplierCounties.get(cat) ?? new Set<string>();
-                set.add(row.county);
-                supplierCounties.set(cat, set);
-              }
+          const suppliers = await sql<{ slug: string; county: string | null; categories: string[] | null }[]>`
+            SELECT slug, county, categories
+            FROM suppliers
+            ORDER BY slug ASC
+          `;
+          for (const row of suppliers) {
+            entries.push({ path: `/supplier/${row.slug}`, changefreq: "monthly", priority: "0.7" });
+            for (const cat of row.categories ?? []) {
+              if (!row.county) continue;
+              const set = supplierCounties.get(cat) ?? new Set<string>();
+              set.add(row.county);
+              supplierCounties.set(cat, set);
             }
-            if (data.length < pageSize) break;
           }
 
-          // Venue profiles.
-          for (let offset = 0; ; offset += pageSize) {
-            const { data, error } = await supabase
-              .from("venues")
-              .select("slug, county")
-              .order("slug")
-              .range(offset, offset + pageSize - 1);
-            if (error) throw error;
-            for (const row of data) {
-              entries.push({ path: `/venue/${row.slug}`, changefreq: "monthly", priority: "0.7" });
-              if (row.county) venueCounties.add(row.county);
-            }
-            if (data.length < pageSize) break;
+          const venues = await sql<{ slug: string; county: string | null }[]>`
+            SELECT slug, county
+            FROM venues
+            ORDER BY slug ASC
+          `;
+          for (const row of venues) {
+            entries.push({ path: `/venue/${row.slug}`, changefreq: "monthly", priority: "0.7" });
+            if (row.county) venueCounties.add(row.county);
           }
         } catch (error) {
           console.error("[Sitemap] Database-backed sitemap entries unavailable", error);

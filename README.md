@@ -2,19 +2,26 @@
 
 TanStack Start and React directory website for Northern Ireland wedding venues, suppliers, wedding fairs, planning tools, and enquiries.
 
-The application currently uses Supabase/Postgres for its database and backend layer and is prepared for Vercel deployment.
+The public directory pages use a Postgres database connection and are prepared for Vercel deployment. The legacy Supabase files remain only for auth/planning-tool areas that have not yet been migrated.
 
 ## Vercel Setup
 
-Configure these environment variables in Vercel before building Preview or Production:
+Configure one of these environment variables in Vercel before building Preview or Production:
 
-- `SUPABASE_URL`
-- `SUPABASE_PUBLISHABLE_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_PUBLISHABLE_KEY`
+- `POSTGRES_URL`
+- `DATABASE_URL`
 
 Do not commit real `.env` files. Use `.env.example` as the template.
+
+## Database Import
+
+After creating and connecting a Vercel/Neon Postgres database, load the spreadsheet directory data with:
+
+```sh
+npm run db:import
+```
+
+The importer creates the public directory tables from `db/schema.sql`, then upserts venues, suppliers, wedding fairs, and imported reviews from the local spreadsheet exports.
 
 ## Build with Lovable
 
@@ -39,4 +46,4 @@ npm run dev
 
 ## Migration Status
 
-See `docs/migration-status.md` for the current Laravel-to-Supabase migration status and the remaining blocked source-of-truth mapping work.
+See `docs/migration-status.md` for the current Laravel-to-Postgres migration status and the remaining blocked source-of-truth mapping work.
