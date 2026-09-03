@@ -42,7 +42,7 @@ function buildCopy(opts: {
 
   const title = ranked
     ? `Top ${TOP_N} ${plural} in ${place} ${SEO_YEAR} — Prices & Reviews`
-    : `${plural} in ${place} — ${count} Listed | WedList Ireland`;
+    : `${plural} in ${place} — ${count} Listed | Wedora Ireland`;
 
   const priceBit = priced ? ` Typical spend around ${euro(priced.median)}.` : "";
   const description = clamp(
@@ -183,7 +183,7 @@ function DirectoryPage() {
   }
   faqs.push({
     q: `How many ${plural.toLowerCase()} are listed in ${place}?`,
-    a: `${total.toLocaleString()} ${plural.toLowerCase()} are listed in ${place} on WedList Ireland. The top ${Math.min(TOP_N, total)} on this page are ranked on portfolio depth, published reviews and how complete the listing is.`,
+    a: `${total.toLocaleString()} ${plural.toLowerCase()} are listed in ${place} on Wedora Ireland. The top ${Math.min(TOP_N, total)} on this page are ranked on portfolio depth, published reviews and how complete the listing is.`,
   });
   faqs.push({
     q: `When should we book ${plural.toLowerCase()} in ${place}?`,

@@ -20,7 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Wedding Guest List Planner | WedList Ireland";
+const TITLE = "Wedding Guest List Planner | Wedora Ireland";
 const DESCRIPTION =
   "Free guest list planner for Irish weddings. Track names, sides, party sizes and RSVPs with a live headcount for your venue and caterer.";
 

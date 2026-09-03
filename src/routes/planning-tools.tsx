@@ -4,7 +4,7 @@ import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { canonical, pageMeta } from "@/lib/seo";
 
-const TITLE = "Free Wedding Planning Tools for Irish Couples | WedList Ireland";
+const TITLE = "Free Wedding Planning Tools for Irish Couples | Wedora Ireland";
 const DESCRIPTION =
   "Checklist, budget calculator, guest list planner, supplier shortlist and running order — free planning tools that save as you go.";
 

@@ -10,9 +10,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Sign In or Create a Free Account | WedList Ireland";
+const TITLE = "Sign In or Create a Free Account | Wedora Ireland";
 const DESCRIPTION =
-  "Create a free WedList Ireland account to shortlist suppliers, send enquiries and save your wedding checklist, budget and guest list.";
+  "Create a free Wedora Ireland account to shortlist suppliers, send enquiries and save your wedding checklist, budget and guest list.";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -84,7 +84,7 @@ function AuthPage() {
     <SiteLayout>
       <Section>
         <div className="mx-auto max-w-md">
-          <h1 className="text-center text-3xl">Your WedList account</h1>
+          <h1 className="text-center text-3xl">Your Wedora account</h1>
           <p className="mt-2 text-center text-sm text-muted-foreground">
             Free for couples. Shortlist suppliers, track enquiries and keep your planning tools in
             one place.

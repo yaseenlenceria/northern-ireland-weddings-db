@@ -20,7 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CATEGORIES, COUNTIES } from "@/lib/taxonomy";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "List Your Wedding Business on WedList Ireland";
+const TITLE = "List Your Wedding Business on Wedora Ireland";
 const DESCRIPTION =
   "Get your wedding business in front of Irish couples. Free listing, your own profile page, county and category pages that rank, and enquiries straight to your inbox.";
 
@@ -108,7 +108,7 @@ function ListBusinessPage() {
 
       <PageHeader
         eyebrow="For suppliers"
-        title="List your wedding business on WedList Ireland"
+        title="List your wedding business on Wedora Ireland"
         description="Couples plan their wedding by county and by category. Get listed where they're already looking, and let them enquire in two minutes."
       >
         <Breadcrumbs items={[{ label: "List Your Business" }]} />

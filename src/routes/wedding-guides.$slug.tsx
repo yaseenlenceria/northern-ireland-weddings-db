@@ -17,7 +17,7 @@ export const Route = createFileRoute("/wedding-guides/$slug")({
       return { meta: [{ title: "Guide not found" }, { name: "robots", content: "noindex" }] };
     }
     const { guide } = loaderData;
-    const title = `${guide.title} | WedList Ireland`;
+    const title = `${guide.title} | Wedora Ireland`;
     const path = `/wedding-guides/${params.slug}`;
     return {
       meta: pageMeta({
@@ -60,8 +60,8 @@ function GuidePage() {
           headline: guide.title,
           description: guide.excerpt,
           articleSection: guide.topic,
-          author: { "@type": "Organization", name: "WedList Ireland" },
-          publisher: { "@type": "Organization", name: "WedList Ireland" },
+          author: { "@type": "Organization", name: "Wedora Ireland" },
+          publisher: { "@type": "Organization", name: "Wedora Ireland" },
         }}
       />
 

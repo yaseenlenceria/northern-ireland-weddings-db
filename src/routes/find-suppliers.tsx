@@ -21,9 +21,9 @@ import { listSuppliers } from "@/lib/directory.functions";
 import { CATEGORIES, COUNTIES } from "@/lib/taxonomy";
 import { canonical, pageMeta } from "@/lib/seo";
 
-const TITLE = "Find Wedding Suppliers in Ireland | WedList Ireland";
+const TITLE = "Find Wedding Suppliers in Ireland | Wedora Ireland";
 const DESCRIPTION =
-  "Search every wedding supplier on WedList Ireland by category, county and name — photographers, bands, florists, planners, celebrants and more.";
+  "Search every wedding supplier on Wedora Ireland by category, county and name — photographers, bands, florists, planners, celebrants and more.";
 
 export const Route = createFileRoute("/find-suppliers")({
   head: () => ({

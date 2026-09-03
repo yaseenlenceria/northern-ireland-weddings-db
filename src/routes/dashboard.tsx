@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "My Wedding Dashboard | WedList Ireland";
+const TITLE = "My Wedding Dashboard | Wedora Ireland";
 const DESCRIPTION =
   "Your shortlisted wedding suppliers and venues, the enquiries you've sent and quick links to your planning tools.";
 
