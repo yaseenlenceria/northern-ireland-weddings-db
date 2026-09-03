@@ -142,7 +142,7 @@ export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number 
           <p className="line-clamp-3b mt-2 text-sm text-muted-foreground">{venue.overview}</p>
         ) : null}
 
-        <dl className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+        <dl className="mt-3 mb-4 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
           <div>
             <dt className="eyebrow">Capacity</dt>
             <dd className="text-foreground/85">{venue.guest_capacity ?? "On request"}</dd>
@@ -153,7 +153,7 @@ export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number 
           </div>
         </dl>
 
-        <div className="mt-4 flex justify-end gap-2 border-t border-border pt-3">
+        <div className="mt-auto flex justify-end gap-2 border-t border-border pt-3">
           <Button asChild size="sm" variant="outline">
             <Link to="/venue/$slug" params={{ slug: venue.slug }}>
               View
