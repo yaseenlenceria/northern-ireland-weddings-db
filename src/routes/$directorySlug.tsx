@@ -329,36 +329,39 @@ function DirectoryPage() {
                 ))}
               </div>
 
-              {page > 1 || hasNext ? (
-                <div className="mt-10 flex justify-center gap-3">
-                  <Button
-                    asChild
-                    variant="outline"
-                    className={page <= 1 ? "pointer-events-none opacity-50" : ""}
-                  >
-                    <Link
-                      to="/$directorySlug"
-                      params={{ directorySlug }}
-                      search={{ page: Math.max(page - 1, 1) }}
-                    >
-                      Previous
-                    </Link>
-                  </Button>
-                  <span className="self-center text-sm text-muted-foreground">Page {page}</span>
-                  <Button
-                    asChild
-                    variant="outline"
-                    className={hasNext ? "" : "pointer-events-none opacity-50"}
-                  >
-                    <Link
-                      to="/$directorySlug"
-                      params={{ directorySlug }}
-                      search={{ page: page + 1 }}
-                    >
-                      Next
-                    </Link>
-                  </Button>
-                </div>
+              {lastPage > 1 ? (
+                <nav
+                  className="mt-10 flex flex-wrap items-center justify-center gap-3"
+                  aria-label="Pagination"
+                >
+                  {page > 1 ? (
+                    <Button asChild variant="outline">
+                      <Link
+                        to="/$directorySlug"
+                        params={{ directorySlug }}
+                        search={page - 1 > 1 ? { page: page - 1 } : {}}
+                        rel="prev"
+                      >
+                        Previous
+                      </Link>
+                    </Button>
+                  ) : null}
+                  <span className="text-sm text-muted-foreground">
+                    Page {page} of {lastPage}
+                  </span>
+                  {hasNext ? (
+                    <Button asChild variant="outline">
+                      <Link
+                        to="/$directorySlug"
+                        params={{ directorySlug }}
+                        search={{ page: page + 1 }}
+                        rel="next"
+                      >
+                        Next
+                      </Link>
+                    </Button>
+                  ) : null}
+                </nav>
               ) : null}
             </Section>
           ) : null}
