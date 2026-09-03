@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button";
 import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { SupplierCard, VenueCard } from "@/components/site/Cards";
+import { Breadcrumbs as _Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
+import { JsonLd } from "@/components/site/JsonLd";
 import { getCountyStats, listSuppliers, listVenues } from "@/lib/directory.functions";
 import { CATEGORIES, VENUE_SLUG, countyFromSlug, countySlug } from "@/lib/taxonomy";
+import { SEO_YEAR, canonical, clamp, pageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/county/$county")({
   loader: async ({ params }) => {
