@@ -7,8 +7,9 @@
 /*
  * WedList Ireland design system.
  * Palette: ivory / soft white grounds, sage green primary, muted gold accent,
- * charcoal text. Headings use a high-contrast serif, body a humanist sans.
+ * charcoal text. Type: Outfit for headings and display, Figtree for body.
  */
+
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
