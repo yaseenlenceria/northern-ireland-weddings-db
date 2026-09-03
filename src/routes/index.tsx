@@ -145,7 +145,10 @@ function HomePage() {
       !(s.categories ?? []).some((c) => excludedCategories.has(c)),
   );
 
-  const featuredSuppliers = (preferred.length >= 8 ? preferred : suppliers).slice(0, 8);
+  const wedding = suppliers.filter(
+    (s) => !(s.categories ?? []).some((c) => excludedCategories.has(c)),
+  );
+  const featuredSuppliers = (preferred.length >= 8 ? preferred : wedding).slice(0, 8);
 
 
   return (

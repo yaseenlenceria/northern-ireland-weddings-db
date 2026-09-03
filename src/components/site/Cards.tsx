@@ -70,10 +70,14 @@ export function SupplierCard({
         ) : null}
 
         {supplier.overview ? (
-          <p className="line-clamp-3b mt-2 text-sm text-muted-foreground">{supplier.overview}</p>
-        ) : null}
+          <p className="line-clamp-3b mt-2 mb-4 text-sm text-muted-foreground">
+            {supplier.overview}
+          </p>
+        ) : (
+          <div className="mb-4" />
+        )}
 
-        <div className="mt-4 flex items-center justify-between gap-2 border-t border-border pt-3">
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-border pt-3">
           <span className="text-xs text-muted-foreground">
             {supplier.avg_price ? supplier.avg_price : "Request pricing"}
           </span>
