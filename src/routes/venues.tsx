@@ -58,7 +58,12 @@ export const Route = createFileRoute("/venues")({
 });
 
 /** Drops default-valued params so /venues stays /venues. */
-function cleanSearch(s: { q?: string; county?: string; capacity?: string; page?: number }) {
+function cleanSearch(s: {
+  q?: string | undefined;
+  county?: string | undefined;
+  capacity?: string | undefined;
+  page?: number | undefined;
+}) {
   return {
     ...(s.q ? { q: s.q } : {}),
     ...(s.county && s.county !== "all" ? { county: s.county } : {}),

@@ -48,7 +48,12 @@ export const Route = createFileRoute("/find-suppliers")({
 });
 
 /** Drops default-valued params so /find-suppliers stays /find-suppliers. */
-function cleanSearch(s: { q?: string; category?: string; county?: string; page?: number }) {
+function cleanSearch(s: {
+  q?: string | undefined;
+  category?: string | undefined;
+  county?: string | undefined;
+  page?: number | undefined;
+}) {
   return {
     ...(s.q ? { q: s.q } : {}),
     ...(s.category && s.category !== "all" ? { category: s.category } : {}),
