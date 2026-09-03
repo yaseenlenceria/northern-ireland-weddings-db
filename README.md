@@ -1,6 +1,6 @@
-# Northern Ireland Weddings Directory
+# Niamh Weddings Ireland Directory
 
-TanStack Start and React directory website for Northern Ireland wedding venues, suppliers, wedding fairs, planning tools, and enquiries.
+TanStack Start and React directory website for Irish wedding venues, suppliers, wedding fairs, planning tools, and enquiries.
 
 The public directory pages use a Postgres database connection and are prepared for Vercel deployment. The legacy Supabase files remain only for auth/planning-tool areas that have not yet been migrated.
 

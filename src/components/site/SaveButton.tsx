@@ -3,7 +3,7 @@ import { Heart } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
-const STORAGE_KEY = "wedora-shortlist";
+const STORAGE_KEY = "niamh-weddings-shortlist";
 
 export type ShortlistItem = {
   id: string;
@@ -72,7 +72,7 @@ export function SaveButton({
       ...items,
     ].slice(0, 100);
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    window.dispatchEvent(new Event("wedora-shortlist-updated"));
+    window.dispatchEvent(new Event("niamh-weddings-shortlist-updated"));
     setSaved(true);
     toast.success("Added to your shortlist.");
   };

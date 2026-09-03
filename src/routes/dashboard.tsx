@@ -10,7 +10,7 @@ import { neonAuth } from "@/integrations/neon/auth-client";
 import { useAuth } from "@/hooks/useAuth";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "My Wedding Dashboard | Wedora Ireland";
+const TITLE = "My Wedding Dashboard | Niamh Weddings";
 const DESCRIPTION =
   "Your browser-saved shortlist, quick links to wedding planning tools and account controls.";
 
@@ -55,10 +55,10 @@ function DashboardPage() {
   useEffect(() => {
     const sync = () => setShortlist(getShortlistItems());
     sync();
-    window.addEventListener("wedora-shortlist-updated", sync);
+    window.addEventListener("niamh-weddings-shortlist-updated", sync);
     window.addEventListener("storage", sync);
     return () => {
-      window.removeEventListener("wedora-shortlist-updated", sync);
+      window.removeEventListener("niamh-weddings-shortlist-updated", sync);
       window.removeEventListener("storage", sync);
     };
   }, []);

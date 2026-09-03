@@ -15,10 +15,10 @@ import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Wedding Guest List Planner | Wedora Ireland";
+const TITLE = "Wedding Guest List Planner | Niamh Weddings";
 const DESCRIPTION =
   "Free guest list planner for Irish weddings. Track names, sides, seats and RSVPs with a live headcount in your browser.";
-const STORAGE_KEY = "wedora-guest-list";
+const STORAGE_KEY = "niamh-weddings-guest-list";
 const SIDES = ["Bride", "Groom", "Both", "Other"];
 const RSVPS = ["pending", "yes", "no"];
 

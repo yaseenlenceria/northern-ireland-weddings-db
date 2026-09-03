@@ -1,5 +1,5 @@
 /**
- * Wedora Ireland taxonomy.
+ * Niamh Weddings taxonomy.
  *
  * Maps the raw category slugs stored on supplier rows (imported from the
  * directory spreadsheet) to public-facing URL slugs and display labels, and

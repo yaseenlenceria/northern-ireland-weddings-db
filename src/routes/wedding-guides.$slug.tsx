@@ -8,7 +8,7 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { ListingImage } from "@/components/site/ListingImage";
 import { getGuideHighlights } from "@/lib/directory.functions";
 import { GUIDES, GUIDE_BY_SLUG } from "@/lib/guides";
-import { canonical, clamp, pageMeta } from "@/lib/seo";
+import { SITE_NAME, canonical, clamp, pageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/wedding-guides/$slug")({
   loader: ({ params }) => {
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/wedding-guides/$slug")({
       return { meta: [{ title: "Guide not found" }, { name: "robots", content: "noindex" }] };
     }
     const { guide } = loaderData;
-    const title = `${guide.title} | Wedora Ireland`;
+    const title = `${guide.title} | ${SITE_NAME}`;
     const path = `/wedding-guides/${params.slug}`;
     return {
       meta: pageMeta({
@@ -69,8 +69,8 @@ function GuidePage() {
           headline: guide.title,
           description: guide.excerpt,
           articleSection: guide.topic,
-          author: { "@type": "Organization", name: "Wedora Ireland" },
-          publisher: { "@type": "Organization", name: "Wedora Ireland" },
+          author: { "@type": "Organization", name: SITE_NAME },
+          publisher: { "@type": "Organization", name: SITE_NAME },
         }}
       />
 

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, X, Heart, LogIn } from "lucide-react";
+import { Menu, X, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { BrandLink } from "@/components/site/BrandMark";
 
 const NAV = [
   { to: "/find-suppliers", label: "Find Suppliers" },
@@ -21,14 +22,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center gap-6 px-4 sm:px-6">
-        <Link to="/" className="flex shrink-0 items-center gap-2" onClick={() => setOpen(false)}>
-          <span className="flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <Heart className="size-4" />
-          </span>
-          <span className="font-serif text-xl leading-none tracking-tight">
-            Wedora <span className="text-primary">Ireland</span>
-          </span>
-        </Link>
+        <BrandLink onClick={() => setOpen(false)} />
 
         <nav aria-label="Main" className="hidden flex-1 items-center gap-1 lg:flex">
           {NAV.map((item) => (

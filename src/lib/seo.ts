@@ -5,10 +5,11 @@
  * so crawlers and social scrapers resolve one authoritative URL per page.
  */
 
-export const SITE_NAME = "Wedora Ireland";
+export const SITE_NAME = "Niamh Weddings";
 
 /** Public origin used for canonical, og:url and sitemap entries. */
-export const SITE_URL = "https://northern-ireland-weddings-db.vercel.app";
+export const SITE_URL =
+  import.meta.env["VITE_SITE_URL"] ?? "https://northern-ireland-weddings-db.vercel.app";
 
 /** Absolute URL for a site-relative path. */
 export const absoluteUrl = (path: string) =>

@@ -23,9 +23,9 @@ import { getSupplierCategoryCounts, listSuppliers } from "@/lib/directory.functi
 import { CATEGORIES, COUNTIES } from "@/lib/taxonomy";
 import { canonical, pageMeta } from "@/lib/seo";
 
-const TITLE = "Find Wedding Suppliers in Ireland | Wedora Ireland";
+const TITLE = "Find Wedding Suppliers in Ireland | Niamh Weddings";
 const DESCRIPTION =
-  "Search every wedding supplier on Wedora Ireland by category, county and name — photographers, bands, florists, planners, celebrants and more.";
+  "Search every wedding supplier on Niamh Weddings by category, county and name — photographers, bands, florists, planners, celebrants and more.";
 
 const PER_PAGE = 24;
 

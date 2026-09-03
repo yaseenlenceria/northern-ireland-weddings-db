@@ -20,10 +20,10 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { getHomeData } from "@/lib/directory.functions";
 import { CATEGORIES, FEATURED_COUNTIES, VENUE_SLUG, countySlug } from "@/lib/taxonomy";
 import { GUIDES } from "@/lib/guides";
-import { absoluteUrl, canonical, pageMeta } from "@/lib/seo";
+import { SITE_NAME, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 import heroImage from "@/assets/hero-wedding-ireland.jpg";
 
-const TITLE = "Wedding Suppliers & Venues in Ireland | Wedora Ireland";
+const TITLE = "Wedding Suppliers & Venues in Ireland | Niamh Weddings";
 const DESCRIPTION =
   "Compare Irish wedding suppliers and venues across every county. Live directory counts, real prices, reviews and free direct enquiries.";
 
@@ -151,7 +151,7 @@ function HomePage() {
               "@type": "WebSite",
               "@id": absoluteUrl("/") + "#website",
               url: absoluteUrl("/"),
-              name: "Wedora Ireland",
+              name: SITE_NAME,
               description: DESCRIPTION,
               inLanguage: "en-IE",
               publisher: { "@id": absoluteUrl("/") + "#organization" },
@@ -168,7 +168,8 @@ function HomePage() {
               "@type": "Organization",
               "@id": absoluteUrl("/") + "#organization",
               url: absoluteUrl("/"),
-              name: "Wedora Ireland",
+              name: SITE_NAME,
+              logo: absoluteUrl("/logo.svg"),
               description:
                 "Directory of wedding venues and suppliers across the Republic of Ireland.",
               areaServed: { "@type": "Country", name: "Ireland" },
@@ -394,7 +395,7 @@ function HomePage() {
       {/* Why */}
       <Section
         tone="ivory"
-        title="Why couples use Wedora Ireland"
+        title="Why couples use Niamh Weddings"
         description="A directory built to be read, not clicked through."
       >
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">

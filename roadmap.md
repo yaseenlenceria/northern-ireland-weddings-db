@@ -1,4 +1,4 @@
-# Wedora Ireland — Roadmap
+# Niamh Weddings — Roadmap
 
 ## Tasks
 - [x] Enable Lovable Cloud
