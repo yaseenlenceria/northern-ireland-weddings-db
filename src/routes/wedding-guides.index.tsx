@@ -3,6 +3,7 @@ import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { GUIDES } from "@/lib/guides";
 import { ArrowRight } from "lucide-react";
+import { canonical, pageMeta } from "@/lib/seo";
 
 const TITLE = "Wedding Guides for Irish Couples | WedList Ireland";
 const DESCRIPTION =
@@ -10,14 +11,8 @@ const DESCRIPTION =
 
 export const Route = createFileRoute("/wedding-guides/")({
   head: () => ({
-    meta: [
-      { title: TITLE },
-      { name: "description", content: DESCRIPTION },
-      { property: "og:title", content: TITLE },
-      { property: "og:description", content: DESCRIPTION },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
+    meta: pageMeta({ title: TITLE, description: DESCRIPTION, path: "/wedding-guides" }),
+    links: canonical("/wedding-guides"),
   }),
   component: GuidesIndex,
 });

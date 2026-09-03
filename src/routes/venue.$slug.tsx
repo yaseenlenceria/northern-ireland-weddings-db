@@ -18,6 +18,7 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { SaveButton } from "@/components/site/SaveButton";
 import { getVenue } from "@/lib/directory.functions";
 import { VENUE_SLUG, countySlug } from "@/lib/taxonomy";
+import { canonical, clamp, pageMeta, reviewSchema } from "@/lib/seo";
 
 export const Route = createFileRoute("/venue/$slug")({
   loader: async ({ params }) => {
@@ -25,33 +26,28 @@ export const Route = createFileRoute("/venue/$slug")({
     if (!result) throw notFound();
     return result;
   },
-  head: ({ loaderData }) => {
+  head: ({ params, loaderData }) => {
     if (!loaderData) {
       return { meta: [{ title: "Venue not found" }, { name: "robots", content: "noindex" }] };
     }
     const v = loaderData.venue;
-    const title = `${v.name} — Wedding Venue${v.county ? ` in Co. ${v.county}` : ""} | WedList Ireland`;
-    const description = (
-      v.overview ??
-      v.description ??
-      `${v.name} is a wedding venue listed on WedList Ireland.`
-    ).slice(0, 155);
-    const image = v.logo_image ?? v.gallery_images?.[0] ?? null;
+    const place = v.county ? `Co. ${v.county}` : "Ireland";
+    const title = `${v.name} — Wedding Venue in ${place} | Prices & Capacity`;
+    const bits = [
+      v.rating && v.review_count ? `Rated ${v.rating}/5 from ${v.review_count} reviews.` : "",
+      v.guest_capacity ? `Capacity ${v.guest_capacity}.` : "",
+      v.per_person_price ? `From ${v.per_person_price} per person.` : "",
+      v.overview ?? v.description ?? "",
+    ].filter(Boolean);
+    const path = `/venue/${params.slug}`;
     return {
-      meta: [
-        { title },
-        { name: "description", content: description },
-        { property: "og:title", content: title },
-        { property: "og:description", content: description },
-        { property: "og:type", content: "website" },
-        { name: "twitter:card", content: "summary_large_image" },
-        ...(image?.startsWith("https://")
-          ? [
-              { property: "og:image", content: image },
-              { name: "twitter:image", content: image },
-            ]
-          : []),
-      ],
+      meta: pageMeta({
+        title,
+        description: clamp(bits.join(" ")),
+        path,
+        image: v.logo_image ?? v.gallery_images?.[0] ?? null,
+      }),
+      links: canonical(path),
     };
   },
   component: VenueProfile,
@@ -138,6 +134,7 @@ function VenueProfile() {
                 },
               }
             : {}),
+          ...(reviews.length ? { review: reviewSchema(reviews) } : {}),
         }}
       />
       <JsonLd

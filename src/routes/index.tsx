@@ -20,22 +20,18 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { getHomeData } from "@/lib/directory.functions";
 import { CATEGORIES, FEATURED_COUNTIES, VENUE_SLUG, countySlug } from "@/lib/taxonomy";
 import { GUIDES } from "@/lib/guides";
+import { SEO_YEAR, canonical, pageMeta } from "@/lib/seo";
+import heroImage from "@/assets/hero-wedding-ireland.jpg";
 
-const TITLE = "WedList Ireland — Find Trusted Wedding Suppliers Across Ireland";
+const TITLE = "Wedding Suppliers & Venues in Ireland | WedList Ireland";
 const DESCRIPTION =
-  "Search real Irish wedding venues, planners, photographers, bands, florists and more. Compare listings by county, send direct enquiries and plan with free tools.";
+  "Compare 785 wedding suppliers and 206 venues across every Irish county. Ranked top 10 lists, real prices, reviews and free direct enquiries.";
 
 export const Route = createFileRoute("/")({
   loader: () => getHomeData(),
   head: () => ({
-    meta: [
-      { title: TITLE },
-      { name: "description", content: DESCRIPTION },
-      { property: "og:title", content: TITLE },
-      { property: "og:description", content: DESCRIPTION },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
+    meta: pageMeta({ title: TITLE, description: DESCRIPTION, path: "/" }),
+    links: canonical("/"),
   }),
   component: HomePage,
 });
@@ -86,6 +82,16 @@ const TOOLS = [
   },
 ];
 
+/** Ranked city pages used for the "Top 10 by city" hub. */
+const TOP_CITIES = ["Dublin", "Cork", "Galway", "Kerry", "Limerick", "Mayo"];
+const TOP_CITY_CATEGORIES = [
+  VENUE_SLUG,
+  "wedding-photographers",
+  "wedding-bands",
+  "wedding-florists",
+  "wedding-singers",
+];
+
 const REASONS = [
   {
     icon: Search,
@@ -123,44 +129,86 @@ function HomePage() {
       <JsonLd
         data={{
           "@context": "https://schema.org",
-          "@type": "WebSite",
-          name: "WedList Ireland",
-          description: DESCRIPTION,
+          "@graph": [
+            {
+              "@type": "WebSite",
+              "@id": "/#website",
+              name: "WedList Ireland",
+              description: DESCRIPTION,
+              inLanguage: "en-IE",
+              publisher: { "@id": "/#organization" },
+              potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate: "/find-suppliers?q={search_term_string}",
+                },
+                "query-input": "required name=search_term_string",
+              },
+            },
+            {
+              "@type": "Organization",
+              "@id": "/#organization",
+              name: "WedList Ireland",
+              description:
+                "Directory of wedding venues and suppliers across the Republic of Ireland.",
+              areaServed: { "@type": "Country", name: "Ireland" },
+            },
+          ],
         }}
       />
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-border bg-ivory">
         <div className="pointer-events-none absolute -right-32 -top-32 size-[28rem] rounded-full bg-primary-soft blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-40 -left-24 size-[24rem] rounded-full bg-gold/15 blur-3xl" />
-        <div className="relative mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
-          <p className="eyebrow text-primary">Ireland's wedding directory</p>
-          <h1 className="mt-3 max-w-3xl text-4xl leading-[1.1] sm:text-5xl lg:text-6xl">
-            Find Trusted Wedding Suppliers Across Ireland
-          </h1>
-          <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
-            Discover venues, planners, singers, photographers, florists and more for your perfect
-            Irish wedding.
-          </p>
+        <div className="relative mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-20">
+          <div>
+            <p className="eyebrow text-primary">Ireland's wedding directory</p>
+            <h1 className="mt-3 text-4xl leading-[1.05] sm:text-5xl lg:text-6xl">
+              Wedding suppliers and venues across Ireland
+            </h1>
+            <p className="mt-5 max-w-xl text-lg text-muted-foreground">
+              {counts.suppliers.toLocaleString()} suppliers and {counts.venues.toLocaleString()}{" "}
+              venues, county by county — with real price guides, published reviews and enquiries
+              that go straight to the supplier.
+            </p>
 
-          <div className="mt-8 max-w-4xl">
-            <SearchBar />
+            <div className="mt-8">
+              <SearchBar />
+            </div>
+
+            <dl className="mt-10 flex flex-wrap gap-x-10 gap-y-4 text-sm">
+              <div>
+                <dt className="eyebrow text-muted-foreground">Suppliers listed</dt>
+                <dd className="font-serif text-2xl">{counts.suppliers.toLocaleString()}</dd>
+              </div>
+              <div>
+                <dt className="eyebrow text-muted-foreground">Venues listed</dt>
+                <dd className="font-serif text-2xl">{counts.venues.toLocaleString()}</dd>
+              </div>
+              <div>
+                <dt className="eyebrow text-muted-foreground">Wedding fairs</dt>
+                <dd className="font-serif text-2xl">{counts.fairs.toLocaleString()}</dd>
+              </div>
+            </dl>
           </div>
 
-          <dl className="mt-10 flex flex-wrap gap-x-10 gap-y-4 text-sm">
-            <div>
-              <dt className="eyebrow text-muted-foreground">Suppliers listed</dt>
-              <dd className="font-serif text-2xl">{counts.suppliers.toLocaleString()}</dd>
+          <div className="relative">
+            <img
+              src={heroImage}
+              alt="Bride and groom walking through the gardens of an Irish country house wedding venue"
+              width={1600}
+              height={1104}
+              className="aspect-4/5 w-full rounded-2xl object-cover shadow-lift sm:aspect-16/12 lg:aspect-4/5"
+            />
+            <div className="absolute -bottom-5 left-5 right-5 rounded-xl border border-border bg-card/95 p-4 shadow-lift backdrop-blur sm:left-8 sm:right-auto sm:max-w-xs">
+              <p className="eyebrow text-primary">Ranked lists</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Top 10 pages for every category in every county, ranked on portfolios and real
+                review scores.
+              </p>
             </div>
-            <div>
-              <dt className="eyebrow text-muted-foreground">Venues listed</dt>
-              <dd className="font-serif text-2xl">{counts.venues.toLocaleString()}</dd>
-            </div>
-            <div>
-              <dt className="eyebrow text-muted-foreground">Wedding fairs</dt>
-              <dd className="font-serif text-2xl">{counts.fairs.toLocaleString()}</dd>
-            </div>
-          </dl>
+          </div>
         </div>
       </section>
 
@@ -231,6 +279,46 @@ function HomePage() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {venues.map((venue) => (
             <VenueCard key={venue.id} venue={venue} />
+          ))}
+        </div>
+      </Section>
+
+      {/* Top 10 by city */}
+      <Section
+        tone="ivory"
+        title={`Top 10 lists by county (${SEO_YEAR})`}
+        description="Every category is ranked county by county on portfolio depth and published review scores. Start where you're getting married."
+      >
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {TOP_CITIES.map((county) => (
+            <div key={county} className="rounded-xl border border-border bg-card p-5 shadow-soft">
+              <h3 className="font-serif text-lg">
+                <Link
+                  to="/county/$county"
+                  params={{ county: countySlug(county) }}
+                  className="hover:text-primary"
+                >
+                  Co. {county}
+                </Link>
+              </h3>
+              <ul className="mt-3 space-y-1.5 text-sm">
+                {TOP_CITY_CATEGORIES.map((slug) => {
+                  const category = CATEGORIES.find((c) => c.slug === slug);
+                  const label = category ? category.plural : "Wedding Venues";
+                  return (
+                    <li key={slug}>
+                      <Link
+                        to="/$directorySlug"
+                        params={{ directorySlug: `${slug}-${countySlug(county)}` }}
+                        className="text-muted-foreground hover:text-primary"
+                      >
+                        Top 10 {label.toLowerCase()} in {county}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           ))}
         </div>
       </Section>

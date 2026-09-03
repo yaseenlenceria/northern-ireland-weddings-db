@@ -15,8 +15,17 @@ import { SupplierCard } from "@/components/site/Cards";
 import { EnquiryForm } from "@/components/site/EnquiryForm";
 import { JsonLd } from "@/components/site/JsonLd";
 import { SaveButton } from "@/components/site/SaveButton";
+import { Stars } from "@/components/site/Stars";
 import { getSupplier } from "@/lib/directory.functions";
 import { CATEGORY_BY_KEY, countySlug } from "@/lib/taxonomy";
+import {
+  aggregateRating,
+  averageRating,
+  canonical,
+  clamp,
+  pageMeta,
+  reviewSchema,
+} from "@/lib/seo";
 
 export const Route = createFileRoute("/supplier/$slug")({
   loader: async ({ params }) => {
@@ -24,34 +33,31 @@ export const Route = createFileRoute("/supplier/$slug")({
     if (!result) throw notFound();
     return result;
   },
-  head: ({ loaderData }) => {
+  head: ({ params, loaderData }) => {
     if (!loaderData) {
       return { meta: [{ title: "Supplier not found" }, { name: "robots", content: "noindex" }] };
     }
     const s = loaderData.supplier;
     const category = CATEGORY_BY_KEY.get(s.categories?.[0] ?? "")?.label ?? "Wedding supplier";
-    const title = `${s.name} — ${category}${s.county ? `, Co. ${s.county}` : ""} | WedList Ireland`;
-    const description = (
-      s.overview ??
-      s.description ??
-      `${s.name} is a ${category.toLowerCase()} listed on WedList Ireland.`
-    ).slice(0, 155);
-    const image = s.logo_image ?? s.gallery_images?.[0] ?? null;
+    const place = s.county ? `Co. ${s.county}` : "Ireland";
+    const avg = averageRating(loaderData.reviews);
+    const title = `${s.name} — ${category}, ${place} | WedList Ireland`;
+    const ratingBit = avg
+      ? `Rated ${avg.toFixed(1)}/5 from ${loaderData.reviews.length} reviews. `
+      : "";
+    const description = clamp(
+      `${ratingBit}${s.overview ?? s.description ?? `${s.name} is a ${category.toLowerCase()} working in ${place}.`}`,
+    );
+    const path = `/supplier/${params.slug}`;
     return {
-      meta: [
-        { title },
-        { name: "description", content: description },
-        { property: "og:title", content: title },
-        { property: "og:description", content: description },
-        { property: "og:type", content: "profile" },
-        { name: "twitter:card", content: "summary_large_image" },
-        ...(image?.startsWith("https://")
-          ? [
-              { property: "og:image", content: image },
-              { name: "twitter:image", content: image },
-            ]
-          : []),
-      ],
+      meta: pageMeta({
+        title,
+        description,
+        path,
+        type: "profile",
+        image: s.logo_image ?? s.gallery_images?.[0] ?? null,
+      }),
+      links: canonical(path),
     };
   },
   component: SupplierProfile,
@@ -100,6 +106,8 @@ function SupplierProfile() {
   const gallery = (supplier.gallery_images ?? []).slice(0, 9);
   const hero = supplier.logo_image ?? gallery[0] ?? null;
   const faqs = FAQS(supplier.name);
+  const avg = averageRating(reviews);
+  const ratingNode = aggregateRating(avg, reviews.length);
 
   return (
     <SiteLayout>
@@ -127,6 +135,8 @@ function SupplierProfile() {
                 },
               }
             : {}),
+          ...(ratingNode ? { aggregateRating: ratingNode } : {}),
+          ...(reviews.length ? { review: reviewSchema(reviews) } : {}),
         }}
       />
       <JsonLd
@@ -181,6 +191,11 @@ function SupplierProfile() {
                 })}
               </div>
               <h1 className="mt-3 text-4xl leading-tight">{supplier.name}</h1>
+              {avg ? (
+                <div className="mt-2">
+                  <Stars rating={avg} count={reviews.length} />
+                </div>
+              ) : null}
               {supplier.county ? (
                 <p className="mt-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
                   <MapPin className="size-4" />

@@ -11,10 +11,26 @@ function cardImage(logo?: string | null, gallery?: string[] | null) {
   return logo || gallery?.[0] || null;
 }
 
-export function SupplierCard({ supplier }: { supplier: SupplierCardRow }) {
+/** Numbered ranking badge used on the "Top 10" directory pages. */
+function RankBadge({ rank }: { rank: number }) {
+  return (
+    <span className="absolute left-3 top-3 z-10 flex size-9 items-center justify-center rounded-full bg-gold font-serif text-sm text-gold-foreground shadow-lift">
+      {rank}
+    </span>
+  );
+}
+
+export function SupplierCard({
+  supplier,
+  rank,
+}: {
+  supplier: SupplierCardRow;
+  rank?: number;
+}) {
   const primary = CATEGORY_BY_KEY.get(supplier.categories?.[0] ?? "");
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift">
+    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift">
+      {rank ? <RankBadge rank={rank} /> : null}
       <Link
         to="/supplier/$slug"
         params={{ slug: supplier.slug }}
@@ -77,9 +93,10 @@ export function SupplierCard({ supplier }: { supplier: SupplierCardRow }) {
   );
 }
 
-export function VenueCard({ venue }: { venue: VenueCardRow }) {
+export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number }) {
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift">
+    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift">
+      {rank ? <RankBadge rank={rank} /> : null}
       <Link
         to="/venue/$slug"
         params={{ slug: venue.slug }}

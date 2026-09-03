@@ -232,6 +232,57 @@ export const listFairs = createServerFn({ method: "GET" }).handler(async () => {
   return data ?? [];
 });
 
+const directoryStatsSchema = z.object({
+  kind: z.enum(["suppliers", "venues"]),
+  category: z.string().optional(),
+  county: z.string().optional(),
+});
+
+/**
+ * Real price and rating spread for a directory page, used for the visible
+ * price guide and the FAQ answers. Only stored values are returned — nothing
+ * is estimated.
+ */
+export const getDirectoryStats = createServerFn({ method: "GET" })
+  .inputValidator((d: unknown) => directoryStatsSchema.parse(d))
+  .handler(async ({ data }) => {
+    const sb = publicClient();
+
+    if (data.kind === "venues") {
+      let q = sb
+        .from("venues")
+        .select("per_person_price_num, capacity_max, rating, review_count")
+        .limit(1000);
+      if (data.county) q = q.eq("county", data.county);
+      const { data: rows, error } = await q;
+      if (error) throw new Error(error.message);
+      return {
+        prices: (rows ?? [])
+          .map((r) => r.per_person_price_num)
+          .filter((n): n is number => typeof n === "number" && n > 0),
+        capacities: (rows ?? [])
+          .map((r) => r.capacity_max)
+          .filter((n): n is number => typeof n === "number" && n > 0),
+        rated: (rows ?? [])
+          .filter((r) => r.rating && r.review_count)
+          .map((r) => ({ rating: r.rating as number, count: r.review_count as number })),
+      };
+    }
+
+    let q = sb.from("suppliers").select("avg_price_num").limit(1000);
+    if (data.category) q = q.contains("categories", [data.category]);
+    if (data.county) q = q.eq("county", data.county);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return {
+      prices: (rows ?? [])
+        .map((r) => r.avg_price_num)
+        .filter((n): n is number => typeof n === "number" && n > 0),
+      capacities: [] as number[],
+      rated: [] as { rating: number; count: number }[],
+    };
+  });
+
 export const getCountyStats = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => z.object({ county: z.string() }).parse(d))
   .handler(async ({ data }) => {

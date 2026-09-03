@@ -11,10 +11,19 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DirectorySlugRouteImport } from './routes/$directorySlug'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BudgetCalculatorRouteImport } from './routes/budget-calculator'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as FindSuppliersRouteImport } from './routes/find-suppliers'
+import { Route as GuestListRouteImport } from './routes/guest-list'
+import { Route as ListYourBusinessRouteImport } from './routes/list-your-business'
 import { Route as PlanningToolsRouteImport } from './routes/planning-tools'
+import { Route as RealWeddingsRouteImport } from './routes/real-weddings'
 import { Route as VenuesRouteImport } from './routes/venues'
 import { Route as WeddingChecklistRouteImport } from './routes/wedding-checklist'
+import { Route as WeddingFairsRouteImport } from './routes/wedding-fairs'
+import { Route as WeddingTimelineRouteImport } from './routes/wedding-timeline'
 import { Route as CountyCountyRouteImport } from './routes/county.$county'
 import { Route as SupplierSlugRouteImport } from './routes/supplier.$slug'
 import { Route as VenueSlugRouteImport } from './routes/venue.$slug'
@@ -31,14 +40,49 @@ const DirectorySlugRoute = DirectorySlugRouteImport.update({
   path: '/$directorySlug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BudgetCalculatorRoute = BudgetCalculatorRouteImport.update({
+  id: '/budget-calculator',
+  path: '/budget-calculator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FindSuppliersRoute = FindSuppliersRouteImport.update({
   id: '/find-suppliers',
   path: '/find-suppliers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuestListRoute = GuestListRouteImport.update({
+  id: '/guest-list',
+  path: '/guest-list',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ListYourBusinessRoute = ListYourBusinessRouteImport.update({
+  id: '/list-your-business',
+  path: '/list-your-business',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlanningToolsRoute = PlanningToolsRouteImport.update({
   id: '/planning-tools',
   path: '/planning-tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RealWeddingsRoute = RealWeddingsRouteImport.update({
+  id: '/real-weddings',
+  path: '/real-weddings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VenuesRoute = VenuesRouteImport.update({
@@ -49,6 +93,16 @@ const VenuesRoute = VenuesRouteImport.update({
 const WeddingChecklistRoute = WeddingChecklistRouteImport.update({
   id: '/wedding-checklist',
   path: '/wedding-checklist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WeddingFairsRoute = WeddingFairsRouteImport.update({
+  id: '/wedding-fairs',
+  path: '/wedding-fairs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WeddingTimelineRoute = WeddingTimelineRouteImport.update({
+  id: '/wedding-timeline',
+  path: '/wedding-timeline',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CountyCountyRoute = CountyCountyRouteImport.update({
@@ -80,10 +134,19 @@ const WeddingGuidesSlugRoute = WeddingGuidesSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$directorySlug': typeof DirectorySlugRoute
+  '/auth': typeof AuthRoute
+  '/budget-calculator': typeof BudgetCalculatorRoute
+  '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/find-suppliers': typeof FindSuppliersRoute
+  '/guest-list': typeof GuestListRoute
+  '/list-your-business': typeof ListYourBusinessRoute
   '/planning-tools': typeof PlanningToolsRoute
+  '/real-weddings': typeof RealWeddingsRoute
   '/venues': typeof VenuesRoute
   '/wedding-checklist': typeof WeddingChecklistRoute
+  '/wedding-fairs': typeof WeddingFairsRoute
+  '/wedding-timeline': typeof WeddingTimelineRoute
   '/county/$county': typeof CountyCountyRoute
   '/supplier/$slug': typeof SupplierSlugRoute
   '/venue/$slug': typeof VenueSlugRoute
@@ -93,10 +156,19 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$directorySlug': typeof DirectorySlugRoute
+  '/auth': typeof AuthRoute
+  '/budget-calculator': typeof BudgetCalculatorRoute
+  '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/find-suppliers': typeof FindSuppliersRoute
+  '/guest-list': typeof GuestListRoute
+  '/list-your-business': typeof ListYourBusinessRoute
   '/planning-tools': typeof PlanningToolsRoute
+  '/real-weddings': typeof RealWeddingsRoute
   '/venues': typeof VenuesRoute
   '/wedding-checklist': typeof WeddingChecklistRoute
+  '/wedding-fairs': typeof WeddingFairsRoute
+  '/wedding-timeline': typeof WeddingTimelineRoute
   '/county/$county': typeof CountyCountyRoute
   '/supplier/$slug': typeof SupplierSlugRoute
   '/venue/$slug': typeof VenueSlugRoute
@@ -107,10 +179,19 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$directorySlug': typeof DirectorySlugRoute
+  '/auth': typeof AuthRoute
+  '/budget-calculator': typeof BudgetCalculatorRoute
+  '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/find-suppliers': typeof FindSuppliersRoute
+  '/guest-list': typeof GuestListRoute
+  '/list-your-business': typeof ListYourBusinessRoute
   '/planning-tools': typeof PlanningToolsRoute
+  '/real-weddings': typeof RealWeddingsRoute
   '/venues': typeof VenuesRoute
   '/wedding-checklist': typeof WeddingChecklistRoute
+  '/wedding-fairs': typeof WeddingFairsRoute
+  '/wedding-timeline': typeof WeddingTimelineRoute
   '/county/$county': typeof CountyCountyRoute
   '/supplier/$slug': typeof SupplierSlugRoute
   '/venue/$slug': typeof VenueSlugRoute
@@ -122,10 +203,19 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$directorySlug'
+    | '/auth'
+    | '/budget-calculator'
+    | '/contact'
+    | '/dashboard'
     | '/find-suppliers'
+    | '/guest-list'
+    | '/list-your-business'
     | '/planning-tools'
+    | '/real-weddings'
     | '/venues'
     | '/wedding-checklist'
+    | '/wedding-fairs'
+    | '/wedding-timeline'
     | '/county/$county'
     | '/supplier/$slug'
     | '/venue/$slug'
@@ -135,10 +225,19 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$directorySlug'
+    | '/auth'
+    | '/budget-calculator'
+    | '/contact'
+    | '/dashboard'
     | '/find-suppliers'
+    | '/guest-list'
+    | '/list-your-business'
     | '/planning-tools'
+    | '/real-weddings'
     | '/venues'
     | '/wedding-checklist'
+    | '/wedding-fairs'
+    | '/wedding-timeline'
     | '/county/$county'
     | '/supplier/$slug'
     | '/venue/$slug'
@@ -148,10 +247,19 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$directorySlug'
+    | '/auth'
+    | '/budget-calculator'
+    | '/contact'
+    | '/dashboard'
     | '/find-suppliers'
+    | '/guest-list'
+    | '/list-your-business'
     | '/planning-tools'
+    | '/real-weddings'
     | '/venues'
     | '/wedding-checklist'
+    | '/wedding-fairs'
+    | '/wedding-timeline'
     | '/county/$county'
     | '/supplier/$slug'
     | '/venue/$slug'
@@ -162,10 +270,19 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DirectorySlugRoute: typeof DirectorySlugRoute
+  AuthRoute: typeof AuthRoute
+  BudgetCalculatorRoute: typeof BudgetCalculatorRoute
+  ContactRoute: typeof ContactRoute
+  DashboardRoute: typeof DashboardRoute
   FindSuppliersRoute: typeof FindSuppliersRoute
+  GuestListRoute: typeof GuestListRoute
+  ListYourBusinessRoute: typeof ListYourBusinessRoute
   PlanningToolsRoute: typeof PlanningToolsRoute
+  RealWeddingsRoute: typeof RealWeddingsRoute
   VenuesRoute: typeof VenuesRoute
   WeddingChecklistRoute: typeof WeddingChecklistRoute
+  WeddingFairsRoute: typeof WeddingFairsRoute
+  WeddingTimelineRoute: typeof WeddingTimelineRoute
   CountyCountyRoute: typeof CountyCountyRoute
   SupplierSlugRoute: typeof SupplierSlugRoute
   VenueSlugRoute: typeof VenueSlugRoute
@@ -189,6 +306,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DirectorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/budget-calculator': {
+      id: '/budget-calculator'
+      path: '/budget-calculator'
+      fullPath: '/budget-calculator'
+      preLoaderRoute: typeof BudgetCalculatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/find-suppliers': {
       id: '/find-suppliers'
       path: '/find-suppliers'
@@ -196,11 +341,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FindSuppliersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guest-list': {
+      id: '/guest-list'
+      path: '/guest-list'
+      fullPath: '/guest-list'
+      preLoaderRoute: typeof GuestListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/list-your-business': {
+      id: '/list-your-business'
+      path: '/list-your-business'
+      fullPath: '/list-your-business'
+      preLoaderRoute: typeof ListYourBusinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/planning-tools': {
       id: '/planning-tools'
       path: '/planning-tools'
       fullPath: '/planning-tools'
       preLoaderRoute: typeof PlanningToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/real-weddings': {
+      id: '/real-weddings'
+      path: '/real-weddings'
+      fullPath: '/real-weddings'
+      preLoaderRoute: typeof RealWeddingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/venues': {
@@ -215,6 +381,20 @@ declare module '@tanstack/react-router' {
       path: '/wedding-checklist'
       fullPath: '/wedding-checklist'
       preLoaderRoute: typeof WeddingChecklistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wedding-fairs': {
+      id: '/wedding-fairs'
+      path: '/wedding-fairs'
+      fullPath: '/wedding-fairs'
+      preLoaderRoute: typeof WeddingFairsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wedding-timeline': {
+      id: '/wedding-timeline'
+      path: '/wedding-timeline'
+      fullPath: '/wedding-timeline'
+      preLoaderRoute: typeof WeddingTimelineRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/county/$county': {
@@ -258,10 +438,19 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DirectorySlugRoute: DirectorySlugRoute,
+  AuthRoute: AuthRoute,
+  BudgetCalculatorRoute: BudgetCalculatorRoute,
+  ContactRoute: ContactRoute,
+  DashboardRoute: DashboardRoute,
   FindSuppliersRoute: FindSuppliersRoute,
+  GuestListRoute: GuestListRoute,
+  ListYourBusinessRoute: ListYourBusinessRoute,
   PlanningToolsRoute: PlanningToolsRoute,
+  RealWeddingsRoute: RealWeddingsRoute,
   VenuesRoute: VenuesRoute,
   WeddingChecklistRoute: WeddingChecklistRoute,
+  WeddingFairsRoute: WeddingFairsRoute,
+  WeddingTimelineRoute: WeddingTimelineRoute,
   CountyCountyRoute: CountyCountyRoute,
   SupplierSlugRoute: SupplierSlugRoute,
   VenueSlugRoute: VenueSlugRoute,
