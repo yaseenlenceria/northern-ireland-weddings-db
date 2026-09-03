@@ -65,7 +65,7 @@ export const Route = createFileRoute("/$directorySlug")({
     const target = parseDirectorySlug(params.directorySlug);
     if (!target) throw notFound();
     const page = Math.max(1, Math.min(deps.page, 200));
-    const place = target.county ? `Co. ${target.county}` : "Ireland";
+    const place = target.county ?? "Ireland";
 
     const statsInput = {
       kind: target.kind,
