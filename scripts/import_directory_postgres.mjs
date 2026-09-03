@@ -18,16 +18,19 @@ function loadEnv(text) {
 }
 
 function databaseUrl(env) {
-  return (
-    env.POSTGRES_URL ||
-    env.DATABASE_URL ||
-    env.POSTGRES_PRISMA_URL ||
-    env.POSTGRES_URL_NON_POOLING ||
-    process.env.POSTGRES_URL ||
-    process.env.DATABASE_URL ||
-    process.env.POSTGRES_PRISMA_URL ||
-    process.env.POSTGRES_URL_NON_POOLING
-  );
+  for (const key of [
+    "POSTGRES_URL",
+    "DATABASE_URL",
+    "POSTGRES_PRISMA_URL",
+    "POSTGRES_URL_NON_POOLING",
+    "DATABASE_URL_UNPOOLED",
+  ]) {
+    const value = env[key] || process.env[key];
+    if (value && value !== "\"\"" && value !== "''" && value.includes("postgres")) {
+      return value;
+    }
+  }
+  return undefined;
 }
 
 async function pythonCommand() {

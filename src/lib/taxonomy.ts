@@ -67,6 +67,13 @@ export const CATEGORIES: CategoryDef[] = [
     blurb: "Bridal makeup, trials and on-the-day touch-ups for the party.",
   },
   {
+    key: "beauty-skincare",
+    slug: "wedding-beauty-skincare",
+    label: "Beauty & Skincare",
+    plural: "Wedding Beauty & Skincare",
+    blurb: "Skin clinics, beauty treatments and pre-wedding skincare support.",
+  },
+  {
     key: "wedding-hair-stylists",
     slug: "wedding-hair-stylists",
     label: "Hair Stylists",
@@ -121,6 +128,13 @@ export const CATEGORIES: CategoryDef[] = [
     label: "Bridal Shops & Accessories",
     plural: "Bridal Shops",
     blurb: "Boutiques, designer gowns, veils and bridal accessories.",
+  },
+  {
+    key: "bridesmaid-dresses",
+    slug: "bridesmaid-dresses",
+    label: "Bridesmaid Dresses",
+    plural: "Bridesmaid Dresses",
+    blurb: "Dresses, fittings and styling for bridesmaids and the bridal party.",
   },
   {
     key: "groomswear",

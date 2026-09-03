@@ -14,6 +14,7 @@ import pandas as pd
 
 SOURCE_FILES = {
     "weddingdates_full": Path(r"C:\Users\Seenu\weddingdates-scrape\WeddingDates_Ireland_Full.xlsx"),
+    "weddingsonline": Path(r"C:\Users\Seenu\weddingdates-scrape\WeddingsOnline_Ireland.xlsx"),
     "hitched_part_2": Path(r"C:\Users\Seenu\weddingdates-scrape\Hitched_Ireland2.xlsx"),
     "wedding_planners": Path(r"C:\Users\Seenu\weddingdates-scrape\Wedding_Planners_Ireland.xlsx"),
     "weddingdates": Path(r"C:\Users\Seenu\weddingdates-scrape\WeddingDates_Directory_Complete.xlsx"),
@@ -48,6 +49,14 @@ FULL_SUPPLIER_SHEETS = [
     "Services",
     "Transport",
     "Videographers",
+]
+
+WEDDINGSONLINE_SUPPLIER_SHEETS = [
+    "Beauty & Skincare",
+    "Bridesmaid Dresses",
+    "Cakes & Accessories",
+    "Ceremony Music",
+    "Photographers",
 ]
 
 IMPORT_NAMESPACE = uuid.UUID("f907c78a-7915-41f0-8469-14fb7061deab")
@@ -128,7 +137,15 @@ def split_images(value: Any) -> list[str] | None:
     if text is None:
         return None
     urls = re.findall(r"https?://[^\s,;|]+", text)
-    return urls or split_list(text)
+    images = urls or split_list(text)
+    if not images:
+        return None
+    useful = [
+        image
+        for image in images
+        if "image_placeholder" not in image.lower() and not image.lower().endswith("/image_placeholder.png")
+    ]
+    return useful or None
 
 
 def first(*values: Any) -> str | None:
@@ -279,7 +296,10 @@ def source_url_from_row(row: dict[str, Any]) -> str | None:
 def category_from_sheet(sheet_name: str) -> str:
     replacements = {
         "Bands": "Wedding Bands",
+        "Beauty & Skincare": "Beauty Skincare",
         "Bridal Shops & Accessories": "Bridal Shops Accessories",
+        "Bridesmaid Dresses": "Bridesmaid Dresses",
+        "Cakes & Accessories": "Cakes Sweet Treats",
         "Cakes & Sweet Treats": "Cakes Sweet Treats",
         "Catering & Wine": "Catering Wine",
         "Celebrants": "Wedding Celebrants",
@@ -305,13 +325,40 @@ def category_from_sheet(sheet_name: str) -> str:
     return replacements.get(sheet_name, sheet_name)
 
 
+def county_from_row(row: dict[str, Any]) -> str | None:
+    county = clean_mojibake(row.get("County"))
+    if county:
+        return county.removeprefix("Co. ").strip()
+    location = clean_mojibake(row.get("Location Text"))
+    if not location:
+        return None
+    match = re.search(r"\bCo\.\s+([A-Za-z ]+)", location)
+    if match:
+        return match.group(1).strip()
+    return location.removeprefix("Co. ").strip()
+
+
+def useful_profile_text(value: Any) -> str | None:
+    text = clean_mojibake(value)
+    if not text:
+        return None
+    lowered = text.lower()
+    if lowered.startswith("awards advertise about contact welcome!") or "use our venue finder > suppliers" in lowered:
+        return None
+    return text
+
+
 def supplier_from_weddingdates(row: dict[str, Any], sheet_name: str | None = None) -> dict[str, Any] | None:
     name = clean_mojibake(first(row.get("Supplier Name"), row.get("Name")))
     if not name:
         return None
-    county = clean_mojibake(row.get("County"))
-    gallery = split_images(row.get("Gallery Images (all)"))
+    if name.lower().startswith("wedding ") and " in " in name.lower() and integer(row.get("Image Count")) == 0:
+        return None
+    county = county_from_row(row)
+    gallery = split_images(first(row.get("Gallery Images (all)"), row.get("All Images")))
     raw_categories = split_list(row.get("Categories"))
+    if not raw_categories:
+        raw_categories = split_list(row.get("Category"))
     categories = [
         item for item in (raw_categories or [])
         if not item.startswith("http") and not item.lower().startswith("www.")
@@ -327,9 +374,16 @@ def supplier_from_weddingdates(row: dict[str, Any], sheet_name: str | None = Non
         "county": county,
         "avg_price": clean_mojibake(row.get("Avg Price")),
         "avg_price_num": number(row.get("Avg Price")),
-        "overview": clean_mojibake(row.get("Overview")),
-        "description": clean_mojibake(row.get("Description")),
-        "logo_image": first(row.get("Logo Image"), row.get("Logo")),
+        "overview": first(
+            useful_profile_text(row.get("Overview")),
+            useful_profile_text(row.get("Meta Description")),
+            useful_profile_text(row.get("Profile Text (excerpt)")),
+        ),
+        "description": first(
+            useful_profile_text(row.get("Description")),
+            useful_profile_text(row.get("Profile Text (excerpt)")),
+        ),
+        "logo_image": first(row.get("Logo Image"), row.get("Logo"), row.get("Top Image")),
         "gallery_images": gallery,
         "featured": False,
         "service_areas": None,
@@ -468,6 +522,15 @@ def build_payload() -> dict[str, list[dict[str, Any]]]:
                 added = add_unique(suppliers, record, "supplier")
                 for review in review_records("supplier", added["id"], row.to_dict()):
                     reviews[review["id"]] = review
+
+    if SOURCE_FILES["weddingsonline"].exists():
+        for sheet_name in WEDDINGSONLINE_SUPPLIER_SHEETS:
+            for _, row in frame("weddingsonline", sheet_name).iterrows():
+                record = supplier_from_weddingdates(row.to_dict(), sheet_name)
+                if record:
+                    added = add_unique(suppliers, record, "supplier")
+                    for review in review_records("supplier", added["id"], row.to_dict()):
+                        reviews[review["id"]] = review
 
     for _, row in frame(primary_key, "Wedding Fairs").iterrows():
         record = fair_from_weddingdates(row.to_dict())

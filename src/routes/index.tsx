@@ -39,6 +39,7 @@ export const Route = createFileRoute("/")({
 const POPULAR = [
   VENUE_SLUG,
   "wedding-planners",
+  "wedding-beauty-skincare",
   "wedding-singers",
   "wedding-photographers",
   "wedding-videographers",
