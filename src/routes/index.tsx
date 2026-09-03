@@ -20,7 +20,7 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { getHomeData } from "@/lib/directory.functions";
 import { CATEGORIES, FEATURED_COUNTIES, VENUE_SLUG, countySlug } from "@/lib/taxonomy";
 import { GUIDES } from "@/lib/guides";
-import { SEO_YEAR, canonical, pageMeta } from "@/lib/seo";
+import { SEO_YEAR, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 import heroImage from "@/assets/hero-wedding-ireland.jpg";
 
 const TITLE = "Wedding Suppliers & Venues in Ireland | Wedora Ireland";
@@ -136,11 +136,19 @@ function HomePage() {
     "DJs",
     "Celebrants",
   ]);
-  const preferred = suppliers.filter((s) =>
-    (s.categories ?? []).some((c) => showcaseCategories.has(c)),
+  // Hen/stag entertainment is in the directory but is not the right first
+  // impression for a wedding homepage, so it is kept out of the showcase.
+  const excludedCategories = new Set(["Hens & Stags", "Hen & Stag"]);
+  const preferred = suppliers.filter(
+    (s) =>
+      (s.categories ?? []).some((c) => showcaseCategories.has(c)) &&
+      !(s.categories ?? []).some((c) => excludedCategories.has(c)),
   );
 
-  const featuredSuppliers = (preferred.length >= 8 ? preferred : suppliers).slice(0, 8);
+  const wedding = suppliers.filter(
+    (s) => !(s.categories ?? []).some((c) => excludedCategories.has(c)),
+  );
+  const featuredSuppliers = (preferred.length >= 8 ? preferred : wedding).slice(0, 8);
 
 
   return (
@@ -151,23 +159,25 @@ function HomePage() {
           "@graph": [
             {
               "@type": "WebSite",
-              "@id": "/#website",
+              "@id": absoluteUrl("/") + "#website",
+              url: absoluteUrl("/"),
               name: "Wedora Ireland",
               description: DESCRIPTION,
               inLanguage: "en-IE",
-              publisher: { "@id": "/#organization" },
+              publisher: { "@id": absoluteUrl("/") + "#organization" },
               potentialAction: {
                 "@type": "SearchAction",
                 target: {
                   "@type": "EntryPoint",
-                  urlTemplate: "/find-suppliers?q={search_term_string}",
+                  urlTemplate: `${absoluteUrl("/find-suppliers")}?q={search_term_string}`,
                 },
                 "query-input": "required name=search_term_string",
               },
             },
             {
               "@type": "Organization",
-              "@id": "/#organization",
+              "@id": absoluteUrl("/") + "#organization",
+              url: absoluteUrl("/"),
               name: "Wedora Ireland",
               description:
                 "Directory of wedding venues and suppliers across the Republic of Ireland.",

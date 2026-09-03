@@ -9,7 +9,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { SiteLayout, Section } from "@/components/site/Layout";
-import { Breadcrumbs } from "@/components/site/Breadcrumbs";
+import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { ListingImage } from "@/components/site/ListingImage";
 import { SupplierCard } from "@/components/site/Cards";
 import { EnquiryForm } from "@/components/site/EnquiryForm";
@@ -112,6 +112,16 @@ function SupplierProfile() {
   return (
     <SiteLayout>
       <JsonLd
+        data={breadcrumbSchema("", [
+          { name: "Home", path: "/" },
+          { name: "Find Suppliers", path: "/find-suppliers" },
+          ...(category
+            ? [{ name: category.plural, path: `/${category.slug}-ireland` }]
+            : []),
+          { name: supplier.name, path: `/supplier/${supplier.slug}` },
+        ])}
+      />
+      <JsonLd
         data={{
           "@context": "https://schema.org",
           "@type": "LocalBusiness",
@@ -174,7 +184,9 @@ function SupplierProfile() {
             <div className="overflow-hidden rounded-2xl border border-border bg-card">
               <ListingImage
                 src={hero}
-                alt={supplier.name}
+                alt={`${supplier.name}${category ? ` — ${category.label.toLowerCase()}` : ""}${
+                  supplier.county ? ` in Co. ${supplier.county}` : ""
+                }`}
                 className="aspect-16/10 w-full object-cover"
               />
             </div>

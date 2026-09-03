@@ -38,7 +38,9 @@ export function SupplierCard({
       >
         <ListingImage
           src={cardImage(supplier.logo_image, supplier.gallery_images)}
-          alt={supplier.name}
+          alt={`${supplier.name}${primary ? ` — ${primary.label.toLowerCase()}` : ""}${
+            supplier.county ? ` in Co. ${supplier.county}` : ""
+          }`}
           className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </Link>
@@ -68,10 +70,14 @@ export function SupplierCard({
         ) : null}
 
         {supplier.overview ? (
-          <p className="line-clamp-3b mt-2 text-sm text-muted-foreground">{supplier.overview}</p>
-        ) : null}
+          <p className="line-clamp-3b mt-2 mb-4 text-sm text-muted-foreground">
+            {supplier.overview}
+          </p>
+        ) : (
+          <div className="mb-4" />
+        )}
 
-        <div className="mt-4 flex items-center justify-between gap-2 border-t border-border pt-3">
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-border pt-3">
           <span className="text-xs text-muted-foreground">
             {supplier.avg_price ? supplier.avg_price : "Request pricing"}
           </span>
@@ -104,7 +110,7 @@ export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number 
       >
         <ListingImage
           src={cardImage(venue.logo_image, venue.gallery_images)}
-          alt={venue.name}
+          alt={`${venue.name}, wedding venue${venue.county ? ` in Co. ${venue.county}` : " in Ireland"}`}
           className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </Link>
@@ -136,7 +142,7 @@ export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number 
           <p className="line-clamp-3b mt-2 text-sm text-muted-foreground">{venue.overview}</p>
         ) : null}
 
-        <dl className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+        <dl className="mt-3 mb-4 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
           <div>
             <dt className="eyebrow">Capacity</dt>
             <dd className="text-foreground/85">{venue.guest_capacity ?? "On request"}</dd>
@@ -147,7 +153,7 @@ export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number 
           </div>
         </dl>
 
-        <div className="mt-4 flex justify-end gap-2 border-t border-border pt-3">
+        <div className="mt-auto flex justify-end gap-2 border-t border-border pt-3">
           <Button asChild size="sm" variant="outline">
             <Link to="/venue/$slug" params={{ slug: venue.slug }}>
               View

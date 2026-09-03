@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Search } from "lucide-react";
@@ -25,21 +27,61 @@ const TITLE = "Find Wedding Suppliers in Ireland | Wedora Ireland";
 const DESCRIPTION =
   "Search every wedding supplier on Wedora Ireland by category, county and name — photographers, bands, florists, planners, celebrants and more.";
 
+const PER_PAGE = 24;
+
+/** Filters live in the URL so results are shareable and the sitewide search action works. */
+const searchSchema = z.object({
+  q: fallback(z.coerce.string(), "").optional(),
+  category: fallback(z.coerce.string(), "all").optional(),
+  county: fallback(z.coerce.string(), "all").optional(),
+  page: fallback(z.coerce.number().int(), 1).optional(),
+});
+
 export const Route = createFileRoute("/find-suppliers")({
+  validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: pageMeta({ title: TITLE, description: DESCRIPTION, path: "/find-suppliers" }),
+    // Filtered variants canonicalise back to the clean URL.
     links: canonical("/find-suppliers"),
   }),
   component: FindSuppliersPage,
 });
 
+/** Drops default-valued params so /find-suppliers stays /find-suppliers. */
+function cleanSearch(s: {
+  q?: string | undefined;
+  category?: string | undefined;
+  county?: string | undefined;
+  page?: number | undefined;
+}) {
+  return {
+    ...(s.q ? { q: s.q } : {}),
+    ...(s.category && s.category !== "all" ? { category: s.category } : {}),
+    ...(s.county && s.county !== "all" ? { county: s.county } : {}),
+    ...(s.page && s.page > 1 ? { page: s.page } : {}),
+  };
+}
+
 function FindSuppliersPage() {
   const fetchSuppliers = useServerFn(listSuppliers);
-  const [category, setCategory] = useState("all");
-  const [county, setCounty] = useState("all");
-  const [q, setQ] = useState("");
-  const [term, setTerm] = useState("");
-  const [page, setPage] = useState(1);
+  const navigate = Route.useNavigate();
+  const search = Route.useSearch();
+
+  const term = search.q ?? "";
+  const category = search.category ?? "all";
+  const county = search.county ?? "all";
+  const page = Math.max(1, search.page ?? 1);
+
+  const [draft, setDraft] = useState(term);
+  useEffect(() => setDraft(term), [term]);
+
+  const update = (next: Partial<{ q: string; category: string; county: string; page: number }>) =>
+    navigate({
+      to: ".",
+      // Defaults are stripped so shared URLs stay clean.
+      search: (prev) => cleanSearch({ ...prev, page: 1, ...next }),
+      resetScroll: false,
+    });
 
   const query = useQuery({
     queryKey: ["suppliers", category, county, term, page],
@@ -50,15 +92,14 @@ function FindSuppliersPage() {
           ...(county !== "all" ? { county } : {}),
           ...(term ? { q: term } : {}),
           page,
-          perPage: 24,
+          perPage: PER_PAGE,
         },
       }),
   });
 
-  const reset = (fn: () => void) => {
-    fn();
-    setPage(1);
-  };
+  const total = query.data?.count ?? 0;
+  const rows = query.data?.rows ?? [];
+  const lastPage = Math.max(1, Math.ceil(total / PER_PAGE));
 
   return (
     <SiteLayout>
@@ -74,14 +115,15 @@ function FindSuppliersPage() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            reset(() => setTerm(q));
+            update({ q: draft });
           }}
-          className="grid gap-4 rounded-xl border border-border bg-card p-5 shadow-soft lg:grid-cols-[1fr_1fr_1.2fr_auto]"
+          className="grid gap-4 rounded-xl border border-border bg-card p-4 shadow-soft sm:p-5 lg:grid-cols-[1fr_1fr_1.2fr_auto]"
+          aria-label="Supplier filters"
         >
           <div className="grid gap-1.5">
-            <Label>Category</Label>
-            <Select value={category} onValueChange={(v) => reset(() => setCategory(v))}>
-              <SelectTrigger>
+            <Label htmlFor="supplier-category">Category</Label>
+            <Select value={category} onValueChange={(v) => update({ category: v })}>
+              <SelectTrigger id="supplier-category" className="h-11">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="max-h-80">
@@ -96,9 +138,9 @@ function FindSuppliersPage() {
           </div>
 
           <div className="grid gap-1.5">
-            <Label>County</Label>
-            <Select value={county} onValueChange={(v) => reset(() => setCounty(v))}>
-              <SelectTrigger>
+            <Label htmlFor="supplier-county">County</Label>
+            <Select value={county} onValueChange={(v) => update({ county: v })}>
+              <SelectTrigger id="supplier-county" className="h-11">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="max-h-80">
@@ -116,52 +158,88 @@ function FindSuppliersPage() {
             <Label htmlFor="supplier-search">Business name</Label>
             <Input
               id="supplier-search"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
               placeholder="Search by name"
+              className="h-11"
             />
           </div>
 
-          <Button type="submit" className="self-end">
-            <Search className="size-4" /> Search
+          <Button type="submit" className="h-11 self-end">
+            <Search className="size-4" aria-hidden="true" /> Search
           </Button>
         </form>
 
-        <p className="mt-6 text-sm text-muted-foreground">
-          {query.isLoading
+        <p className="mt-6 text-sm text-muted-foreground" role="status" aria-live="polite">
+          {query.isPending
             ? "Searching…"
-            : `${(query.data?.count ?? 0).toLocaleString()} suppliers match your filters.`}
+            : query.isError
+              ? "We couldn't load suppliers just now."
+              : `${total.toLocaleString()} suppliers match your filters.`}
         </p>
 
-        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {query.isLoading
-            ? Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-96 w-full rounded-xl" />
-              ))
-            : query.data?.rows.map((supplier) => (
-                <SupplierCard key={supplier.id} supplier={supplier} />
-              ))}
-        </div>
+        {query.isError ? (
+          <div className="mt-6 rounded-xl border border-destructive/40 bg-card p-8 text-center">
+            <h2 className="text-xl">Results didn't load</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              This is usually a temporary connection issue. Try again in a moment.
+            </p>
+            <Button className="mt-5" onClick={() => query.refetch()}>
+              Try again
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {query.isPending
+                ? Array.from({ length: 6 }).map((_, i) => (
+                    <Skeleton key={i} className="h-96 w-full rounded-2xl" />
+                  ))
+                : rows.map((supplier) => <SupplierCard key={supplier.id} supplier={supplier} />)}
+            </div>
 
-        {!query.isLoading && (query.data?.rows.length ?? 0) === 0 ? (
-          <p className="mt-10 text-center text-muted-foreground">
-            No suppliers match those filters. Try widening the county or category.
-          </p>
-        ) : null}
+            {!query.isPending && rows.length === 0 ? (
+              <div className="mt-10 rounded-xl border border-dashed border-border p-10 text-center">
+                <h2 className="text-xl">No suppliers match those filters</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Try widening the county or category, or clear the name search.
+                </p>
+                <Button
+                  variant="outline"
+                  className="mt-5"
+                  onClick={() => update({ q: "", category: "all", county: "all" })}
+                >
+                  Clear filters
+                </Button>
+              </div>
+            ) : null}
 
-        <div className="mt-10 flex justify-center gap-3">
-          <Button variant="outline" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-            Previous
-          </Button>
-          <span className="self-center text-sm text-muted-foreground">Page {page}</span>
-          <Button
-            variant="outline"
-            disabled={(query.data?.rows.length ?? 0) < 24}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </Button>
-        </div>
+            {total > PER_PAGE ? (
+              <nav
+                className="mt-10 flex flex-wrap items-center justify-center gap-3"
+                aria-label="Pagination"
+              >
+                <Button
+                  variant="outline"
+                  disabled={page <= 1}
+                  onClick={() => update({ page: page - 1 })}
+                >
+                  Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Page {page} of {lastPage}
+                </span>
+                <Button
+                  variant="outline"
+                  disabled={page >= lastPage}
+                  onClick={() => update({ page: page + 1 })}
+                >
+                  Next
+                </Button>
+              </nav>
+            ) : null}
+          </>
+        )}
       </Section>
     </SiteLayout>
   );
