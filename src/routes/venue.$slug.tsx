@@ -18,7 +18,7 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { SaveButton } from "@/components/site/SaveButton";
 import { getVenue } from "@/lib/directory.functions";
 import { VENUE_SLUG, countySlug } from "@/lib/taxonomy";
-import { canonical, clamp, pageMeta, reviewSchema } from "@/lib/seo";
+import { canonical, clamp, pageMeta, reviewSchema, sourcedReviewSchema } from "@/lib/seo";
 
 export const Route = createFileRoute("/venue/$slug")({
   loader: async ({ params }) => {
@@ -92,7 +92,7 @@ const FAQS = (name: string, capacity: string | null) => [
 ];
 
 function VenueProfile() {
-  const { venue, reviews, similar } = Route.useLoaderData();
+  const { venue, reviews, sourcedReviews, similar } = Route.useLoaderData();
   const gallery = (venue.gallery_images ?? []).slice(0, 12);
   const hero = venue.logo_image ?? gallery[0] ?? null;
   const faqs = FAQS(venue.name, venue.guest_capacity);
@@ -149,7 +149,14 @@ function VenueProfile() {
                 },
               }
             : {}),
-          ...(reviews.length ? { review: reviewSchema(reviews) } : {}),
+          ...(reviews.length || sourcedReviews.length
+            ? {
+                review: [...reviewSchema(reviews), ...sourcedReviewSchema(sourcedReviews)].slice(
+                  0,
+                  10,
+                ),
+              }
+            : {}),
         }}
       />
       <JsonLd
