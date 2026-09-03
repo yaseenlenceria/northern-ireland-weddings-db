@@ -19,6 +19,7 @@ import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { SignInPrompt } from "@/components/site/SignInPrompt";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { canonical, pageMeta } from "@/lib/seo";
 
 const TITLE = "Wedding Checklist for Irish Weddings | WedList Ireland";
 const DESCRIPTION =
@@ -56,14 +57,8 @@ const STARTER: { title: string; category: string }[] = [
 
 export const Route = createFileRoute("/wedding-checklist")({
   head: () => ({
-    meta: [
-      { title: TITLE },
-      { name: "description", content: DESCRIPTION },
-      { property: "og:title", content: TITLE },
-      { property: "og:description", content: DESCRIPTION },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
+    meta: pageMeta({ title: TITLE, description: DESCRIPTION, path: "/wedding-checklist" }),
+    links: canonical("/wedding-checklist"),
   }),
   component: ChecklistPage,
 });

@@ -4,6 +4,7 @@ import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { JsonLd } from "@/components/site/JsonLd";
 import { GUIDES, GUIDE_BY_SLUG } from "@/lib/guides";
+import { canonical, clamp, pageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/wedding-guides/$slug")({
   loader: ({ params }) => {
@@ -11,21 +12,21 @@ export const Route = createFileRoute("/wedding-guides/$slug")({
     if (!guide) throw notFound();
     return { guide };
   },
-  head: ({ loaderData }) => {
+  head: ({ params, loaderData }) => {
     if (!loaderData) {
       return { meta: [{ title: "Guide not found" }, { name: "robots", content: "noindex" }] };
     }
     const { guide } = loaderData;
     const title = `${guide.title} | WedList Ireland`;
+    const path = `/wedding-guides/${params.slug}`;
     return {
-      meta: [
-        { title },
-        { name: "description", content: guide.excerpt.slice(0, 155) },
-        { property: "og:title", content: title },
-        { property: "og:description", content: guide.excerpt.slice(0, 155) },
-        { property: "og:type", content: "article" },
-        { name: "twitter:card", content: "summary_large_image" },
-      ],
+      meta: pageMeta({
+        title,
+        description: clamp(guide.excerpt),
+        path,
+        type: "article",
+      }),
+      links: canonical(path),
     };
   },
   component: GuidePage,

@@ -19,6 +19,7 @@ import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { VenueCard } from "@/components/site/Cards";
 import { listVenues } from "@/lib/directory.functions";
 import { COUNTIES } from "@/lib/taxonomy";
+import { canonical, pageMeta } from "@/lib/seo";
 
 const TITLE = "Wedding Venues Ireland — Search Every County | WedList Ireland";
 const DESCRIPTION =
@@ -34,14 +35,8 @@ const CAPACITIES = [
 
 export const Route = createFileRoute("/venues")({
   head: () => ({
-    meta: [
-      { title: TITLE },
-      { name: "description", content: DESCRIPTION },
-      { property: "og:title", content: TITLE },
-      { property: "og:description", content: DESCRIPTION },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
+    meta: pageMeta({ title: TITLE, description: DESCRIPTION, path: "/venues" }),
+    links: canonical("/venues"),
   }),
   component: VenuesPage,
 });
