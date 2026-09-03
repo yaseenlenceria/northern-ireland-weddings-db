@@ -109,7 +109,7 @@ export function SearchBar({ compact = false }: { compact?: boolean }) {
       {compact ? null : (
         <Field
           icon={<CalendarDays className="size-4" />}
-          label="Wedding date (optional)"
+          label="Wedding date"
           htmlFor="wedding-date"
         >
           <Input
