@@ -20,6 +20,7 @@ import { Route as GuestListRouteImport } from './routes/guest-list'
 import { Route as ListYourBusinessRouteImport } from './routes/list-your-business'
 import { Route as PlanningToolsRouteImport } from './routes/planning-tools'
 import { Route as RealWeddingsRouteImport } from './routes/real-weddings'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as VenuesRouteImport } from './routes/venues'
 import { Route as WeddingChecklistRouteImport } from './routes/wedding-checklist'
 import { Route as WeddingFairsRouteImport } from './routes/wedding-fairs'
@@ -85,6 +86,11 @@ const RealWeddingsRoute = RealWeddingsRouteImport.update({
   path: '/real-weddings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VenuesRoute = VenuesRouteImport.update({
   id: '/venues',
   path: '/venues',
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/list-your-business': typeof ListYourBusinessRoute
   '/planning-tools': typeof PlanningToolsRoute
   '/real-weddings': typeof RealWeddingsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/venues': typeof VenuesRoute
   '/wedding-checklist': typeof WeddingChecklistRoute
   '/wedding-fairs': typeof WeddingFairsRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/list-your-business': typeof ListYourBusinessRoute
   '/planning-tools': typeof PlanningToolsRoute
   '/real-weddings': typeof RealWeddingsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/venues': typeof VenuesRoute
   '/wedding-checklist': typeof WeddingChecklistRoute
   '/wedding-fairs': typeof WeddingFairsRoute
@@ -188,6 +196,7 @@ export interface FileRoutesById {
   '/list-your-business': typeof ListYourBusinessRoute
   '/planning-tools': typeof PlanningToolsRoute
   '/real-weddings': typeof RealWeddingsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/venues': typeof VenuesRoute
   '/wedding-checklist': typeof WeddingChecklistRoute
   '/wedding-fairs': typeof WeddingFairsRoute
@@ -212,6 +221,7 @@ export interface FileRouteTypes {
     | '/list-your-business'
     | '/planning-tools'
     | '/real-weddings'
+    | '/sitemap.xml'
     | '/venues'
     | '/wedding-checklist'
     | '/wedding-fairs'
@@ -234,6 +244,7 @@ export interface FileRouteTypes {
     | '/list-your-business'
     | '/planning-tools'
     | '/real-weddings'
+    | '/sitemap.xml'
     | '/venues'
     | '/wedding-checklist'
     | '/wedding-fairs'
@@ -256,6 +267,7 @@ export interface FileRouteTypes {
     | '/list-your-business'
     | '/planning-tools'
     | '/real-weddings'
+    | '/sitemap.xml'
     | '/venues'
     | '/wedding-checklist'
     | '/wedding-fairs'
@@ -279,6 +291,7 @@ export interface RootRouteChildren {
   ListYourBusinessRoute: typeof ListYourBusinessRoute
   PlanningToolsRoute: typeof PlanningToolsRoute
   RealWeddingsRoute: typeof RealWeddingsRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   VenuesRoute: typeof VenuesRoute
   WeddingChecklistRoute: typeof WeddingChecklistRoute
   WeddingFairsRoute: typeof WeddingFairsRoute
@@ -369,6 +382,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RealWeddingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/venues': {
       id: '/venues'
       path: '/venues'
@@ -447,6 +467,7 @@ const rootRouteChildren: RootRouteChildren = {
   ListYourBusinessRoute: ListYourBusinessRoute,
   PlanningToolsRoute: PlanningToolsRoute,
   RealWeddingsRoute: RealWeddingsRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   VenuesRoute: VenuesRoute,
   WeddingChecklistRoute: WeddingChecklistRoute,
   WeddingFairsRoute: WeddingFairsRoute,
