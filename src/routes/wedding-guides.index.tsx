@@ -5,7 +5,7 @@ import { GUIDES } from "@/lib/guides";
 import { ArrowRight } from "lucide-react";
 import { canonical, pageMeta } from "@/lib/seo";
 
-const TITLE = "Wedding Guides for Irish Couples | WedList Ireland";
+const TITLE = "Wedding Guides for Irish Couples | Wedora Ireland";
 const DESCRIPTION =
   "Practical wedding planning guides written for Ireland: real costs, booking order, venue questions, music, photography styles and seasonal flowers.";
 

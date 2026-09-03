@@ -23,7 +23,7 @@ import { GUIDES } from "@/lib/guides";
 import { SEO_YEAR, canonical, pageMeta } from "@/lib/seo";
 import heroImage from "@/assets/hero-wedding-ireland.jpg";
 
-const TITLE = "Wedding Suppliers & Venues in Ireland | WedList Ireland";
+const TITLE = "Wedding Suppliers & Venues in Ireland | Wedora Ireland";
 const DESCRIPTION =
   "Compare 785 wedding suppliers and 206 venues across every Irish county. Ranked top 10 lists, real prices, reviews and free direct enquiries.";
 
@@ -152,7 +152,7 @@ function HomePage() {
             {
               "@type": "WebSite",
               "@id": "/#website",
-              name: "WedList Ireland",
+              name: "Wedora Ireland",
               description: DESCRIPTION,
               inLanguage: "en-IE",
               publisher: { "@id": "/#organization" },
@@ -168,7 +168,7 @@ function HomePage() {
             {
               "@type": "Organization",
               "@id": "/#organization",
-              name: "WedList Ireland",
+              name: "Wedora Ireland",
               description:
                 "Directory of wedding venues and suppliers across the Republic of Ireland.",
               areaServed: { "@type": "Country", name: "Ireland" },
@@ -267,7 +267,7 @@ function HomePage() {
       <Section
         tone="ivory"
         title="Featured suppliers"
-        description="A cross-section of the businesses listed on WedList Ireland right now."
+        description="A cross-section of the businesses listed on Wedora Ireland right now."
         action={
           <Button asChild variant="outline">
             <Link to="/find-suppliers">
@@ -387,7 +387,7 @@ function HomePage() {
       {/* Why */}
       <Section
         tone="ivory"
-        title="Why couples use WedList Ireland"
+        title="Why couples use Wedora Ireland"
         description="A directory built to be read, not clicked through."
       >
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">

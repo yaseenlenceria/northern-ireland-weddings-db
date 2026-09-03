@@ -77,13 +77,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "WedList Ireland — Wedding Suppliers & Venues" },
+      { title: "Wedora Ireland — Wedding Suppliers & Venues" },
       {
         name: "description",
         content:
           "Ireland's wedding directory: venues, photographers, bands, florists and more, county by county.",
       },
-      { property: "og:site_name", content: "WedList Ireland" },
+      { property: "og:site_name", content: "Wedora Ireland" },
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "en_IE" },
       { name: "twitter:card", content: "summary_large_image" },

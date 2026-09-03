@@ -21,7 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { canonical, pageMeta } from "@/lib/seo";
 
-const TITLE = "Wedding Checklist for Irish Weddings | WedList Ireland";
+const TITLE = "Wedding Checklist for Irish Weddings | Wedora Ireland";
 const DESCRIPTION =
   "A free wedding checklist that saves to your account. Work through venue, suppliers, legal notice, styling and day-of tasks in a sensible order.";
 

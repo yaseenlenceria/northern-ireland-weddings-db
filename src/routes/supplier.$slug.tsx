@@ -41,7 +41,7 @@ export const Route = createFileRoute("/supplier/$slug")({
     const category = CATEGORY_BY_KEY.get(s.categories?.[0] ?? "")?.label ?? "Wedding supplier";
     const place = s.county ? `Co. ${s.county}` : "Ireland";
     const avg = averageRating(loaderData.reviews);
-    const title = `${s.name} — ${category}, ${place} | WedList Ireland`;
+    const title = `${s.name} — ${category}, ${place} | Wedora Ireland`;
     const ratingBit = avg
       ? `Rated ${avg.toFixed(1)}/5 from ${loaderData.reviews.length} reviews. `
       : "";
@@ -84,7 +84,7 @@ export const Route = createFileRoute("/supplier/$slug")({
 const FAQS = (name: string) => [
   {
     q: `How do I check availability with ${name}?`,
-    a: `Send an enquiry through the form on this page with your wedding date and rough guest numbers. ${name} replies to you directly by email — WedList Ireland does not sit in the middle or charge a booking fee.`,
+    a: `Send an enquiry through the form on this page with your wedding date and rough guest numbers. ${name} replies to you directly by email — Wedora Ireland does not sit in the middle or charge a booking fee.`,
   },
   {
     q: "How far in advance should I book?",

@@ -13,7 +13,7 @@ export function Footer() {
             <span className="flex size-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
               <Heart className="size-4" />
             </span>
-            <span className="font-serif text-xl">WedList Ireland</span>
+            <span className="font-serif text-xl">Wedora Ireland</span>
           </div>
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">
             An Ireland-focused wedding directory: real venues, real suppliers, and free planning
@@ -94,7 +94,7 @@ export function Footer() {
 
       <div className="border-t border-border/70">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <p>© {new Date().getFullYear()} WedList Ireland. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Wedora Ireland. All rights reserved.</p>
           <p>Made in Ireland for couples getting married here.</p>
         </div>
       </div>

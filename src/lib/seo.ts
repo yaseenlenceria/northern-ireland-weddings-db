@@ -5,7 +5,7 @@
  * so crawlers and social scrapers resolve one authoritative URL per page.
  */
 
-export const SITE_NAME = "WedList Ireland";
+export const SITE_NAME = "Wedora Ireland";
 
 /** Public origin used for canonical, og:url and sitemap entries. */
 export const SITE_URL = "https://northern-ireland-weddings-db.lovable.app";

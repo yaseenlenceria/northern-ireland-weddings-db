@@ -26,7 +26,7 @@ export function Header() {
             <Heart className="size-4" />
           </span>
           <span className="font-serif text-xl leading-none tracking-tight">
-            WedList <span className="text-primary">Ireland</span>
+            Wedora <span className="text-primary">Ireland</span>
           </span>
         </Link>
 

@@ -1,4 +1,4 @@
-# WedList Ireland — Roadmap
+# Wedora Ireland — Roadmap
 
 ## Tasks
 - [x] Enable Lovable Cloud

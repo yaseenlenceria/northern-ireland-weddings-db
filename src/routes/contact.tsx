@@ -12,9 +12,9 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { supabase } from "@/integrations/supabase/client";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Contact WedList Ireland";
+const TITLE = "Contact Wedora Ireland";
 const DESCRIPTION =
-  "Get in touch with WedList Ireland — listing questions, profile claims, corrections to a supplier entry, or help using the planning tools.";
+  "Get in touch with Wedora Ireland — listing questions, profile claims, corrections to a supplier entry, or help using the planning tools.";
 
 const FAQS = [
   {
@@ -23,7 +23,7 @@ const FAQS = [
   },
   {
     q: "Does it cost anything to be listed?",
-    a: "No. Listing your wedding business and receiving enquiries through WedList Ireland is free.",
+    a: "No. Listing your wedding business and receiving enquiries through Wedora Ireland is free.",
   },
   {
     q: "How do enquiries reach suppliers?",
@@ -85,7 +85,7 @@ function ContactPage() {
 
       <PageHeader
         eyebrow="Contact"
-        title="Talk to WedList Ireland"
+        title="Talk to Wedora Ireland"
         description="Listing questions, corrections, profile claims or help with the planning tools — this reaches us directly."
       >
         <Breadcrumbs items={[{ label: "Contact" }]} />

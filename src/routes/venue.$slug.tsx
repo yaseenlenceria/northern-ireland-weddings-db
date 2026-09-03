@@ -281,7 +281,7 @@ function VenueProfile() {
             <h2 className="text-3xl">Reviews</h2>
             {reviews.length === 0 ? (
               <p className="mt-3 text-muted-foreground">
-                No written reviews on WedList yet
+                No written reviews on Wedora yet
                 {venue.rating ? `, though this venue holds a ${venue.rating}/5 rating.` : "."}
               </p>
             ) : (

@@ -20,7 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Wedding Budget Calculator (Ireland) | WedList Ireland";
+const TITLE = "Wedding Budget Calculator (Ireland) | Wedora Ireland";
 const DESCRIPTION =
   "Free wedding budget calculator for Irish couples. Set estimates by category, log what you've paid and see exactly what's left to find.";
 
