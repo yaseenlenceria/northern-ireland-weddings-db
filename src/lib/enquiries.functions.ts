@@ -47,10 +47,10 @@ export const submitEnquiry = createServerFn({ method: "POST" })
         ${data.name},
         ${data.email},
         ${emptyToNull(data.phone)},
-        ${emptyToNull(data.weddingDate)},
+        ${emptyToNull(data.weddingDate)}::date,
         ${data.guestCount ?? null},
         ${data.message},
-        ${data.metadata ?? {}}
+        ${JSON.stringify(data.metadata ?? {})}::jsonb
       )
     `;
 
