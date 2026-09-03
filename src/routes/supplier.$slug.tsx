@@ -244,7 +244,14 @@ function SupplierProfile() {
                 <Button asChild size="lg">
                   <a href="#enquire">Enquire now</a>
                 </Button>
-                <SaveButton supplierId={supplier.id} />
+                <SaveButton
+                  id={supplier.id}
+                  type="supplier"
+                  name={supplier.name}
+                  slug={supplier.slug}
+                  county={supplier.county}
+                  image={hero}
+                />
                 {supplier.website ? (
                   <Button asChild size="lg" variant="outline">
                     <a href={supplier.website} target="_blank" rel="noopener noreferrer nofollow">

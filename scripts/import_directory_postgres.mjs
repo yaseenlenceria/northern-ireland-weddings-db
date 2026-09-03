@@ -30,6 +30,17 @@ function databaseUrl(env) {
   );
 }
 
+async function pythonCommand() {
+  if (process.env.PYTHON) return process.env.PYTHON;
+  const bundled = "C:\\Users\\Seenu\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe";
+  try {
+    await fs.access(bundled);
+    return bundled;
+  } catch {
+    return "python";
+  }
+}
+
 function updatableColumns(row) {
   return Object.keys(row).filter((key) => key !== "id" && key !== "created_at");
 }
@@ -62,6 +73,8 @@ async function upsertBatch(sql, table, rows, batchSize = 100) {
 
 const env = {
   ...(await fs.readFile(path.join(root, ".env"), "utf8").then(loadEnv).catch(() => ({}))),
+  ...(await fs.readFile(path.join(root, ".env.local"), "utf8").then(loadEnv).catch(() => ({}))),
+  ...(await fs.readFile(path.join(root, ".env.development.local"), "utf8").then(loadEnv).catch(() => ({}))),
   ...process.env,
 };
 const url = databaseUrl(env);
@@ -71,7 +84,7 @@ if (!url) {
   process.exit(2);
 }
 
-const python = process.env.PYTHON || "python";
+const python = await pythonCommand();
 const build = spawnSync(python, ["scripts/import_directory_data.py", "--dry-run", "--out", payloadPath], {
   cwd: root,
   stdio: "inherit",

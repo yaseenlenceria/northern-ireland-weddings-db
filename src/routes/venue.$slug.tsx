@@ -238,7 +238,14 @@ function VenueProfile() {
                 <Button asChild size="lg">
                   <a href="#enquire">Enquire now</a>
                 </Button>
-                <SaveButton venueId={venue.id} />
+                <SaveButton
+                  id={venue.id}
+                  type="venue"
+                  name={venue.name}
+                  slug={venue.slug}
+                  county={venue.county}
+                  image={hero}
+                />
                 {venue.website ? (
                   <Button asChild size="lg" variant="outline">
                     <a href={venue.website} target="_blank" rel="noopener noreferrer nofollow">

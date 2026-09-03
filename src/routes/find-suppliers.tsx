@@ -19,7 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { SupplierCard } from "@/components/site/Cards";
-import { listSuppliers } from "@/lib/directory.functions";
+import { getSupplierCategoryCounts, listSuppliers } from "@/lib/directory.functions";
 import { CATEGORIES, COUNTIES } from "@/lib/taxonomy";
 import { canonical, pageMeta } from "@/lib/seo";
 
@@ -64,6 +64,7 @@ function cleanSearch(s: {
 
 function FindSuppliersPage() {
   const fetchSuppliers = useServerFn(listSuppliers);
+  const fetchCategoryCounts = useServerFn(getSupplierCategoryCounts);
   const navigate = Route.useNavigate();
   const search = Route.useSearch();
 
@@ -96,6 +97,11 @@ function FindSuppliersPage() {
         },
       }),
   });
+  const categoryCounts = useQuery({
+    queryKey: ["supplier-category-counts"],
+    queryFn: () => fetchCategoryCounts(),
+  });
+  const countByCategory = new Map((categoryCounts.data ?? []).map((row) => [row.category, row.count]));
 
   const total = query.data?.count ?? 0;
   const rows = query.data?.rows ?? [];
@@ -177,6 +183,28 @@ function FindSuppliersPage() {
               ? "We couldn't load suppliers just now."
               : `${total.toLocaleString()} suppliers match your filters.`}
         </p>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {CATEGORIES.map((item) => {
+            const count = countByCategory.get(item.key) ?? 0;
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => update({ category: item.key })}
+                className={`rounded-xl border p-4 text-left transition-colors hover:border-primary/50 hover:bg-primary-soft ${
+                  category === item.key ? "border-primary bg-primary-soft" : "border-border bg-card"
+                }`}
+              >
+                <span className="block font-serif text-lg">{item.plural}</span>
+                <span className="mt-1 block text-xs text-muted-foreground">{item.blurb}</span>
+                <span className="mt-3 block text-sm text-primary">
+                  {categoryCounts.isPending ? "Loading" : `${count.toLocaleString()} listed`}
+                </span>
+              </button>
+            );
+          })}
+        </div>
 
         {query.isError ? (
           <div className="mt-6 rounded-xl border border-destructive/40 bg-card p-8 text-center">

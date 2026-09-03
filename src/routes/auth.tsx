@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SiteLayout, Section } from "@/components/site/Layout";
-import { supabase } from "@/integrations/supabase/client";
+import { isNeonAuthConfigured, neonAuth } from "@/integrations/neon/auth-client";
 import { useAuth } from "@/hooks/useAuth";
 import { pageMeta, canonical } from "@/lib/seo";
 
@@ -39,8 +39,12 @@ function AuthPage() {
   const signIn = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    if (!neonAuth) {
+      toast.error("Account login is not connected yet.");
+      return;
+    }
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error } = await neonAuth.signInWithPassword({
       email: String(form.get("email") ?? ""),
       password: String(form.get("password") ?? ""),
     });
@@ -55,8 +59,12 @@ function AuthPage() {
   const signUp = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    if (!neonAuth) {
+      toast.error("Account login is not connected yet.");
+      return;
+    }
     setBusy(true);
-    const { error } = await supabase.auth.signUp({
+    const { error } = await neonAuth.signUp({
       email: String(form.get("email") ?? ""),
       password: String(form.get("password") ?? ""),
       options: {
@@ -73,9 +81,13 @@ function AuthPage() {
   };
 
   const google = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
+    if (!neonAuth) {
+      toast.error("Account login is not connected yet.");
+      return;
+    }
+    const { error } = await neonAuth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: window.location.origin },
+      options: { redirectTo: `${window.location.origin}/dashboard` },
     });
     if (error) toast.error(error.message);
   };
@@ -91,6 +103,12 @@ function AuthPage() {
           </p>
 
           <div className="mt-8 rounded-xl border border-border bg-card p-6">
+            {!isNeonAuthConfigured ? (
+              <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                Account login is waiting for Neon Auth environment variables. You can still browse,
+                enquire and use the planning tools.
+              </p>
+            ) : null}
             <Button variant="outline" className="w-full" onClick={google}>
               Continue with Google
             </Button>

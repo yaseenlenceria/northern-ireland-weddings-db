@@ -1,8 +1,12 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { JsonLd } from "@/components/site/JsonLd";
+import { ListingImage } from "@/components/site/ListingImage";
+import { getGuideHighlights } from "@/lib/directory.functions";
 import { GUIDES, GUIDE_BY_SLUG } from "@/lib/guides";
 import { canonical, clamp, pageMeta } from "@/lib/seo";
 
@@ -49,6 +53,11 @@ export const Route = createFileRoute("/wedding-guides/$slug")({
 
 function GuidePage() {
   const { guide } = Route.useLoaderData();
+  const fetchHighlights = useServerFn(getGuideHighlights);
+  const highlights = useQuery({
+    queryKey: ["guide-highlights"],
+    queryFn: () => fetchHighlights(),
+  });
   const others = GUIDES.filter((g) => g.slug !== guide.slug).slice(0, 3);
 
   return (
@@ -83,6 +92,44 @@ function GuidePage() {
               </div>
             </section>
           ))}
+
+          <section>
+            <h2 className="text-2xl">Real listings to compare next</h2>
+            <p className="mt-3 text-muted-foreground">
+              These examples come from the live directory database, so couples can move from advice
+              into actual Irish venues and suppliers.
+            </p>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              {[...(highlights.data?.venues ?? []), ...(highlights.data?.suppliers ?? [])]
+                .slice(0, 4)
+                .map((item, index) => {
+                  const isVenue = index < (highlights.data?.venues.length ?? 0);
+                  return (
+                    <Link
+                      key={`${isVenue ? "venue" : "supplier"}-${item.slug}`}
+                      to={isVenue ? "/venue/$slug" : "/supplier/$slug"}
+                      params={{ slug: item.slug }}
+                      className="group overflow-hidden rounded-xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift"
+                    >
+                      <ListingImage
+                        src={item.image}
+                        alt={item.name}
+                        className="aspect-16/10 w-full object-cover"
+                      />
+                      <div className="p-4">
+                        <p className="eyebrow text-primary">{isVenue ? "Venue" : "Supplier"}</p>
+                        <h3 className="mt-1 font-serif text-xl group-hover:text-primary">
+                          {item.name}
+                        </h3>
+                        {item.county ? (
+                          <p className="mt-1 text-sm text-muted-foreground">Co. {item.county}</p>
+                        ) : null}
+                      </div>
+                    </Link>
+                  );
+                })}
+            </div>
+          </section>
 
           <div className="rounded-xl border border-primary/25 bg-primary-soft p-6 text-center">
             <h2 className="font-serif text-2xl">Ready to start enquiring?</h2>

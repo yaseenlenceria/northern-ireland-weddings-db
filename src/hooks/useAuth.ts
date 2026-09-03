@@ -1,26 +1,48 @@
 import { useEffect, useState } from "react";
-import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { neonAuth } from "@/integrations/neon/auth-client";
 
-/** Client-side Supabase auth state. Safe during SSR (returns loading/no user). */
+type AuthUser = {
+  id: string;
+  email?: string;
+  name?: string | null;
+};
+
+type AuthSession = {
+  user: AuthUser;
+};
+
+/** Client-side Neon auth state. Safe during SSR (returns loading/no user). */
 export function useAuth() {
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<AuthSession | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
+    if (!neonAuth) {
+      setSession(null);
+      setLoading(false);
+      return;
+    }
+
+    const { data: sub } = neonAuth.onAuthStateChange((_event, next) => {
       if (!active) return;
-      setSession(next);
+      setSession(next as AuthSession | null);
       setLoading(false);
     });
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!active) return;
-      setSession(data.session);
-      setLoading(false);
-    });
+    neonAuth
+      .getSession()
+      .then(({ data }) => {
+        if (!active) return;
+        setSession((data.session as AuthSession | null) ?? null);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!active) return;
+        setSession(null);
+        setLoading(false);
+      });
 
     return () => {
       active = false;
@@ -28,6 +50,6 @@ export function useAuth() {
     };
   }, []);
 
-  const user: User | null = session?.user ?? null;
+  const user: AuthUser | null = session?.user ?? null;
   return { session, user, loading };
 }

@@ -6,7 +6,7 @@ import { canonical, pageMeta } from "@/lib/seo";
 
 const TITLE = "Free Wedding Planning Tools for Irish Couples | Wedora Ireland";
 const DESCRIPTION =
-  "Checklist, budget calculator, guest list planner, supplier shortlist and running order — free planning tools that save as you go.";
+  "Checklist, budget calculator, guest list planner and running order — free wedding planning tools that work in your browser.";
 
 const TOOLS = [
   {
@@ -28,10 +28,10 @@ const TOOLS = [
     copy: "Track names, sides, party sizes and RSVPs, with a live headcount for your caterer.",
   },
   {
-    to: "/dashboard" as const,
+    to: "/find-suppliers" as const,
     icon: Heart,
-    title: "Supplier Shortlist",
-    copy: "Everything you've saved from the directory, in one place to compare.",
+    title: "Supplier Finder",
+    copy: "Browse venues and suppliers, then use enquiry forms to contact the best matches.",
   },
   {
     to: "/wedding-timeline" as const,
@@ -55,7 +55,7 @@ function PlanningToolsPage() {
       <PageHeader
         eyebrow="Planning"
         title="Wedding planning tools"
-        description="Free with a couple account. Everything saves to your account so you can pick it back up on any device."
+        description="Free tools that work straight away. Checklist, budget and guest list changes save in this browser."
       >
         <Breadcrumbs items={[{ label: "Planning Tools" }]} />
       </PageHeader>

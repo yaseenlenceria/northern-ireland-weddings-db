@@ -362,3 +362,48 @@ export const getCountyStats = createServerFn({ method: "GET" })
       return { suppliers: 0, venues: 0 };
     }
   });
+
+export const getSupplierCategoryCounts = createServerFn({ method: "GET" }).handler(async () => {
+  try {
+    const sql = await db();
+    return await sql<{ category: string; count: number }[]>`
+      SELECT category, count(*)::int AS count
+      FROM suppliers
+      CROSS JOIN LATERAL unnest(categories) AS category
+      GROUP BY category
+      ORDER BY count DESC, category ASC
+    `;
+  } catch (error) {
+    logPublicDataError("getSupplierCategoryCounts", error);
+    return [] as { category: string; count: number }[];
+  }
+});
+
+export const getGuideHighlights = createServerFn({ method: "GET" }).handler(async () => {
+  try {
+    const sql = await db();
+    const [venues, suppliers] = await Promise.all([
+      sql<{ slug: string; name: string; county: string | null; image: string | null }[]>`
+        SELECT slug, name, county, COALESCE(logo_image, gallery_images[1]) AS image
+        FROM venues
+        WHERE COALESCE(logo_image, gallery_images[1]) IS NOT NULL
+        ORDER BY rating DESC NULLS LAST, image_count DESC NULLS LAST, name ASC
+        LIMIT 3
+      `,
+      sql<{ slug: string; name: string; county: string | null; image: string | null }[]>`
+        SELECT slug, name, county, COALESCE(logo_image, gallery_images[1]) AS image
+        FROM suppliers
+        WHERE COALESCE(logo_image, gallery_images[1]) IS NOT NULL
+        ORDER BY image_count DESC NULLS LAST, name ASC
+        LIMIT 3
+      `,
+    ]);
+    return { venues, suppliers };
+  } catch (error) {
+    logPublicDataError("getGuideHighlights", error);
+    return {
+      venues: [] as { slug: string; name: string; county: string | null; image: string | null }[],
+      suppliers: [] as { slug: string; name: string; county: string | null; image: string | null }[],
+    };
+  }
+});

@@ -3,27 +3,52 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import os
 import re
 import sys
-import time
 import uuid
 from pathlib import Path
 from typing import Any
-from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
 
 import pandas as pd
 
 
 SOURCE_FILES = {
+    "weddingdates_full": Path(r"C:\Users\Seenu\weddingdates-scrape\WeddingDates_Ireland_Full.xlsx"),
     "hitched_part_2": Path(r"C:\Users\Seenu\weddingdates-scrape\Hitched_Ireland2.xlsx"),
     "wedding_planners": Path(r"C:\Users\Seenu\weddingdates-scrape\Wedding_Planners_Ireland.xlsx"),
     "weddingdates": Path(r"C:\Users\Seenu\weddingdates-scrape\WeddingDates_Directory_Complete.xlsx"),
     "hitched": Path(r"C:\Users\Seenu\weddingdates-scrape\Hitched_Ireland.xlsx"),
     "hitched_top_50": Path(r"C:\Users\Seenu\weddingdates-scrape\Hitched_Ireland_Top50.xlsx"),
 }
+
+FULL_SUPPLIER_SHEETS = [
+    "Bands",
+    "Bridal Shops & Accessories",
+    "Cakes & Sweet Treats",
+    "Catering & Wine",
+    "Celebrants",
+    "Childcare & Nannies",
+    "Church Singers & Music",
+    "Decor, Lighting & Styling",
+    "Djs",
+    "Entertainment & Photobooths",
+    "Florists",
+    "Gifts & Favours",
+    "Groomswear",
+    "Hair Stylists",
+    "Health & Fitness",
+    "Hen & Stag",
+    "Honeymoon",
+    "Invitations & Stationery",
+    "Jewellers",
+    "Make Up Artists, Beauty & Cosme",
+    "Marquee Hire",
+    "Photographers",
+    "Planners",
+    "Services",
+    "Transport",
+    "Videographers",
+]
 
 IMPORT_NAMESPACE = uuid.UUID("f907c78a-7915-41f0-8469-14fb7061deab")
 
@@ -230,33 +255,91 @@ def venue_from_hitched(row: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
-def supplier_from_weddingdates(row: dict[str, Any]) -> dict[str, Any] | None:
-    name = clean_text(row.get("Supplier Name"))
+def clean_mojibake(value: Any) -> str | None:
+    text = clean_text(value)
+    if text is None:
+        return None
+    return (
+        text.replace("�", "'")
+        .replace("â€™", "'")
+        .replace("â€“", "-")
+        .replace("â€”", "-")
+        .replace("Â", "")
+    )
+
+
+def source_url_from_row(row: dict[str, Any]) -> str | None:
+    for key in ["Profile URL", "Categories", "Source URL"]:
+        value = clean_text(row.get(key))
+        if value and value.startswith("http"):
+            return value
+    return None
+
+
+def category_from_sheet(sheet_name: str) -> str:
+    replacements = {
+        "Bands": "Wedding Bands",
+        "Bridal Shops & Accessories": "Bridal Shops Accessories",
+        "Cakes & Sweet Treats": "Cakes Sweet Treats",
+        "Catering & Wine": "Catering Wine",
+        "Celebrants": "Wedding Celebrants",
+        "Childcare & Nannies": "Childcare Nannies",
+        "Church Singers & Music": "Church Singers Music",
+        "Decor, Lighting & Styling": "Wedding Decor Lighting Styling",
+        "Djs": "Wedding DJs",
+        "Entertainment & Photobooths": "Wedding Entertainment Photobooths",
+        "Florists": "Wedding Florists",
+        "Gifts & Favours": "Wedding Gifts Favours",
+        "Hair Stylists": "Wedding Hair Stylists",
+        "Health & Fitness": "Health Fitness",
+        "Hen & Stag": "Hens Stags",
+        "Jewellers": "Wedding Jewellers",
+        "Invitations & Stationery": "Wedding Invitations Stationery",
+        "Make Up Artists, Beauty & Cosme": "Make Up Artists",
+        "Photographers": "Wedding Photographers",
+        "Planners": "Wedding Planners",
+        "Services": "Wedding Services",
+        "Transport": "Wedding Cars",
+        "Videographers": "Wedding Videographers",
+    }
+    return replacements.get(sheet_name, sheet_name)
+
+
+def supplier_from_weddingdates(row: dict[str, Any], sheet_name: str | None = None) -> dict[str, Any] | None:
+    name = clean_mojibake(first(row.get("Supplier Name"), row.get("Name")))
     if not name:
         return None
-    county = clean_text(row.get("County"))
+    county = clean_mojibake(row.get("County"))
     gallery = split_images(row.get("Gallery Images (all)"))
-    categories = split_list(row.get("Categories")) or ["wedding-suppliers"]
+    raw_categories = split_list(row.get("Categories"))
+    categories = [
+        item for item in (raw_categories or [])
+        if not item.startswith("http") and not item.lower().startswith("www.")
+    ]
+    if not categories and sheet_name:
+        categories = [category_from_sheet(sheet_name)]
+    if not categories:
+        categories = ["Wedding Suppliers"]
     return {
         "slug": slugify(f"{name}-{county or ''}"),
         "name": name,
         "categories": [slugify(c) for c in categories],
         "county": county,
-        "avg_price": clean_text(row.get("Avg Price")),
+        "avg_price": clean_mojibake(row.get("Avg Price")),
         "avg_price_num": number(row.get("Avg Price")),
-        "overview": clean_text(row.get("Overview")),
-        "description": clean_text(row.get("Description")),
-        "logo_image": clean_text(row.get("Logo Image")),
+        "overview": clean_mojibake(row.get("Overview")),
+        "description": clean_mojibake(row.get("Description")),
+        "logo_image": first(row.get("Logo Image"), row.get("Logo")),
         "gallery_images": gallery,
         "featured": False,
         "service_areas": None,
         "image_count": integer(row.get("Image Count")) or (len(gallery) if gallery else None),
-        "address": clean_text(row.get("Address")),
+        "address": clean_mojibake(first(row.get("Address"), row.get("Town/Address"))),
         "latitude": number(row.get("Latitude")),
         "longitude": number(row.get("Longitude")),
-        "phone": clean_text(row.get("Phone")),
-        "source_url": clean_text(row.get("Profile URL")),
-        "website": clean_text(row.get("Website")),
+        "phone": clean_mojibake(row.get("Phone")),
+        "source_url": source_url_from_row(row),
+        "website": clean_mojibake(row.get("Website")),
     }
 
 
@@ -341,7 +424,9 @@ def build_payload() -> dict[str, list[dict[str, Any]]]:
     fairs: dict[str, dict[str, Any]] = {}
     reviews: dict[str, dict[str, Any]] = {}
 
-    for _, row in frame("weddingdates", "Venues").iterrows():
+    primary_key = "weddingdates_full" if SOURCE_FILES["weddingdates_full"].exists() else "weddingdates"
+
+    for _, row in frame(primary_key, "Venues").iterrows():
         record = venue_from_weddingdates(row.to_dict())
         if record:
             added = add_unique(venues, record, "venue")
@@ -360,21 +445,31 @@ def build_payload() -> dict[str, list[dict[str, Any]]]:
                 for review in review_records("venue", added["id"], row.to_dict()):
                     reviews[review["id"]] = review
 
-    for _, row in frame("weddingdates", "Suppliers").iterrows():
-        record = supplier_from_weddingdates(row.to_dict())
-        if record:
-            added = add_unique(suppliers, record, "supplier")
-            for review in review_records("supplier", added["id"], row.to_dict()):
-                reviews[review["id"]] = review
+    if primary_key == "weddingdates_full":
+        for sheet_name in FULL_SUPPLIER_SHEETS:
+            for _, row in frame(primary_key, sheet_name).iterrows():
+                record = supplier_from_weddingdates(row.to_dict(), sheet_name)
+                if record:
+                    added = add_unique(suppliers, record, "supplier")
+                    for review in review_records("supplier", added["id"], row.to_dict()):
+                        reviews[review["id"]] = review
+    else:
+        for _, row in frame("weddingdates", "Suppliers").iterrows():
+            record = supplier_from_weddingdates(row.to_dict())
+            if record:
+                added = add_unique(suppliers, record, "supplier")
+                for review in review_records("supplier", added["id"], row.to_dict()):
+                    reviews[review["id"]] = review
 
-    for _, row in frame("wedding_planners", "Wedding Planners").iterrows():
-        record = supplier_from_planner(row.to_dict())
-        if record:
-            added = add_unique(suppliers, record, "supplier")
-            for review in review_records("supplier", added["id"], row.to_dict()):
-                reviews[review["id"]] = review
+    if SOURCE_FILES["wedding_planners"].exists():
+        for _, row in frame("wedding_planners", "Wedding Planners").iterrows():
+            record = supplier_from_planner(row.to_dict())
+            if record:
+                added = add_unique(suppliers, record, "supplier")
+                for review in review_records("supplier", added["id"], row.to_dict()):
+                    reviews[review["id"]] = review
 
-    for _, row in frame("weddingdates", "Wedding Fairs").iterrows():
+    for _, row in frame(primary_key, "Wedding Fairs").iterrows():
         record = fair_from_weddingdates(row.to_dict())
         if record:
             fairs[record["slug"]] = best_record(fairs.get(record["slug"]), record)
@@ -387,45 +482,10 @@ def build_payload() -> dict[str, list[dict[str, Any]]]:
     }
 
 
-def api_headers(key: str) -> dict[str, str]:
-    headers = {
-        "apikey": key,
-        "Content-Type": "application/json",
-        "Prefer": "resolution=merge-duplicates,return=minimal",
-    }
-    if not key.startswith("sb_"):
-        headers["Authorization"] = f"Bearer {key}"
-    return headers
-
-
-def post_batch(url: str, key: str, table: str, rows: list[dict[str, Any]], batch_size: int) -> None:
-    if not rows:
-        return
-    endpoint = f"{url.rstrip('/')}/rest/v1/{table}?{urlencode({'on_conflict': 'id'})}"
-    headers = api_headers(key)
-    for start in range(0, len(rows), batch_size):
-        batch = rows[start:start + batch_size]
-        body = json.dumps(batch, ensure_ascii=False).encode("utf-8")
-        request = Request(endpoint, data=body, headers=headers, method="POST")
-        try:
-            with urlopen(request, timeout=60) as response:
-                if response.status >= 300:
-                    raise RuntimeError(f"{table} import returned HTTP {response.status}")
-        except HTTPError as exc:
-            detail = exc.read().decode("utf-8", errors="replace")
-            raise RuntimeError(f"{table} import failed with HTTP {exc.code}: {detail}") from exc
-        except URLError as exc:
-            raise RuntimeError(f"{table} import failed: {exc}") from exc
-        print(f"Imported {table}: {min(start + batch_size, len(rows))}/{len(rows)}")
-        time.sleep(0.1)
-
-
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Import wedding directory spreadsheets into Supabase.")
-    parser.add_argument("--env-file", default=".env")
+    parser = argparse.ArgumentParser(description="Build the wedding directory import payload from spreadsheets.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--out", default=None, help="Optional JSON output file for the generated payload.")
-    parser.add_argument("--batch-size", type=int, default=100)
     args = parser.parse_args()
 
     payload = build_payload()
@@ -437,21 +497,9 @@ def main() -> None:
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    if args.dry_run:
-        return
-
-    env = {**load_env(Path(args.env_file)), **os.environ}
-    supabase_url = env.get("SUPABASE_URL") or env.get("VITE_SUPABASE_URL")
-    supabase_key = env.get("SUPABASE_SERVICE_ROLE_KEY") or env.get("SUPABASE_PUBLISHABLE_KEY") or env.get("VITE_SUPABASE_PUBLISHABLE_KEY")
-
-    if not supabase_url or not supabase_key:
-        print("Missing Supabase URL/key. Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY before importing.", file=sys.stderr)
+    if not args.dry_run:
+        print("This script only builds JSON payloads. Run npm run db:import to upsert into Neon Postgres.", file=sys.stderr)
         raise SystemExit(2)
-
-    key_type = "service role" if env.get("SUPABASE_SERVICE_ROLE_KEY") else "publishable"
-    print(f"Using {key_type} key for import.")
-    for table in ["venues", "suppliers", "wedding_fairs", "imported_reviews"]:
-        post_batch(supabase_url, supabase_key, table, payload[table], args.batch_size)
 
 
 if __name__ == "__main__":
