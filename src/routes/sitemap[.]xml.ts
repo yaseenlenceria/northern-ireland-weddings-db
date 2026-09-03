@@ -36,6 +36,21 @@ function publicClientFetch(key: string) {
   };
 }
 
+function getSupabaseEnv() {
+  const url = process.env["SUPABASE_URL"];
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
+
+  if (!url || !key) {
+    const missing = [
+      ...(!url ? ["SUPABASE_URL"] : []),
+      ...(!key ? ["SUPABASE_PUBLISHABLE_KEY"] : []),
+    ];
+    throw new Error(`Missing Supabase environment variable(s): ${missing.join(", ")}`);
+  }
+
+  return { url, key };
+}
+
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
@@ -46,50 +61,55 @@ export const Route = createFileRoute("/sitemap.xml")({
           entries.push({ path: `/wedding-guides/${guide.slug}`, changefreq: "monthly", priority: "0.6" });
         }
 
-        const { createClient } = await import("@supabase/supabase-js");
-        const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-        const supabase = createClient(process.env["SUPABASE_URL"]!, key, {
-          auth: { persistSession: false, autoRefreshToken: false },
-          global: { fetch: publicClientFetch(key) },
-        });
-
-        const pageSize = 1000;
-
-        // Supplier profiles.
         const supplierCounties = new Map<string, Set<string>>();
-        for (let offset = 0; ; offset += pageSize) {
-          const { data, error } = await supabase
-            .from("suppliers")
-            .select("slug, county, categories")
-            .order("slug")
-            .range(offset, offset + pageSize - 1);
-          if (error) throw error;
-          for (const row of data) {
-            entries.push({ path: `/supplier/${row.slug}`, changefreq: "monthly", priority: "0.7" });
-            for (const cat of row.categories ?? []) {
-              if (!row.county) continue;
-              const set = supplierCounties.get(cat) ?? new Set<string>();
-              set.add(row.county);
-              supplierCounties.set(cat, set);
-            }
-          }
-          if (data.length < pageSize) break;
-        }
-
-        // Venue profiles.
         const venueCounties = new Set<string>();
-        for (let offset = 0; ; offset += pageSize) {
-          const { data, error } = await supabase
-            .from("venues")
-            .select("slug, county")
-            .order("slug")
-            .range(offset, offset + pageSize - 1);
-          if (error) throw error;
-          for (const row of data) {
-            entries.push({ path: `/venue/${row.slug}`, changefreq: "monthly", priority: "0.7" });
-            if (row.county) venueCounties.add(row.county);
+
+        try {
+          const { createClient } = await import("@supabase/supabase-js");
+          const { url, key } = getSupabaseEnv();
+          const supabase = createClient(url, key, {
+            auth: { persistSession: false, autoRefreshToken: false },
+            global: { fetch: publicClientFetch(key) },
+          });
+
+          const pageSize = 1000;
+
+          // Supplier profiles.
+          for (let offset = 0; ; offset += pageSize) {
+            const { data, error } = await supabase
+              .from("suppliers")
+              .select("slug, county, categories")
+              .order("slug")
+              .range(offset, offset + pageSize - 1);
+            if (error) throw error;
+            for (const row of data) {
+              entries.push({ path: `/supplier/${row.slug}`, changefreq: "monthly", priority: "0.7" });
+              for (const cat of row.categories ?? []) {
+                if (!row.county) continue;
+                const set = supplierCounties.get(cat) ?? new Set<string>();
+                set.add(row.county);
+                supplierCounties.set(cat, set);
+              }
+            }
+            if (data.length < pageSize) break;
           }
-          if (data.length < pageSize) break;
+
+          // Venue profiles.
+          for (let offset = 0; ; offset += pageSize) {
+            const { data, error } = await supabase
+              .from("venues")
+              .select("slug, county")
+              .order("slug")
+              .range(offset, offset + pageSize - 1);
+            if (error) throw error;
+            for (const row of data) {
+              entries.push({ path: `/venue/${row.slug}`, changefreq: "monthly", priority: "0.7" });
+              if (row.county) venueCounties.add(row.county);
+            }
+            if (data.length < pageSize) break;
+          }
+        } catch (error) {
+          console.error("[Sitemap] Database-backed sitemap entries unavailable", error);
         }
 
         // County hubs — only counties that actually have listings.

@@ -1,13 +1,24 @@
-# Remix of Northern Ireland Wedding Planners
+# Northern Ireland Weddings Directory
 
-i have data baese for wedding Wedding Planners in Northern Ireland
+TanStack Start and React directory website for Northern Ireland wedding venues, suppliers, wedding fairs, planning tools, and enquiries.
 
+The application currently uses Supabase/Postgres for its database and backend layer and is prepared for Vercel deployment.
 
- in excel how can you read that and make your database
+## Vercel Setup
 
-This project was built with [Lovable](https://lovable.dev).
+Configure these environment variables in Vercel before building Preview or Production:
+
+- `SUPABASE_URL`
+- `SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+
+Do not commit real `.env` files. Use `.env.example` as the template.
 
 ## Build with Lovable
+
+This project was built with [Lovable](https://lovable.dev).
 
 Continue developing this project in the [Lovable editor](https://lovable.dev/projects/f2801c21-49f7-4601-ae40-9518518bbdf5).
 
@@ -25,3 +36,7 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Migration Status
+
+See `docs/migration-status.md` for the current Laravel-to-Supabase migration status and the remaining blocked source-of-truth mapping work.
