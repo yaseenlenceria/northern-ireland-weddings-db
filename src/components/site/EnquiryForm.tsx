@@ -1,15 +1,17 @@
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
+import { submitEnquiry } from "@/lib/enquiries.functions";
 
 type Props = { supplierId?: string; venueId?: string; listingName: string };
 
 /** Public enquiry form. Anyone may submit; owners read their own enquiries. */
 export function EnquiryForm({ supplierId, venueId, listingName }: Props) {
+  const sendEnquiry = useServerFn(submitEnquiry);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -18,27 +20,31 @@ export function EnquiryForm({ supplierId, venueId, listingName }: Props) {
     const form = new FormData(event.currentTarget);
     setSending(true);
 
-    const { data: sessionData } = await supabase.auth.getSession();
     const guests = form.get("guest_count");
     const weddingDate = String(form.get("wedding_date") ?? "");
 
-    const { error } = await supabase.from("enquiries").insert({
-      supplier_id: supplierId ?? null,
-      venue_id: venueId ?? null,
-      user_id: sessionData.session?.user.id ?? null,
-      name: String(form.get("name") ?? ""),
-      email: String(form.get("email") ?? ""),
-      phone: String(form.get("phone") ?? "") || null,
-      wedding_date: weddingDate || null,
-      guest_count: guests ? Number(guests) : null,
-      message: String(form.get("message") ?? ""),
-    });
-
-    setSending(false);
-    if (error) {
+    try {
+      await sendEnquiry({
+        data: {
+          supplierId,
+          venueId,
+          kind: "listing_enquiry",
+          listingName,
+          name: String(form.get("name") ?? ""),
+          email: String(form.get("email") ?? ""),
+          phone: String(form.get("phone") ?? "") || undefined,
+          weddingDate: weddingDate || undefined,
+          guestCount: guests ? Number(guests) : undefined,
+          message: String(form.get("message") ?? ""),
+        },
+      });
+    } catch {
+      setSending(false);
       toast.error("We couldn't send that enquiry. Please try again.");
       return;
     }
+
+    setSending(false);
     setSent(true);
     toast.success(`Your enquiry has been sent to ${listingName}.`);
   };

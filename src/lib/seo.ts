@@ -8,7 +8,7 @@
 export const SITE_NAME = "Wedora Ireland";
 
 /** Public origin used for canonical, og:url and sitemap entries. */
-export const SITE_URL = "https://northern-ireland-weddings-db.lovable.app";
+export const SITE_URL = "https://northern-ireland-weddings-db.vercel.app";
 
 /** Absolute URL for a site-relative path. */
 export const absoluteUrl = (path: string) =>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { Mail, HelpCircle, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { JsonLd } from "@/components/site/JsonLd";
-import { supabase } from "@/integrations/supabase/client";
+import { submitEnquiry } from "@/lib/enquiries.functions";
 import { pageMeta, canonical } from "@/lib/seo";
 
 const TITLE = "Contact Wedora Ireland";
@@ -44,6 +45,7 @@ export const Route = createFileRoute("/contact")({
 });
 
 function ContactPage() {
+  const sendEnquiry = useServerFn(submitEnquiry);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -51,20 +53,23 @@ function ContactPage() {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     setSending(true);
-    const { error } = await supabase.from("enquiries").insert({
-      name: String(form.get("name") ?? ""),
-      email: String(form.get("email") ?? ""),
-      message: [
-        `SUBJECT: ${String(form.get("subject") ?? "General")}`,
-        "",
-        String(form.get("message") ?? ""),
-      ].join("\n"),
-    });
-    setSending(false);
-    if (error) {
+    try {
+      await sendEnquiry({
+        data: {
+          kind: "contact",
+          name: String(form.get("name") ?? ""),
+          email: String(form.get("email") ?? ""),
+          message: String(form.get("message") ?? ""),
+          metadata: { subject: String(form.get("subject") ?? "General") },
+        },
+      });
+    } catch {
+      setSending(false);
       toast.error("That didn't send. Please try again.");
       return;
     }
+
+    setSending(false);
     setSent(true);
     toast.success("Message sent — thanks.");
   };

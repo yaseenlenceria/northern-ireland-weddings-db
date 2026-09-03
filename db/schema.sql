@@ -94,6 +94,22 @@ CREATE TABLE IF NOT EXISTS imported_reviews (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS enquiries (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  supplier_id uuid REFERENCES suppliers(id) ON DELETE SET NULL,
+  venue_id uuid REFERENCES venues(id) ON DELETE SET NULL,
+  kind text NOT NULL DEFAULT 'listing_enquiry',
+  listing_name text,
+  name text NOT NULL,
+  email text NOT NULL,
+  phone text,
+  wedding_date date,
+  guest_count integer,
+  message text NOT NULL,
+  metadata jsonb NOT NULL DEFAULT '{}',
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
 CREATE INDEX IF NOT EXISTS venues_county_idx ON venues(county);
 CREATE INDEX IF NOT EXISTS venues_featured_idx ON venues(featured);
 CREATE INDEX IF NOT EXISTS venues_rating_idx ON venues(rating DESC NULLS LAST);
@@ -108,3 +124,6 @@ CREATE INDEX IF NOT EXISTS suppliers_name_trgm_idx ON suppliers USING gin (name 
 
 CREATE INDEX IF NOT EXISTS imported_reviews_venue_idx ON imported_reviews(venue_id);
 CREATE INDEX IF NOT EXISTS imported_reviews_supplier_idx ON imported_reviews(supplier_id);
+CREATE INDEX IF NOT EXISTS enquiries_supplier_idx ON enquiries(supplier_id);
+CREATE INDEX IF NOT EXISTS enquiries_venue_idx ON enquiries(venue_id);
+CREATE INDEX IF NOT EXISTS enquiries_created_at_idx ON enquiries(created_at DESC);

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { Check, TrendingUp, Search, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ import {
 import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { JsonLd } from "@/components/site/JsonLd";
-import { supabase } from "@/integrations/supabase/client";
+import { submitEnquiry } from "@/lib/enquiries.functions";
 import { CATEGORIES, COUNTIES } from "@/lib/taxonomy";
 import { pageMeta, canonical } from "@/lib/seo";
 
@@ -60,6 +61,7 @@ export const Route = createFileRoute("/list-your-business")({
 });
 
 function ListBusinessPage() {
+  const sendEnquiry = useServerFn(submitEnquiry);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [category, setCategory] = useState(CATEGORIES[0]!.key);
@@ -71,26 +73,30 @@ function ListBusinessPage() {
     setSending(true);
 
     const categoryLabel = CATEGORIES.find((c) => c.key === category)?.plural ?? category;
-    const { error } = await supabase.from("enquiries").insert({
-      name: String(form.get("name") ?? ""),
-      email: String(form.get("email") ?? ""),
-      phone: String(form.get("phone") ?? "") || null,
-      message: [
-        "SUPPLIER LISTING REQUEST",
-        `Business: ${String(form.get("business") ?? "")}`,
-        `Category: ${categoryLabel}`,
-        `County: ${county}`,
-        `Website: ${String(form.get("website") ?? "") || "—"}`,
-        "",
-        String(form.get("about") ?? ""),
-      ].join("\n"),
-    });
-
-    setSending(false);
-    if (error) {
+    try {
+      await sendEnquiry({
+        data: {
+          kind: "business_listing_request",
+          listingName: String(form.get("business") ?? ""),
+          name: String(form.get("name") ?? ""),
+          email: String(form.get("email") ?? ""),
+          phone: String(form.get("phone") ?? "") || undefined,
+          message: String(form.get("about") ?? ""),
+          metadata: {
+            business: String(form.get("business") ?? ""),
+            category: categoryLabel,
+            county,
+            website: String(form.get("website") ?? ""),
+          },
+        },
+      });
+    } catch {
+      setSending(false);
       toast.error("We couldn't send that just now. Please try again.");
       return;
     }
+
+    setSending(false);
     setSent(true);
     toast.success("Request received — we'll be in touch about your listing.");
   };
