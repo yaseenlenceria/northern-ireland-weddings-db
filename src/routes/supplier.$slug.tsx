@@ -101,13 +101,19 @@ const FAQS = (name: string) => [
 ];
 
 function SupplierProfile() {
-  const { supplier, reviews, similar } = Route.useLoaderData();
+  const { supplier, reviews, sourcedReviews, similar } = Route.useLoaderData();
   const category = CATEGORY_BY_KEY.get(supplier.categories?.[0] ?? "");
   const gallery = (supplier.gallery_images ?? []).slice(0, 9);
   const hero = supplier.logo_image ?? gallery[0] ?? null;
   const faqs = FAQS(supplier.name);
-  const avg = averageRating(reviews);
-  const ratingNode = aggregateRating(avg, reviews.length);
+  const allScored = [
+    ...reviews.filter((r) => typeof r.rating === "number").map((r) => r.rating as number),
+    ...sourcedReviews.filter((r) => typeof r.rating === "number").map((r) => r.rating as number),
+  ];
+  const avg = allScored.length
+    ? allScored.reduce((s, r) => s + r, 0) / allScored.length
+    : averageRating(reviews);
+  const ratingNode = aggregateRating(avg, allScored.length);
 
   return (
     <SiteLayout>
@@ -146,7 +152,14 @@ function SupplierProfile() {
               }
             : {}),
           ...(ratingNode ? { aggregateRating: ratingNode } : {}),
-          ...(reviews.length ? { review: reviewSchema(reviews) } : {}),
+          ...(reviews.length || sourcedReviews.length
+            ? {
+                review: [...reviewSchema(reviews), ...sourcedReviewSchema(sourcedReviews)].slice(
+                  0,
+                  10,
+                ),
+              }
+            : {}),
         }}
       />
       <JsonLd
