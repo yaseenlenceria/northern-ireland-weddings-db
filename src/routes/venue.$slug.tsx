@@ -9,7 +9,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { SiteLayout, Section } from "@/components/site/Layout";
-import { Breadcrumbs } from "@/components/site/Breadcrumbs";
+import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { ListingImage } from "@/components/site/ListingImage";
 import { Stars } from "@/components/site/Stars";
 import { VenueCard } from "@/components/site/Cards";
@@ -100,6 +100,21 @@ function VenueProfile() {
   return (
     <SiteLayout>
       <JsonLd
+        data={breadcrumbSchema("", [
+          { name: "Home", path: "/" },
+          { name: "Venues", path: "/venues" },
+          ...(venue.county
+            ? [
+                {
+                  name: `Co. ${venue.county}`,
+                  path: `/${VENUE_SLUG}-${countySlug(venue.county)}`,
+                },
+              ]
+            : []),
+          { name: venue.name, path: `/venue/${venue.slug}` },
+        ])}
+      />
+      <JsonLd
         data={{
           "@context": "https://schema.org",
           "@type": "EventVenue",
@@ -171,7 +186,7 @@ function VenueProfile() {
             <div className="overflow-hidden rounded-2xl border border-border bg-card">
               <ListingImage
                 src={hero}
-                alt={venue.name}
+                alt={`${venue.name}, wedding venue${venue.county ? ` in Co. ${venue.county}` : " in Ireland"}`}
                 className="aspect-16/10 w-full object-cover"
               />
             </div>
