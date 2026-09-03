@@ -22,8 +22,8 @@ const PER_PAGE = 24;
 const TOP_N = 10;
 
 const searchSchema = z.object({
-  page: fallback(z.number().int(), 1).default(1),
-  date: fallback(z.string(), "").default(""),
+  page: fallback(z.number().int(), 1).optional(),
+  date: fallback(z.string(), "").optional(),
 });
 
 /** Copy for the page title / H1 / meta, driven by the real listing count. */
@@ -64,7 +64,7 @@ export const Route = createFileRoute("/$directorySlug")({
   loader: async ({ params, deps }) => {
     const target = parseDirectorySlug(params.directorySlug);
     if (!target) throw notFound();
-    const page = Math.max(1, Math.min(deps.page, 200));
+    const page = Math.max(1, Math.min(deps.page ?? 1, 200));
     const place = target.county ?? "Ireland";
 
     const statsInput = {
@@ -147,7 +147,8 @@ export const Route = createFileRoute("/$directorySlug")({
 
 function DirectoryPage() {
   const { target, place, suppliers, venues, stats } = Route.useLoaderData();
-  const { page } = Route.useSearch();
+  const { page: pageParam } = Route.useSearch();
+  const page = pageParam ?? 1;
   const { directorySlug } = Route.useParams();
 
   const total = suppliers?.count ?? venues?.count ?? 0;
