@@ -29,7 +29,12 @@ const RSVPS = ["pending", "yes", "no"];
 
 export const Route = createFileRoute("/guest-list")({
   head: () => ({
-    meta: pageMeta({ title: TITLE, description: DESCRIPTION, path: "/guest-list" }),
+    meta: pageMeta({
+      title: TITLE,
+      description: DESCRIPTION,
+      path: "/guest-list",
+      noindex: true,
+    }),
     links: canonical("/guest-list"),
   }),
   component: GuestListPage,

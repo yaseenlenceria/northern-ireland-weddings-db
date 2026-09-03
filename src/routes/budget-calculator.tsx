@@ -61,7 +61,12 @@ const euro = (n: number) => `€${n.toLocaleString("en-IE", { maximumFractionDig
 
 export const Route = createFileRoute("/budget-calculator")({
   head: () => ({
-    meta: pageMeta({ title: TITLE, description: DESCRIPTION, path: "/budget-calculator" }),
+    meta: pageMeta({
+      title: TITLE,
+      description: DESCRIPTION,
+      path: "/budget-calculator",
+      noindex: true,
+    }),
     links: canonical("/budget-calculator"),
   }),
   component: BudgetPage,

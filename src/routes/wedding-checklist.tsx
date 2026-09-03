@@ -57,7 +57,12 @@ const STARTER: { title: string; category: string }[] = [
 
 export const Route = createFileRoute("/wedding-checklist")({
   head: () => ({
-    meta: pageMeta({ title: TITLE, description: DESCRIPTION, path: "/wedding-checklist" }),
+    meta: pageMeta({
+      title: TITLE,
+      description: DESCRIPTION,
+      path: "/wedding-checklist",
+      noindex: true,
+    }),
     links: canonical("/wedding-checklist"),
   }),
   component: ChecklistPage,
