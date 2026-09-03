@@ -29,12 +29,13 @@ const DESCRIPTION =
 
 const PER_PAGE = 24;
 
+/** Non-numeric values keep the URL readable (?capacity=min120, not ?capacity="120"). */
 const CAPACITIES = [
   { value: "all", label: "Any capacity" },
-  { value: "80", label: "80+ guests" },
-  { value: "120", label: "120+ guests" },
-  { value: "180", label: "180+ guests" },
-  { value: "250", label: "250+ guests" },
+  { value: "min80", label: "80+ guests" },
+  { value: "min120", label: "120+ guests" },
+  { value: "min180", label: "180+ guests" },
+  { value: "min250", label: "250+ guests" },
 ];
 
 /**
@@ -100,7 +101,7 @@ function VenuesPage() {
       fetchVenues({
         data: {
           ...(county !== "all" ? { county } : {}),
-          ...(capacity !== "all" ? { minCapacity: Number(capacity) } : {}),
+          ...(capacity !== "all" ? { minCapacity: Number(capacity.replace("min", "")) } : {}),
           ...(term ? { q: term } : {}),
           page,
           perPage: PER_PAGE,
