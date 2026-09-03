@@ -37,11 +37,15 @@ const CAPACITIES = [
   { value: "250", label: "250+ guests" },
 ];
 
+/**
+ * Search params are JSON-parsed by the router, so "120" arrives as a number.
+ * z.coerce.string() keeps numeric-looking filters valid instead of dropping them.
+ */
 const searchSchema = z.object({
-  q: fallback(z.string(), "").optional(),
-  county: fallback(z.string(), "all").optional(),
-  capacity: fallback(z.string(), "all").optional(),
-  page: fallback(z.number().int(), 1).optional(),
+  q: fallback(z.coerce.string(), "").optional(),
+  county: fallback(z.coerce.string(), "all").optional(),
+  capacity: fallback(z.coerce.string(), "all").optional(),
+  page: fallback(z.coerce.number().int(), 1).optional(),
 });
 
 export const Route = createFileRoute("/venues")({
@@ -52,6 +56,16 @@ export const Route = createFileRoute("/venues")({
   }),
   component: VenuesPage,
 });
+
+/** Drops default-valued params so /venues stays /venues. */
+function cleanSearch(s: { q?: string; county?: string; capacity?: string; page?: number }) {
+  return {
+    ...(s.q ? { q: s.q } : {}),
+    ...(s.county && s.county !== "all" ? { county: s.county } : {}),
+    ...(s.capacity && s.capacity !== "all" ? { capacity: s.capacity } : {}),
+    ...(s.page && s.page > 1 ? { page: s.page } : {}),
+  };
+}
 
 function VenuesPage() {
   const fetchVenues = useServerFn(listVenues);
@@ -69,7 +83,9 @@ function VenuesPage() {
   const update = (next: Partial<{ q: string; county: string; capacity: string; page: number }>) =>
     navigate({
       to: ".",
-      search: (prev) => ({ ...prev, page: 1, ...next }),
+      // Defaults are stripped so shared URLs stay clean.
+      search: (prev) =>
+        cleanSearch({ q: term, county, capacity, page: 1, ...prev, page: 1, ...next }),
       resetScroll: false,
     });
 

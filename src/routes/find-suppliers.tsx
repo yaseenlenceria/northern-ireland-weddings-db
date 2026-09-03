@@ -31,10 +31,10 @@ const PER_PAGE = 24;
 
 /** Filters live in the URL so results are shareable and the sitewide search action works. */
 const searchSchema = z.object({
-  q: fallback(z.string(), "").optional(),
-  category: fallback(z.string(), "all").optional(),
-  county: fallback(z.string(), "all").optional(),
-  page: fallback(z.number().int(), 1).optional(),
+  q: fallback(z.coerce.string(), "").optional(),
+  category: fallback(z.coerce.string(), "all").optional(),
+  county: fallback(z.coerce.string(), "all").optional(),
+  page: fallback(z.coerce.number().int(), 1).optional(),
 });
 
 export const Route = createFileRoute("/find-suppliers")({
@@ -46,6 +46,16 @@ export const Route = createFileRoute("/find-suppliers")({
   }),
   component: FindSuppliersPage,
 });
+
+/** Drops default-valued params so /find-suppliers stays /find-suppliers. */
+function cleanSearch(s: { q?: string; category?: string; county?: string; page?: number }) {
+  return {
+    ...(s.q ? { q: s.q } : {}),
+    ...(s.category && s.category !== "all" ? { category: s.category } : {}),
+    ...(s.county && s.county !== "all" ? { county: s.county } : {}),
+    ...(s.page && s.page > 1 ? { page: s.page } : {}),
+  };
+}
 
 function FindSuppliersPage() {
   const fetchSuppliers = useServerFn(listSuppliers);
@@ -63,7 +73,8 @@ function FindSuppliersPage() {
   const update = (next: Partial<{ q: string; category: string; county: string; page: number }>) =>
     navigate({
       to: ".",
-      search: (prev) => ({ ...prev, page: 1, ...next }),
+      // Defaults are stripped so shared URLs stay clean.
+      search: (prev) => cleanSearch({ ...prev, page: 1, ...next }),
       resetScroll: false,
     });
 
