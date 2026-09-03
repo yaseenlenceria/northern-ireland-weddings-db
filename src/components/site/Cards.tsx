@@ -29,7 +29,7 @@ export function SupplierCard({
 }) {
   const primary = CATEGORY_BY_KEY.get(supplier.categories?.[0] ?? "");
   return (
-    <article className="card-lift group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
+    <article className="card-lift group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
       {rank ? <RankBadge rank={rank} /> : null}
       <Link
         to="/supplier/$slug"
@@ -95,7 +95,7 @@ export function SupplierCard({
 
 export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number }) {
   return (
-    <article className="card-lift group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
+    <article className="card-lift group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
       {rank ? <RankBadge rank={rank} /> : null}
       <Link
         to="/venue/$slug"
