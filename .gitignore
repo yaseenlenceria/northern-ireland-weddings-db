@@ -34,3 +34,4 @@ work/
 *.njsproj
 *.sln
 *.sw?
+.vercel

@@ -40,20 +40,23 @@ function quoteIdentifier(value) {
 
 async function upsertBatch(sql, table, rows, batchSize = 100) {
   if (!rows.length) return;
-  const columns = Object.keys(rows[0]);
-  const updateColumns = updatableColumns(rows[0]);
+  const columns = [...new Set(rows.flatMap((row) => Object.keys(row)))];
+  const normalizedRows = rows.map((row) =>
+    Object.fromEntries(columns.map((column) => [column, row[column] === undefined ? null : row[column]])),
+  );
+  const updateColumns = columns.filter((key) => key !== "id" && key !== "created_at");
   const assignments = updateColumns
     .map((column) => `${quoteIdentifier(column)} = EXCLUDED.${quoteIdentifier(column)}`)
     .join(", ");
 
-  for (let offset = 0; offset < rows.length; offset += batchSize) {
-    const batch = rows.slice(offset, offset + batchSize);
+  for (let offset = 0; offset < normalizedRows.length; offset += batchSize) {
+    const batch = normalizedRows.slice(offset, offset + batchSize);
     await sql`
       INSERT INTO ${sql(table)} ${sql(batch, columns)}
       ON CONFLICT (id) DO UPDATE SET
       ${sql.unsafe(assignments)}
     `;
-    console.log(`Imported ${table}: ${Math.min(offset + batchSize, rows.length)}/${rows.length}`);
+    console.log(`Imported ${table}: ${Math.min(offset + batchSize, normalizedRows.length)}/${normalizedRows.length}`);
   }
 }
 
