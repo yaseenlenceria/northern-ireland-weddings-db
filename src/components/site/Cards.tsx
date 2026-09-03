@@ -55,7 +55,7 @@ export function SupplierCard({
           ) : null}
         </div>
 
-        <h3 className="mt-2 font-serif text-lg leading-snug">
+        <h3 className="mt-2 font-serif text-lg font-semibold leading-snug tracking-tight">
           <Link to="/supplier/$slug" params={{ slug: supplier.slug }} className="hover:text-primary">
             {supplier.name}
           </Link>
@@ -118,7 +118,7 @@ export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number 
         </div>
 
         <div className="mt-2 flex items-start justify-between gap-3">
-          <h3 className="font-serif text-lg leading-snug">
+          <h3 className="font-serif text-lg font-semibold leading-snug tracking-tight">
             <Link to="/venue/$slug" params={{ slug: venue.slug }} className="hover:text-primary">
               {venue.name}
             </Link>
