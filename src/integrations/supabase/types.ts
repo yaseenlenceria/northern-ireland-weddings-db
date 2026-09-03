@@ -173,6 +173,66 @@ export type Database = {
         }
         Relationships: []
       }
+      imported_reviews: {
+        Row: {
+          author_name: string | null
+          body: string
+          created_at: string
+          id: string
+          rating: number | null
+          review_date: string | null
+          source_name: string | null
+          source_url: string | null
+          supplier_id: string | null
+          title: string | null
+          updated_at: string
+          venue_id: string | null
+        }
+        Insert: {
+          author_name?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          rating?: number | null
+          review_date?: string | null
+          source_name?: string | null
+          source_url?: string | null
+          supplier_id?: string | null
+          title?: string | null
+          updated_at?: string
+          venue_id?: string | null
+        }
+        Update: {
+          author_name?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          rating?: number | null
+          review_date?: string | null
+          source_name?: string | null
+          source_url?: string | null
+          supplier_id?: string | null
+          title?: string | null
+          updated_at?: string
+          venue_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imported_reviews_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imported_reviews_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
