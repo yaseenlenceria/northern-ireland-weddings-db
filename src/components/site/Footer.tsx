@@ -21,8 +21,10 @@ export function Footer() {
           </p>
         </div>
 
-        <div>
-          <h3 className="eyebrow text-muted-foreground">Browse suppliers</h3>
+        <nav aria-labelledby="footer-suppliers">
+          <h3 id="footer-suppliers" className="eyebrow text-muted-foreground">
+            Browse suppliers
+          </h3>
           <ul className="mt-4 space-y-2 text-sm">
             {topCategories.map((c) => (
               <li key={c.slug}>
@@ -36,10 +38,12 @@ export function Footer() {
               </li>
             ))}
           </ul>
-        </div>
+        </nav>
 
-        <div>
-          <h3 className="eyebrow text-muted-foreground">Venues by county</h3>
+        <nav aria-labelledby="footer-counties">
+          <h3 id="footer-counties" className="eyebrow text-muted-foreground">
+            Venues by county
+          </h3>
           <ul className="mt-4 grid grid-cols-2 gap-2 text-sm">
             {FEATURED_COUNTIES.slice(0, 10).map((county) => (
               <li key={county}>
@@ -53,10 +57,12 @@ export function Footer() {
               </li>
             ))}
           </ul>
-        </div>
+        </nav>
 
-        <div>
-          <h3 className="eyebrow text-muted-foreground">Plan &amp; connect</h3>
+        <nav aria-labelledby="footer-plan">
+          <h3 id="footer-plan" className="eyebrow text-muted-foreground">
+            Plan &amp; connect
+          </h3>
           <ul className="mt-4 space-y-2 text-sm">
             <li>
               <Link to="/wedding-checklist" className="text-foreground/80 hover:text-primary">
@@ -88,8 +94,23 @@ export function Footer() {
                 List Your Business
               </Link>
             </li>
+            <li>
+              <Link to="/wedding-guides" className="text-foreground/80 hover:text-primary">
+                Wedding Guides
+              </Link>
+            </li>
+            <li>
+              <Link to="/real-weddings" className="text-foreground/80 hover:text-primary">
+                Real Weddings
+              </Link>
+            </li>
+            <li>
+              <Link to="/contact" className="text-foreground/80 hover:text-primary">
+                Contact
+              </Link>
+            </li>
           </ul>
-        </div>
+        </nav>
       </div>
 
       <div className="border-t border-border/70">
