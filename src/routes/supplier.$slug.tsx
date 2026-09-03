@@ -25,6 +25,7 @@ import {
   clamp,
   pageMeta,
   reviewSchema,
+  sourcedReviewSchema,
 } from "@/lib/seo";
 
 export const Route = createFileRoute("/supplier/$slug")({
