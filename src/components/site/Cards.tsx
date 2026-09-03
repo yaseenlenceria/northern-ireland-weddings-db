@@ -70,7 +70,7 @@ export function SupplierCard({
         ) : null}
 
         {supplier.overview ? (
-          <p className="line-clamp-3b mt-2 mb-4 text-sm text-muted-foreground">
+          <p className="line-clamp-3 mt-2 mb-4 text-sm text-muted-foreground">
             {supplier.overview}
           </p>
         ) : (
@@ -139,7 +139,7 @@ export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number 
         ) : null}
 
         {venue.overview ? (
-          <p className="line-clamp-3b mt-2 text-sm text-muted-foreground">{venue.overview}</p>
+          <p className="line-clamp-3 mt-2 text-sm text-muted-foreground">{venue.overview}</p>
         ) : null}
 
         <dl className="mt-3 mb-4 grid grid-cols-2 gap-2 text-xs text-muted-foreground">

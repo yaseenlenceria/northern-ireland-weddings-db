@@ -25,7 +25,7 @@ import heroImage from "@/assets/hero-wedding-ireland.jpg";
 
 const TITLE = "Wedding Suppliers & Venues in Ireland | Wedora Ireland";
 const DESCRIPTION =
-  "Compare 785 wedding suppliers and 206 venues across every Irish county. Ranked top 10 lists, real prices, reviews and free direct enquiries.";
+  "Compare Irish wedding suppliers and venues across every county. Ranked top 10 lists, real prices, reviews and free direct enquiries.";
 
 export const Route = createFileRoute("/")({
   loader: () => getHomeData(),
@@ -78,7 +78,7 @@ const TOOLS = [
     to: "/wedding-timeline" as const,
     icon: CalendarCheck,
     title: "Wedding Timeline",
-    copy: "Build a running order for the day, from first look to last dance.",
+    copy: "Build a running order for the day, from morning prep to last dance.",
   },
 ];
 
@@ -116,7 +116,7 @@ const REASONS = [
   {
     icon: Sparkles,
     title: "Planning tools included",
-    copy: "Checklist, budget, guest list and timeline are free with a couple account.",
+    copy: "Checklist, budget, guest list and timeline work free in your browser.",
   },
 ];
 
@@ -189,7 +189,6 @@ function HomePage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-border bg-ivory">
-        <div className="pointer-events-none absolute -right-32 -top-32 size-[28rem] rounded-full bg-primary-soft blur-3xl" />
         <div className="relative mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-20">
           <div>
             <p className="eyebrow text-primary">Ireland's wedding directory</p>
@@ -263,7 +262,7 @@ function HomePage() {
                 <h3 className="font-serif text-lg leading-snug group-hover:text-primary">
                   {label}
                 </h3>
-                <p className="line-clamp-2b mt-2 text-xs text-muted-foreground">{blurb}</p>
+                <p className="line-clamp-2 mt-2 text-xs text-muted-foreground">{blurb}</p>
                 <span className="mt-3 inline-flex items-center gap-1 text-xs text-primary">
                   Browse <ArrowRight className="size-3" />
                 </span>
@@ -375,7 +374,7 @@ function HomePage() {
       {/* Planning tools */}
       <Section
         title="Wedding planning tools"
-        description="Free with a couple account. Your data saves as you go."
+        description="Free tools that work straight away and save in this browser."
       >
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {TOOLS.map((tool) => (
@@ -448,7 +447,7 @@ function HomePage() {
             >
               <p className="eyebrow text-primary">{guide.topic}</p>
               <h3 className="mt-2 font-serif text-xl group-hover:text-primary">{guide.title}</h3>
-              <p className="line-clamp-3b mt-2 text-sm text-muted-foreground">{guide.excerpt}</p>
+              <p className="line-clamp-3 mt-2 text-sm text-muted-foreground">{guide.excerpt}</p>
               <span className="mt-4 inline-flex items-center gap-1 text-xs text-primary">
                 Read guide <ArrowRight className="size-3" />
               </span>
