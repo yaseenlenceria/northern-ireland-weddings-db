@@ -424,7 +424,7 @@ def parse_review_blob(value: Any) -> list[dict[str, Any]]:
             flags=re.S,
         )
         if match:
-            title = clean_mojibake(match.group("title"))
+            title = clean_review_title(match.group("title"))
             body = clean_mojibake(match.group("body"))
             if body:
                 reviews.append({
@@ -443,6 +443,17 @@ def parse_review_blob(value: Any) -> list[dict[str, Any]]:
                 "body": chunk,
             })
     return reviews
+
+
+def clean_review_title(value: Any) -> str | None:
+    title = clean_mojibake(value)
+    if not title:
+        return None
+    title = title.strip(" -:;,.\"'")
+    words = [word for word in re.split(r"\s+", title) if word]
+    if len(title) < 8 or len(words) < 2:
+        return None
+    return title
 
 
 def venue_from_master(row: dict[str, Any]) -> dict[str, Any] | None:
