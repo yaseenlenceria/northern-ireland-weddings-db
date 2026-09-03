@@ -29,7 +29,7 @@ export function SupplierCard({
 }) {
   const primary = CATEGORY_BY_KEY.get(supplier.categories?.[0] ?? "");
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift">
+    <article className="card-lift group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
       {rank ? <RankBadge rank={rank} /> : null}
       <Link
         to="/supplier/$slug"
@@ -55,7 +55,7 @@ export function SupplierCard({
           ) : null}
         </div>
 
-        <h3 className="mt-2 font-serif text-lg leading-snug">
+        <h3 className="mt-2 font-serif text-lg font-semibold leading-snug tracking-tight">
           <Link to="/supplier/$slug" params={{ slug: supplier.slug }} className="hover:text-primary">
             {supplier.name}
           </Link>
@@ -95,7 +95,7 @@ export function SupplierCard({
 
 export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number }) {
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-soft transition-shadow hover:shadow-lift">
+    <article className="card-lift group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
       {rank ? <RankBadge rank={rank} /> : null}
       <Link
         to="/venue/$slug"
@@ -118,7 +118,7 @@ export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number 
         </div>
 
         <div className="mt-2 flex items-start justify-between gap-3">
-          <h3 className="font-serif text-lg leading-snug">
+          <h3 className="font-serif text-lg font-semibold leading-snug tracking-tight">
             <Link to="/venue/$slug" params={{ slug: venue.slug }} className="hover:text-primary">
               {venue.name}
             </Link>

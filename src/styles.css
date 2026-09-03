@@ -7,8 +7,9 @@
 /*
  * WedList Ireland design system.
  * Palette: ivory / soft white grounds, sage green primary, muted gold accent,
- * charcoal text. Headings use a high-contrast serif, body a humanist sans.
+ * charcoal text. Type: Outfit for headings and display, Figtree for body.
  */
+
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -55,10 +56,14 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --font-serif: "Cormorant Garamond", Georgia, serif;
-  --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
+  /* Kept as --font-serif so existing `font-serif` headings pick up the display face. */
+  --font-serif: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
   --shadow-soft: var(--shadow-soft-v);
   --shadow-lift: var(--shadow-lift-v);
+  --shadow-glow: var(--shadow-glow-v);
+
 }
 
 :root {
@@ -115,7 +120,11 @@
   --sidebar-ring: oklch(0.505 0.045 150);
 
   --shadow-soft-v: 0 1px 2px oklch(0.255 0.012 60 / 0.04), 0 4px 16px oklch(0.255 0.012 60 / 0.05);
-  --shadow-lift-v: 0 2px 6px oklch(0.255 0.012 60 / 0.06), 0 16px 40px oklch(0.255 0.012 60 / 0.1);
+  --shadow-lift-v: 0 2px 6px oklch(0.255 0.012 60 / 0.06), 0 18px 44px oklch(0.255 0.012 60 / 0.11);
+  --shadow-glow-v: 0 10px 34px oklch(0.505 0.045 150 / 0.18);
+
+  --gradient-ivory: linear-gradient(180deg, var(--ivory) 0%, var(--background) 100%);
+  --gradient-sage: linear-gradient(135deg, oklch(0.505 0.045 150) 0%, oklch(0.585 0.058 158) 100%);
 }
 
 .dark {
@@ -157,6 +166,9 @@
   --sidebar-ring: oklch(0.665 0.055 150);
   --shadow-soft-v: 0 1px 2px oklch(0 0 0 / 0.3), 0 4px 16px oklch(0 0 0 / 0.28);
   --shadow-lift-v: 0 2px 6px oklch(0 0 0 / 0.35), 0 16px 40px oklch(0 0 0 / 0.4);
+  --shadow-glow-v: 0 10px 34px oklch(0 0 0 / 0.45);
+  --gradient-ivory: linear-gradient(180deg, var(--ivory) 0%, var(--background) 100%);
+  --gradient-sage: linear-gradient(135deg, oklch(0.665 0.055 150) 0%, oklch(0.585 0.05 158) 100%);
 }
 
 @layer base {
@@ -175,9 +187,19 @@
   h2,
   h3,
   h4 {
-    font-family: var(--font-serif);
-    font-weight: 500;
-    letter-spacing: -0.01em;
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  h1 {
+    font-weight: 600;
+    letter-spacing: -0.035em;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 }
 
@@ -200,4 +222,28 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Ivory-to-page wash used behind hero and section bands. */
+@utility surface-ivory {
+  background-image: var(--gradient-ivory);
+}
+
+/* Hairline gold rule used to lift premium sections. */
+@utility rule-gold {
+  border-top: 1px solid color-mix(in oklab, var(--gold) 45%, transparent);
+}
+
+/* Card that lifts on hover — used by listing cards. */
+@utility card-lift {
+  transition:
+    box-shadow 300ms ease,
+    transform 300ms ease,
+    border-color 300ms ease;
+
+  &:hover {
+    box-shadow: var(--shadow-lift-v);
+    transform: translateY(-3px);
+    border-color: color-mix(in oklab, var(--gold) 40%, var(--border));
+  }
 }

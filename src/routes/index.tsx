@@ -122,7 +122,26 @@ const REASONS = [
 
 function HomePage() {
   const { suppliers, venues, counts } = Route.useLoaderData();
-  const featuredSuppliers = suppliers.slice(0, 8);
+  // Keep the homepage showcase on the categories couples shop first, so the
+  // featured strip reads as a curated edit rather than a random sample.
+  const showcaseCategories = new Set([
+    "Photographers",
+    "Videographers",
+    "Bands",
+    "Singers",
+    "Florists",
+    "Wedding Planners",
+    "Cakes",
+    "Hair & Makeup",
+    "DJs",
+    "Celebrants",
+  ]);
+  const preferred = suppliers.filter((s) =>
+    (s.categories ?? []).some((c) => showcaseCategories.has(c)),
+  );
+
+  const featuredSuppliers = (preferred.length >= 8 ? preferred : suppliers).slice(0, 8);
+
 
   return (
     <SiteLayout>
