@@ -16,6 +16,7 @@ import { EnquiryForm } from "@/components/site/EnquiryForm";
 import { JsonLd } from "@/components/site/JsonLd";
 import { SaveButton } from "@/components/site/SaveButton";
 import { Stars } from "@/components/site/Stars";
+import { ReviewList } from "@/components/site/Reviews";
 import { getSupplier } from "@/lib/directory.functions";
 import { CATEGORY_BY_KEY, countySlug } from "@/lib/taxonomy";
 import {
@@ -115,6 +116,7 @@ function SupplierProfile() {
     ? allScored.reduce((s, r) => s + r, 0) / allScored.length
     : averageRating(reviews);
   const ratingNode = aggregateRating(avg, allScored.length);
+  const profileReviews = [...reviews, ...sourcedReviews];
 
   return (
     <SiteLayout>
@@ -219,7 +221,7 @@ function SupplierProfile() {
               <h1 className="mt-3 text-4xl leading-tight">{supplier.name}</h1>
               {avg ? (
                 <div className="mt-2">
-                  <Stars rating={avg} count={reviews.length} />
+                  <Stars rating={avg} count={profileReviews.length} />
                 </div>
               ) : null}
               {supplier.county ? (
@@ -310,43 +312,20 @@ function SupplierProfile() {
 
           <section id="reviews" className="scroll-mt-24">
             <h2 className="text-3xl">Reviews</h2>
-            {reviews.length === 0 && sourcedReviews.length === 0 ? (
-              <p className="mt-3 text-muted-foreground">
-                No reviews yet. If you booked {supplier.name}, sign in and be the first to write one.
-              </p>
-            ) : (
-              <ul className="mt-4 space-y-4">
-                {reviews.map((review) => (
-                  <li key={review.id} className="rounded-xl border border-border bg-card p-5">
-                    <p className="font-medium">{review.title ?? "Review"}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {review.author_name} · {review.rating}/5
-                    </p>
-                    <p className="mt-3 text-sm text-muted-foreground">{review.body}</p>
-                  </li>
-                ))}
-                {sourcedReviews.map((review) => (
-                  <li key={review.id} className="rounded-xl border border-border bg-card p-5">
-                    <p className="font-medium">{review.title ?? "Review"}</p>
-                    <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      <span>{review.author_name || "Verified couple"}</span>
-                      {review.rating ? <span>· {review.rating}/5</span> : null}
-                      {review.review_date ? (
-                        <span>
-                          ·{" "}
-                          {new Date(review.review_date).toLocaleDateString("en-IE", {
-                            month: "long",
-                            year: "numeric",
-                          })}
-                        </span>
-                      ) : null}
-                      {review.source_name ? <span>· via {review.source_name}</span> : null}
-                    </p>
-                    <p className="mt-3 text-sm text-muted-foreground">{review.body}</p>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <ReviewList
+              reviews={profileReviews}
+              empty={`No written reviews are available yet for ${supplier.name}.`}
+              summary={
+                avg ? (
+                  <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-ivory p-4">
+                    <Stars rating={avg} count={profileReviews.length} />
+                    <span className="text-sm text-muted-foreground">
+                      {avg.toFixed(1)}/5 from {profileReviews.length.toLocaleString()} imported written reviews
+                    </span>
+                  </div>
+                ) : null
+              }
+            />
           </section>
 
 

@@ -241,13 +241,43 @@ export const getVenue = createServerFn({ method: "GET" })
 export const getHomeData = createServerFn({ method: "GET" }).handler(async () => {
   try {
     const sql = await db();
-    const [suppliers, venues, supplierCount, venueCount, fairCount] = await Promise.all([
+    const [suppliers, venues, supplierCount, venueCount, fairCount, categoryCounts] = await Promise.all([
       sql<SupplierCardRow[]>`
+        WITH priority_categories AS (
+          SELECT unnest(ARRAY[
+            'wedding-photographers',
+            'wedding-videographers',
+            'wedding-bands',
+            'church-singers-music',
+            'wedding-florists',
+            'wedding-planners',
+            'wedding-celebrants',
+            'wedding-djs'
+          ]::text[]) AS category
+        ),
+        picked AS (
+          SELECT DISTINCT ON (pc.category)
+            s.id, s.slug, s.name, s.categories, s.county, s.avg_price, s.avg_price_num,
+            s.overview, s.logo_image, s.gallery_images, s.featured, s.service_areas,
+            pc.category
+          FROM priority_categories pc
+          JOIN suppliers s ON s.categories @> ARRAY[pc.category]::text[]
+          WHERE s.logo_image IS NOT NULL
+          ORDER BY pc.category, s.featured DESC, s.image_count DESC NULLS LAST, s.name ASC
+        )
         SELECT id, slug, name, categories, county, avg_price, avg_price_num, overview,
                logo_image, gallery_images, featured, service_areas
-        FROM suppliers
-        WHERE logo_image IS NOT NULL
-        ORDER BY image_count DESC NULLS LAST, featured DESC, name ASC
+        FROM picked
+        ORDER BY array_position(ARRAY[
+          'wedding-photographers',
+          'wedding-videographers',
+          'wedding-bands',
+          'church-singers-music',
+          'wedding-florists',
+          'wedding-planners',
+          'wedding-celebrants',
+          'wedding-djs'
+        ]::text[], category)
         LIMIT 8
       `,
       sql<VenueCardRow[]>`
@@ -262,6 +292,12 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
       sql<{ count: string }[]>`SELECT count(*)::text AS count FROM suppliers`,
       sql<{ count: string }[]>`SELECT count(*)::text AS count FROM venues`,
       sql<{ count: string }[]>`SELECT count(*)::text AS count FROM wedding_fairs`,
+      sql<{ category: string; count: number }[]>`
+        SELECT category, count(*)::int AS count
+        FROM suppliers
+        CROSS JOIN LATERAL unnest(categories) AS category
+        GROUP BY category
+      `,
     ]);
 
     return {
@@ -272,6 +308,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
         venues: countValue(venueCount),
         fairs: countValue(fairCount),
       },
+      categoryCounts,
     };
   } catch (error) {
     logPublicDataError("getHomeData", error);
@@ -279,6 +316,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
       suppliers: [] as SupplierCardRow[],
       venues: [] as VenueCardRow[],
       counts: { suppliers: 0, venues: 0, fairs: 0 },
+      categoryCounts: [] as { category: string; count: number }[],
     };
   }
 });

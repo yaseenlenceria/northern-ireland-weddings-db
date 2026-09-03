@@ -11,7 +11,15 @@ function cardImage(logo?: string | null, gallery?: string[] | null) {
   return logo || gallery?.[0] || null;
 }
 
-/** Numbered ranking badge used on the "Top 10" directory pages. */
+function shortOverview(value: string | null | undefined, max = 180) {
+  if (!value) return null;
+  const clean = value.replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean;
+  const sentence = clean.slice(0, max).replace(/[.!?][^.!?]*$/, "").trim();
+  return `${(sentence.length > 80 ? sentence : clean.slice(0, max)).trim()}...`;
+}
+
+/** Numbered ranking badge used on ranked directory cards. */
 function RankBadge({ rank }: { rank: number }) {
   return (
     <span className="absolute left-3 top-3 z-10 flex size-9 items-center justify-center rounded-full bg-gold font-serif text-sm text-gold-foreground shadow-lift">
@@ -28,6 +36,7 @@ export function SupplierCard({
   rank?: number;
 }) {
   const primary = CATEGORY_BY_KEY.get(supplier.categories?.[0] ?? "");
+  const overview = shortOverview(supplier.overview);
   return (
     <article className="card-lift group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
       {rank ? <RankBadge rank={rank} /> : null}
@@ -69,9 +78,9 @@ export function SupplierCard({
           </p>
         ) : null}
 
-        {supplier.overview ? (
+        {overview ? (
           <p className="line-clamp-3 mt-2 mb-4 text-sm text-muted-foreground">
-            {supplier.overview}
+            {overview}
           </p>
         ) : (
           <div className="mb-4" />
@@ -100,6 +109,7 @@ export function SupplierCard({
 }
 
 export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number }) {
+  const overview = shortOverview(venue.overview);
   return (
     <article className="card-lift group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
       {rank ? <RankBadge rank={rank} /> : null}
@@ -138,8 +148,8 @@ export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number 
           </p>
         ) : null}
 
-        {venue.overview ? (
-          <p className="line-clamp-3 mt-2 text-sm text-muted-foreground">{venue.overview}</p>
+        {overview ? (
+          <p className="line-clamp-3 mt-2 text-sm text-muted-foreground">{overview}</p>
         ) : null}
 
         <dl className="mt-3 mb-4 grid grid-cols-2 gap-2 text-xs text-muted-foreground">

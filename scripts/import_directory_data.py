@@ -6,6 +6,7 @@ import math
 import re
 import sys
 import uuid
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +14,7 @@ import pandas as pd
 
 
 SOURCE_FILES = {
+    "master": Path(r"C:\Users\Seenu\weddingdates-scrape\Master_Ireland_Wedding_Directory.xlsx"),
     "weddingdates_full": Path(r"C:\Users\Seenu\weddingdates-scrape\WeddingDates_Ireland_Full.xlsx"),
     "weddingsonline": Path(r"C:\Users\Seenu\weddingdates-scrape\WeddingsOnline_Ireland.xlsx"),
     "hitched_part_2": Path(r"C:\Users\Seenu\weddingdates-scrape\Hitched_Ireland2.xlsx"),
@@ -325,6 +327,40 @@ def category_from_sheet(sheet_name: str) -> str:
     return replacements.get(sheet_name, sheet_name)
 
 
+CANONICAL_CATEGORY_ALIASES = {
+    "accessories": "bridal-shops-accessories",
+    "beauty-and-skincare": "beauty-skincare",
+    "beauty-hair-and-make-up": "make-up-artists",
+    "cakes-and-accessories": "cakes-sweet-treats",
+    "cakes-accessories": "cakes-sweet-treats",
+    "cakes": "cakes-sweet-treats",
+    "cars-and-travel": "wedding-cars",
+    "catering": "catering-wine",
+    "ceremony-music": "church-singers-music",
+    "celebrants": "wedding-celebrants",
+    "destinations": "honeymoon",
+    "entertainment": "wedding-entertainment-photobooths",
+    "favours": "wedding-gifts-favours",
+    "florists": "wedding-florists",
+    "groom-attire": "groomswear",
+    "bridalwear-shops": "bridal-shops-accessories",
+    "honeymoons": "honeymoon",
+    "mobile-bar-services": "catering-wine",
+    "music-and-djs": "wedding-djs",
+    "photo-booths": "wedding-entertainment-photobooths",
+    "photographers": "wedding-photographers",
+    "something-different": "wedding-entertainment-photobooths",
+    "stationery": "wedding-invitations-stationery",
+    "venue": "wedding-venues",
+    "videographers": "wedding-videographers",
+}
+
+
+def category_key(value: str) -> str:
+    key = slugify(value)
+    return CANONICAL_CATEGORY_ALIASES.get(key, key)
+
+
 def county_from_row(row: dict[str, Any]) -> str | None:
     county = clean_mojibake(row.get("County"))
     if county:
@@ -346,6 +382,140 @@ def useful_profile_text(value: Any) -> str | None:
     if lowered.startswith("awards advertise about contact welcome!") or "use our venue finder > suppliers" in lowered:
         return None
     return text
+
+
+def boolish(value: Any) -> bool:
+    text = clean_text(value)
+    if not text:
+        return False
+    return text.lower() in {"1", "true", "yes", "y", "premium"}
+
+
+def profile_url_from_row(row: dict[str, Any]) -> str | None:
+    return first(row.get("Profile URL"), row.get("Source URL"))
+
+
+def date_iso(value: str | None) -> str | None:
+    if not value:
+        return None
+    for fmt in ("%d/%m/%Y", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(value.strip(), fmt).date().isoformat()
+        except ValueError:
+            continue
+    return None
+
+
+def parse_review_blob(value: Any) -> list[dict[str, Any]]:
+    text = clean_mojibake(value)
+    if not text:
+        return []
+
+    chunks = [chunk.strip() for chunk in re.split(r"\n\s*\n+", text) if chunk.strip()]
+    if len(chunks) <= 1:
+        pattern = re.compile(r"(?=.{3,160}?\([^()\n]{1,80},\s*\d{1,2}/\d{1,2}/\d{4},\s*\d(?:\.\d)?/5\):)")
+        chunks = [chunk.strip() for chunk in pattern.split(text) if chunk.strip()]
+
+    reviews = []
+    for chunk in chunks:
+        match = re.match(
+            r"(?P<title>.+?)\s+\((?P<author>[^,()]+),\s*(?P<date>\d{1,2}/\d{1,2}/\d{4}),\s*(?P<rating>\d(?:\.\d)?)/5\):\s*(?P<body>.+)",
+            chunk,
+            flags=re.S,
+        )
+        if match:
+            title = clean_mojibake(match.group("title"))
+            body = clean_mojibake(match.group("body"))
+            if body:
+                reviews.append({
+                    "title": title,
+                    "author_name": clean_mojibake(match.group("author")),
+                    "review_date": date_iso(match.group("date")),
+                    "rating": number(match.group("rating")),
+                    "body": body,
+                })
+        elif len(chunk) > 30:
+            reviews.append({
+                "title": None,
+                "author_name": None,
+                "review_date": None,
+                "rating": None,
+                "body": chunk,
+            })
+    return reviews
+
+
+def venue_from_master(row: dict[str, Any]) -> dict[str, Any] | None:
+    name = clean_mojibake(row.get("Business Name"))
+    if not name:
+        return None
+    county = clean_mojibake(row.get("County"))
+    gallery = split_images(first(row.get("All Images"), row.get("Top Image"), row.get("Logo Image")))
+    capacity_text = first(row.get("Capacity"))
+    return {
+        "slug": slugify(f"{name}-{county or ''}"),
+        "name": name,
+        "county": county,
+        "badge": clean_mojibake(row.get("Category")),
+        "guest_capacity": capacity_text,
+        "capacity_min": integer(row.get("Min Guests")),
+        "capacity_max": integer(first(row.get("Max Guests"), capacity_text)),
+        "per_person_price": clean_mojibake(row.get("Price From")),
+        "per_person_price_num": number(row.get("Price From")),
+        "venue_hire_price": None,
+        "rating": number(row.get("Rating")),
+        "review_count": integer(row.get("Review Count")),
+        "overview": clean_mojibake(row.get("Description")),
+        "description": first(clean_mojibake(row.get("Description")), clean_mojibake(row.get("Extra Info"))),
+        "logo_image": first(row.get("Logo Image"), row.get("Top Image")),
+        "gallery_images": gallery,
+        "image_count": integer(row.get("Image Count")) or (len(gallery) if gallery else None),
+        "venue_types": split_list(row.get("Services / Venue Types")),
+        "styles": None,
+        "facilities": split_list(first(row.get("All Facilities & FAQs"), row.get("Extra Info"))),
+        "real_weddings": None,
+        "brochures": None,
+        "featured": boolish(row.get("Premium")),
+        "address": clean_mojibake(first(row.get("Full Address"), row.get("Street"))),
+        "postcode": clean_mojibake(row.get("Postcode")),
+        "contact_person": None,
+        "contact_role": None,
+        "latitude": number(row.get("Latitude")),
+        "longitude": number(row.get("Longitude")),
+        "phone": clean_mojibake(row.get("Phone")),
+        "source_url": profile_url_from_row(row),
+        "website": clean_mojibake(row.get("Website")),
+    }
+
+
+def supplier_from_master(row: dict[str, Any]) -> dict[str, Any] | None:
+    name = clean_mojibake(row.get("Business Name"))
+    if not name:
+        return None
+    county = clean_mojibake(row.get("County"))
+    category = clean_mojibake(row.get("Category")) or "Wedding Suppliers"
+    gallery = split_images(first(row.get("All Images"), row.get("Top Image"), row.get("Logo Image")))
+    return {
+        "slug": slugify(f"{name}-{county or ''}"),
+        "name": name,
+        "categories": [category_key(category)],
+        "county": county,
+        "avg_price": clean_mojibake(row.get("Price From")),
+        "avg_price_num": number(row.get("Price From")),
+        "overview": clean_mojibake(row.get("Description")),
+        "description": first(clean_mojibake(row.get("Description")), clean_mojibake(row.get("Extra Info"))),
+        "logo_image": first(row.get("Logo Image"), row.get("Top Image")),
+        "gallery_images": gallery,
+        "featured": boolish(row.get("Premium")),
+        "service_areas": split_list(row.get("Areas Served")),
+        "image_count": integer(row.get("Image Count")) or (len(gallery) if gallery else None),
+        "address": clean_mojibake(first(row.get("Full Address"), row.get("Street"), row.get("Town/City"))),
+        "latitude": number(row.get("Latitude")),
+        "longitude": number(row.get("Longitude")),
+        "phone": clean_mojibake(row.get("Phone")),
+        "source_url": profile_url_from_row(row),
+        "website": clean_mojibake(row.get("Website")),
+    }
 
 
 def supplier_from_weddingdates(row: dict[str, Any], sheet_name: str | None = None) -> dict[str, Any] | None:
@@ -370,7 +540,7 @@ def supplier_from_weddingdates(row: dict[str, Any], sheet_name: str | None = Non
     return {
         "slug": slugify(f"{name}-{county or ''}"),
         "name": name,
-        "categories": [slugify(c) for c in categories],
+        "categories": [category_key(c) for c in categories],
         "county": county,
         "avg_price": clean_mojibake(row.get("Avg Price")),
         "avg_price_num": number(row.get("Avg Price")),
@@ -448,7 +618,7 @@ def fair_from_weddingdates(row: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def review_records(parent_kind: str, parent_id: str, row: dict[str, Any]) -> list[dict[str, Any]]:
-    source_url = clean_text(row.get("Profile URL"))
+    source_url = profile_url_from_row(row)
     out = []
     for key in ["Top Review 1", "Top Review 2", "Top Review 3", "Top Reviews (verbatim)"]:
         body = clean_text(row.get(key))
@@ -465,6 +635,25 @@ def review_records(parent_kind: str, parent_id: str, row: dict[str, Any]) -> lis
             "source_name": clean_text(row.get("Source Site")) or "Imported spreadsheet",
             "source_url": source_url,
         })
+
+    review_blob = first(
+        row.get("All Reviews (verbatim)"),
+        row.get("Top Reviews (verbatim)"),
+        row.get("Review Highlights (3)"),
+    )
+    for index, review in enumerate(parse_review_blob(review_blob)[:20], start=1):
+        out.append({
+            "id": stable_id("review", f"{parent_id}:parsed:{index}:{review.get('title') or ''}:{review['body'][:80]}"),
+            "venue_id": parent_id if parent_kind == "venue" else None,
+            "supplier_id": parent_id if parent_kind == "supplier" else None,
+            "author_name": review.get("author_name"),
+            "rating": review.get("rating") or number(row.get("Rating")),
+            "title": review.get("title"),
+            "body": review["body"],
+            "review_date": review.get("review_date"),
+            "source_name": clean_text(row.get("Source Site")) or clean_text(row.get("Listed On (sites)")) or "Imported spreadsheet",
+            "source_url": source_url,
+        })
     return out
 
 
@@ -479,58 +668,76 @@ def build_payload() -> dict[str, list[dict[str, Any]]]:
     reviews: dict[str, dict[str, Any]] = {}
 
     primary_key = "weddingdates_full" if SOURCE_FILES["weddingdates_full"].exists() else "weddingdates"
+    use_master = SOURCE_FILES["master"].exists()
 
-    for _, row in frame(primary_key, "Venues").iterrows():
-        record = venue_from_weddingdates(row.to_dict())
-        if record:
-            added = add_unique(venues, record, "venue")
-            for review in review_records("venue", added["id"], row.to_dict()):
-                reviews[review["id"]] = review
+    if use_master:
+        for _, row in frame("master", "Venues (All)").iterrows():
+            row_dict = row.to_dict()
+            record = venue_from_master(row_dict)
+            if record:
+                added = add_unique(venues, record, "venue")
+                for review in review_records("venue", added["id"], row_dict):
+                    reviews[review["id"]] = review
 
-    for key, sheet in [
-        ("hitched", "Hitched Venues (IE)"),
-        ("hitched_part_2", "Hitched Venues 2"),
-        ("hitched_top_50", "Wedding Venues"),
-    ]:
-        for _, row in frame(key, sheet).iterrows():
-            record = venue_from_hitched(row.to_dict())
+        for _, row in frame("master", "Suppliers (All)").iterrows():
+            row_dict = row.to_dict()
+            record = supplier_from_master(row_dict)
+            if record:
+                added = add_unique(suppliers, record, "supplier")
+                for review in review_records("supplier", added["id"], row_dict):
+                    reviews[review["id"]] = review
+    else:
+        for _, row in frame(primary_key, "Venues").iterrows():
+            record = venue_from_weddingdates(row.to_dict())
             if record:
                 added = add_unique(venues, record, "venue")
                 for review in review_records("venue", added["id"], row.to_dict()):
                     reviews[review["id"]] = review
 
-    if primary_key == "weddingdates_full":
-        for sheet_name in FULL_SUPPLIER_SHEETS:
-            for _, row in frame(primary_key, sheet_name).iterrows():
-                record = supplier_from_weddingdates(row.to_dict(), sheet_name)
+        for key, sheet in [
+            ("hitched", "Hitched Venues (IE)"),
+            ("hitched_part_2", "Hitched Venues 2"),
+            ("hitched_top_50", "Wedding Venues"),
+        ]:
+            for _, row in frame(key, sheet).iterrows():
+                record = venue_from_hitched(row.to_dict())
+                if record:
+                    added = add_unique(venues, record, "venue")
+                    for review in review_records("venue", added["id"], row.to_dict()):
+                        reviews[review["id"]] = review
+
+        if primary_key == "weddingdates_full":
+            for sheet_name in FULL_SUPPLIER_SHEETS:
+                for _, row in frame(primary_key, sheet_name).iterrows():
+                    record = supplier_from_weddingdates(row.to_dict(), sheet_name)
+                    if record:
+                        added = add_unique(suppliers, record, "supplier")
+                        for review in review_records("supplier", added["id"], row.to_dict()):
+                            reviews[review["id"]] = review
+        else:
+            for _, row in frame("weddingdates", "Suppliers").iterrows():
+                record = supplier_from_weddingdates(row.to_dict())
                 if record:
                     added = add_unique(suppliers, record, "supplier")
                     for review in review_records("supplier", added["id"], row.to_dict()):
                         reviews[review["id"]] = review
-    else:
-        for _, row in frame("weddingdates", "Suppliers").iterrows():
-            record = supplier_from_weddingdates(row.to_dict())
-            if record:
-                added = add_unique(suppliers, record, "supplier")
-                for review in review_records("supplier", added["id"], row.to_dict()):
-                    reviews[review["id"]] = review
 
-    if SOURCE_FILES["wedding_planners"].exists():
-        for _, row in frame("wedding_planners", "Wedding Planners").iterrows():
-            record = supplier_from_planner(row.to_dict())
-            if record:
-                added = add_unique(suppliers, record, "supplier")
-                for review in review_records("supplier", added["id"], row.to_dict()):
-                    reviews[review["id"]] = review
-
-    if SOURCE_FILES["weddingsonline"].exists():
-        for sheet_name in WEDDINGSONLINE_SUPPLIER_SHEETS:
-            for _, row in frame("weddingsonline", sheet_name).iterrows():
-                record = supplier_from_weddingdates(row.to_dict(), sheet_name)
+        if SOURCE_FILES["wedding_planners"].exists():
+            for _, row in frame("wedding_planners", "Wedding Planners").iterrows():
+                record = supplier_from_planner(row.to_dict())
                 if record:
                     added = add_unique(suppliers, record, "supplier")
                     for review in review_records("supplier", added["id"], row.to_dict()):
                         reviews[review["id"]] = review
+
+        if SOURCE_FILES["weddingsonline"].exists():
+            for sheet_name in WEDDINGSONLINE_SUPPLIER_SHEETS:
+                for _, row in frame("weddingsonline", sheet_name).iterrows():
+                    record = supplier_from_weddingdates(row.to_dict(), sheet_name)
+                    if record:
+                        added = add_unique(suppliers, record, "supplier")
+                        for review in review_records("supplier", added["id"], row.to_dict()):
+                            reviews[review["id"]] = review
 
     for _, row in frame(primary_key, "Wedding Fairs").iterrows():
         record = fair_from_weddingdates(row.to_dict())

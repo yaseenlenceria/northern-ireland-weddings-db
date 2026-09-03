@@ -16,6 +16,7 @@ import { VenueCard } from "@/components/site/Cards";
 import { EnquiryForm } from "@/components/site/EnquiryForm";
 import { JsonLd } from "@/components/site/JsonLd";
 import { SaveButton } from "@/components/site/SaveButton";
+import { ReviewList } from "@/components/site/Reviews";
 import { getVenue } from "@/lib/directory.functions";
 import { VENUE_SLUG, countySlug } from "@/lib/taxonomy";
 import { canonical, clamp, pageMeta, reviewSchema, sourcedReviewSchema } from "@/lib/seo";
@@ -96,6 +97,7 @@ function VenueProfile() {
   const gallery = (venue.gallery_images ?? []).slice(0, 12);
   const hero = venue.logo_image ?? gallery[0] ?? null;
   const faqs = FAQS(venue.name, venue.guest_capacity);
+  const profileReviews = [...reviews, ...sourcedReviews];
 
   return (
     <SiteLayout>
@@ -308,53 +310,24 @@ function VenueProfile() {
 
           <section id="reviews" className="scroll-mt-24">
             <h2 className="text-3xl">Reviews</h2>
-            {venue.rating && venue.review_count ? (
-              <div className="mt-3 flex items-center gap-3">
-                <Stars rating={venue.rating} count={venue.review_count} />
-                <span className="text-sm text-muted-foreground">
-                  {venue.rating}/5 from {venue.review_count} couple reviews
-                </span>
-              </div>
-            ) : null}
-
-            {reviews.length === 0 && sourcedReviews.length === 0 ? (
-              <p className="mt-3 text-muted-foreground">
-                No written reviews on Wedora yet
-                {venue.rating ? `, though this venue holds a ${venue.rating}/5 rating.` : "."}
-              </p>
-            ) : (
-              <ul className="mt-4 space-y-4">
-                {reviews.map((review) => (
-                  <li key={review.id} className="rounded-xl border border-border bg-card p-5">
-                    <p className="font-medium">{review.title ?? "Review"}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {review.author_name} · {review.rating}/5
-                    </p>
-                    <p className="mt-3 text-sm text-muted-foreground">{review.body}</p>
-                  </li>
-                ))}
-                {sourcedReviews.map((review) => (
-                  <li key={review.id} className="rounded-xl border border-border bg-card p-5">
-                    <p className="font-medium">{review.title ?? "Review"}</p>
-                    <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      <span>{review.author_name || "Verified couple"}</span>
-                      {review.rating ? <span>· {review.rating}/5</span> : null}
-                      {review.review_date ? (
-                        <span>
-                          ·{" "}
-                          {new Date(review.review_date).toLocaleDateString("en-IE", {
-                            month: "long",
-                            year: "numeric",
-                          })}
-                        </span>
-                      ) : null}
-                      {review.source_name ? <span>· via {review.source_name}</span> : null}
-                    </p>
-                    <p className="mt-3 text-sm text-muted-foreground">{review.body}</p>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <ReviewList
+              reviews={profileReviews}
+              empty={
+                venue.rating
+                  ? `No written review text is available yet, though this venue holds a ${venue.rating}/5 rating.`
+                  : "No written reviews are available yet."
+              }
+              summary={
+                venue.rating && venue.review_count ? (
+                  <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-ivory p-4">
+                    <Stars rating={venue.rating} count={venue.review_count} />
+                    <span className="text-sm text-muted-foreground">
+                      {venue.rating}/5 from {venue.review_count.toLocaleString()} couple reviews
+                    </span>
+                  </div>
+                ) : null
+              }
+            />
           </section>
 
 

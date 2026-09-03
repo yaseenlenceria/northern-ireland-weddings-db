@@ -44,12 +44,57 @@ async function pythonCommand() {
   }
 }
 
-function updatableColumns(row) {
-  return Object.keys(row).filter((key) => key !== "id" && key !== "created_at");
-}
-
 function quoteIdentifier(value) {
   return `"${value.replaceAll('"', '""')}"`;
+}
+
+function assignmentFor(table, column) {
+  const target = `${quoteIdentifier(table)}.${quoteIdentifier(column)}`;
+  const incoming = `EXCLUDED.${quoteIdentifier(column)}`;
+
+  if (["overview", "description"].includes(column)) {
+    return `${quoteIdentifier(column)} = CASE
+      WHEN ${incoming} IS NULL OR ${incoming} = '' THEN ${target}
+      WHEN ${target} IS NULL OR ${target} = '' THEN ${incoming}
+      WHEN length(${incoming}) > length(${target}) THEN ${incoming}
+      ELSE ${target}
+    END`;
+  }
+
+  if ([
+    "gallery_images",
+    "venue_types",
+    "styles",
+    "facilities",
+    "service_areas",
+    "brochures",
+    "real_weddings",
+    "categories",
+  ].includes(column)) {
+    return `${quoteIdentifier(column)} = CASE
+      WHEN ${incoming} IS NULL OR cardinality(${incoming}) = 0 THEN ${target}
+      WHEN ${target} IS NULL OR cardinality(${target}) = 0 THEN ${incoming}
+      ELSE ARRAY(SELECT DISTINCT item FROM unnest(${target} || ${incoming}) AS item WHERE item IS NOT NULL AND item <> '')
+    END`;
+  }
+
+  if (["image_count", "review_count"].includes(column)) {
+    return `${quoteIdentifier(column)} = GREATEST(COALESCE(${target}, 0), COALESCE(${incoming}, 0))`;
+  }
+
+  if (["rating", "avg_price_num", "per_person_price_num", "capacity_min", "capacity_max"].includes(column)) {
+    return `${quoteIdentifier(column)} = COALESCE(${incoming}, ${target})`;
+  }
+
+  return `${quoteIdentifier(column)} = COALESCE(NULLIF(${incoming}::text, '')::${columnType(column)}, ${target})`;
+}
+
+function columnType(column) {
+  if (["venue_id", "supplier_id"].includes(column)) return "uuid";
+  if (["featured"].includes(column)) return "boolean";
+  if (["latitude", "longitude"].includes(column)) return "numeric";
+  if (["review_date"].includes(column)) return "date";
+  return "text";
 }
 
 async function upsertBatch(sql, table, rows, batchSize = 100) {
@@ -60,7 +105,7 @@ async function upsertBatch(sql, table, rows, batchSize = 100) {
   );
   const updateColumns = columns.filter((key) => key !== "id" && key !== "created_at");
   const assignments = updateColumns
-    .map((column) => `${quoteIdentifier(column)} = EXCLUDED.${quoteIdentifier(column)}`)
+    .map((column) => assignmentFor(table, column))
     .join(", ");
 
   for (let offset = 0; offset < normalizedRows.length; offset += batchSize) {
