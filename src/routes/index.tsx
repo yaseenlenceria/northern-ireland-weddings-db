@@ -136,7 +136,10 @@ function HomePage() {
     "DJs",
     "Celebrants",
   ]);
-  const preferred = suppliers.filter((s) => showcaseCategories.has(s.category ?? ""));
+  const preferred = suppliers.filter((s) =>
+    (s.categories ?? []).some((c) => showcaseCategories.has(c)),
+  );
+
   const featuredSuppliers = (preferred.length >= 8 ? preferred : suppliers).slice(0, 8);
 
 
