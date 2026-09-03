@@ -45,7 +45,7 @@ export function pageMeta({
     { property: "og:description", content: desc },
     { property: "og:type", content: type },
     { property: "og:site_name", content: SITE_NAME },
-    { property: "og:url", content: path },
+    { property: "og:url", content: absoluteUrl(path) },
     { name: "twitter:card", content: "summary_large_image" },
   ];
   if (image && image.startsWith("https://")) {
@@ -58,7 +58,7 @@ export function pageMeta({
 
 /** Self-referencing canonical for a leaf route. */
 export function canonical(path: string) {
-  return [{ rel: "canonical", href: path }];
+  return [{ rel: "canonical", href: absoluteUrl(path) }];
 }
 
 /** Truncates copy to a safe meta-description length. */
