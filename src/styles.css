@@ -247,3 +247,33 @@
     border-color: color-mix(in oklab, var(--gold) 40%, var(--border));
   }
 }
+
+/* Visible, consistent keyboard focus on every interactive element. */
+@layer base {
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Anchor targets clear the sticky header. */
+  :target {
+    scroll-margin-top: 6rem;
+  }
+}
+
+/* Respect the OS "reduce motion" setting: no transforms, no long transitions. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .card-lift:hover {
+    transform: none;
+  }
+}
