@@ -1,9 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
-import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { SupplierCard, VenueCard } from "@/components/site/Cards";
-import { Breadcrumbs as _Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
+import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { JsonLd } from "@/components/site/JsonLd";
 import { getCountyStats, listSuppliers, listVenues } from "@/lib/directory.functions";
 import { CATEGORIES, VENUE_SLUG, countyFromSlug, countySlug } from "@/lib/taxonomy";
@@ -22,20 +21,23 @@ export const Route = createFileRoute("/county/$county")({
   },
   head: ({ params, loaderData }) => {
     const county = loaderData?.county ?? countyFromSlug(params.county);
-    if (!county) {
+    if (!county || !loaderData) {
       return { meta: [{ title: "County not found" }, { name: "robots", content: "noindex" }] };
     }
-    const title = `Weddings in Co. ${county} — Venues & Suppliers | WedList Ireland`;
-    const description = `Every wedding venue and supplier listed in Co. ${county} on WedList Ireland, with pricing guides, capacity and direct enquiry forms.`;
+    const { stats } = loaderData;
+    const title = `Wedding Venues & Suppliers in Co. ${county} (${SEO_YEAR}) | WedList Ireland`;
+    const description = clamp(
+      `${stats.venues} wedding venues and ${stats.suppliers} suppliers listed in Co. ${county}. Compare capacity, per-person prices and reviews, then enquire free.`,
+    );
+    const path = `/county/${params.county}`;
     return {
-      meta: [
-        { title },
-        { name: "description", content: description },
-        { property: "og:title", content: title },
-        { property: "og:description", content: description },
-        { property: "og:type", content: "website" },
-        { name: "twitter:card", content: "summary_large_image" },
-      ],
+      meta: pageMeta({
+        title,
+        description,
+        path,
+        image: loaderData.venues[0]?.logo_image ?? null,
+      }),
+      links: canonical(path),
     };
   },
   component: CountyPage,
@@ -55,8 +57,26 @@ function CountyPage() {
   const { county, stats, venues, suppliers } = Route.useLoaderData();
   const slug = countySlug(county);
 
+  const topVenue = venues[0];
+
   return (
     <SiteLayout>
+      <JsonLd
+        data={breadcrumbSchema("", [
+          { name: "Home", path: "/" },
+          { name: `Co. ${county}`, path: `/county/${slug}` },
+        ])}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: `Weddings in Co. ${county}`,
+          about: { "@type": "AdministrativeArea", name: `County ${county}, Ireland` },
+          description: `Wedding venues and suppliers listed in Co. ${county}, Ireland.`,
+        }}
+      />
+
       <PageHeader
         eyebrow="County guide"
         title={`Getting married in Co. ${county}`}
@@ -64,6 +84,25 @@ function CountyPage() {
       >
         <Breadcrumbs items={[{ label: `Co. ${county}` }]} />
       </PageHeader>
+
+      <div className="border-b border-border bg-card">
+        <div className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-6 sm:grid-cols-3 sm:px-6">
+          <div>
+            <p className="eyebrow text-primary">Venues</p>
+            <p className="mt-1 font-serif text-xl">{stats.venues.toLocaleString()}</p>
+          </div>
+          <div>
+            <p className="eyebrow text-primary">Suppliers</p>
+            <p className="mt-1 font-serif text-xl">{stats.suppliers.toLocaleString()}</p>
+          </div>
+          <div>
+            <p className="eyebrow text-primary">Highest rated venue</p>
+            <p className="mt-1 font-serif text-xl">
+              {topVenue?.rating ? `${topVenue.name} · ${topVenue.rating}/5` : "—"}
+            </p>
+          </div>
+        </div>
+      </div>
 
       <Section
         title={`Wedding venues in Co. ${county}`}
