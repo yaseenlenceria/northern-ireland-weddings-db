@@ -11,7 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DirectorySlugRouteImport } from './routes/$directorySlug'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BudgetCalculatorRouteImport } from './routes/budget-calculator'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as FindSuppliersRouteImport } from './routes/find-suppliers'
+import { Route as GuestListRouteImport } from './routes/guest-list'
 import { Route as PlanningToolsRouteImport } from './routes/planning-tools'
 import { Route as VenuesRouteImport } from './routes/venues'
 import { Route as WeddingChecklistRouteImport } from './routes/wedding-checklist'
@@ -31,9 +35,29 @@ const DirectorySlugRoute = DirectorySlugRouteImport.update({
   path: '/$directorySlug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BudgetCalculatorRoute = BudgetCalculatorRouteImport.update({
+  id: '/budget-calculator',
+  path: '/budget-calculator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FindSuppliersRoute = FindSuppliersRouteImport.update({
   id: '/find-suppliers',
   path: '/find-suppliers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuestListRoute = GuestListRouteImport.update({
+  id: '/guest-list',
+  path: '/guest-list',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlanningToolsRoute = PlanningToolsRouteImport.update({
@@ -80,7 +104,11 @@ const WeddingGuidesSlugRoute = WeddingGuidesSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$directorySlug': typeof DirectorySlugRoute
+  '/auth': typeof AuthRoute
+  '/budget-calculator': typeof BudgetCalculatorRoute
+  '/dashboard': typeof DashboardRoute
   '/find-suppliers': typeof FindSuppliersRoute
+  '/guest-list': typeof GuestListRoute
   '/planning-tools': typeof PlanningToolsRoute
   '/venues': typeof VenuesRoute
   '/wedding-checklist': typeof WeddingChecklistRoute
@@ -93,7 +121,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$directorySlug': typeof DirectorySlugRoute
+  '/auth': typeof AuthRoute
+  '/budget-calculator': typeof BudgetCalculatorRoute
+  '/dashboard': typeof DashboardRoute
   '/find-suppliers': typeof FindSuppliersRoute
+  '/guest-list': typeof GuestListRoute
   '/planning-tools': typeof PlanningToolsRoute
   '/venues': typeof VenuesRoute
   '/wedding-checklist': typeof WeddingChecklistRoute
@@ -107,7 +139,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$directorySlug': typeof DirectorySlugRoute
+  '/auth': typeof AuthRoute
+  '/budget-calculator': typeof BudgetCalculatorRoute
+  '/dashboard': typeof DashboardRoute
   '/find-suppliers': typeof FindSuppliersRoute
+  '/guest-list': typeof GuestListRoute
   '/planning-tools': typeof PlanningToolsRoute
   '/venues': typeof VenuesRoute
   '/wedding-checklist': typeof WeddingChecklistRoute
@@ -122,7 +158,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$directorySlug'
+    | '/auth'
+    | '/budget-calculator'
+    | '/dashboard'
     | '/find-suppliers'
+    | '/guest-list'
     | '/planning-tools'
     | '/venues'
     | '/wedding-checklist'
@@ -135,7 +175,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$directorySlug'
+    | '/auth'
+    | '/budget-calculator'
+    | '/dashboard'
     | '/find-suppliers'
+    | '/guest-list'
     | '/planning-tools'
     | '/venues'
     | '/wedding-checklist'
@@ -148,7 +192,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$directorySlug'
+    | '/auth'
+    | '/budget-calculator'
+    | '/dashboard'
     | '/find-suppliers'
+    | '/guest-list'
     | '/planning-tools'
     | '/venues'
     | '/wedding-checklist'
@@ -162,7 +210,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DirectorySlugRoute: typeof DirectorySlugRoute
+  AuthRoute: typeof AuthRoute
+  BudgetCalculatorRoute: typeof BudgetCalculatorRoute
+  DashboardRoute: typeof DashboardRoute
   FindSuppliersRoute: typeof FindSuppliersRoute
+  GuestListRoute: typeof GuestListRoute
   PlanningToolsRoute: typeof PlanningToolsRoute
   VenuesRoute: typeof VenuesRoute
   WeddingChecklistRoute: typeof WeddingChecklistRoute
@@ -189,11 +241,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DirectorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/budget-calculator': {
+      id: '/budget-calculator'
+      path: '/budget-calculator'
+      fullPath: '/budget-calculator'
+      preLoaderRoute: typeof BudgetCalculatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/find-suppliers': {
       id: '/find-suppliers'
       path: '/find-suppliers'
       fullPath: '/find-suppliers'
       preLoaderRoute: typeof FindSuppliersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guest-list': {
+      id: '/guest-list'
+      path: '/guest-list'
+      fullPath: '/guest-list'
+      preLoaderRoute: typeof GuestListRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/planning-tools': {
@@ -258,7 +338,11 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DirectorySlugRoute: DirectorySlugRoute,
+  AuthRoute: AuthRoute,
+  BudgetCalculatorRoute: BudgetCalculatorRoute,
+  DashboardRoute: DashboardRoute,
   FindSuppliersRoute: FindSuppliersRoute,
+  GuestListRoute: GuestListRoute,
   PlanningToolsRoute: PlanningToolsRoute,
   VenuesRoute: VenuesRoute,
   WeddingChecklistRoute: WeddingChecklistRoute,
