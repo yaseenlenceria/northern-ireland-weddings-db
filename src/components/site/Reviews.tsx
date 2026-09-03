@@ -7,19 +7,19 @@ type Review = {
   rating: number | null;
   title: string | null;
   body: string;
-  review_date?: string | null;
+  review_date?: string | Date | null;
   source_name?: string | null;
   source_url?: string | null;
 };
 
-function formatDate(value?: string | null) {
+function formatDate(value?: string | Date | null) {
   if (!value) return null;
-  const [year, month, day] = value.split("-").map(Number);
-  if (!year || !month || !day) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
   return new Intl.DateTimeFormat("en-IE", {
     month: "long",
     year: "numeric",
-  }).format(new Date(year, month - 1, day));
+  }).format(date);
 }
 
 function reviewTitle(review: Review) {
