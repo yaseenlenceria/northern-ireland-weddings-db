@@ -16,7 +16,7 @@ export const absoluteUrl = (path: string) =>
 
 
 
-/** Current year, used in "Top 10 ... (2026)" style titles. */
+/** Current year, used in directory titles and guide pages. */
 export const SEO_YEAR = new Date().getFullYear();
 
 export type MetaInput = {

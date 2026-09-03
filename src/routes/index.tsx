@@ -25,7 +25,7 @@ import heroImage from "@/assets/hero-wedding-ireland.jpg";
 
 const TITLE = "Wedding Suppliers & Venues in Ireland | Wedora Ireland";
 const DESCRIPTION =
-  "Compare Irish wedding suppliers and venues across every county. Ranked top 10 lists, real prices, reviews and free direct enquiries.";
+  "Compare Irish wedding suppliers and venues across every county. Live directory counts, real prices, reviews and free direct enquiries.";
 
 export const Route = createFileRoute("/")({
   loader: () => getHomeData(),
@@ -83,7 +83,7 @@ const TOOLS = [
   },
 ];
 
-/** Ranked city pages used for the "Top 10 by city" hub. */
+/** Ranked county pages used for the directory hub. */
 const TOP_CITIES = ["Dublin", "Cork", "Galway", "Kerry", "Limerick", "Mayo"];
 const TOP_CITY_CATEGORIES = [
   VENUE_SLUG,
@@ -233,8 +233,7 @@ function HomePage() {
             <div className="absolute -bottom-5 left-5 right-5 rounded-xl border border-border bg-card/95 p-4 shadow-lift backdrop-blur sm:left-8 sm:right-auto sm:max-w-xs">
               <p className="eyebrow text-primary">Ranked lists</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Top 10 pages for every category in every county, ranked on portfolios and real
-                review scores.
+                Live category pages for every county, ranked on portfolios and real review scores.
               </p>
             </div>
           </div>
@@ -312,10 +311,10 @@ function HomePage() {
         </div>
       </Section>
 
-      {/* Top 10 by city */}
+      {/* Ranked by county */}
       <Section
         tone="ivory"
-        title={`Top 10 lists by county (${SEO_YEAR})`}
+        title={`Ranked lists by county (${SEO_YEAR})`}
         description="Every category is ranked county by county on portfolio depth and published review scores. Start where you're getting married."
       >
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -341,7 +340,7 @@ function HomePage() {
                         params={{ directorySlug: `${slug}-${countySlug(county)}` }}
                         className="text-muted-foreground hover:text-primary"
                       >
-                        Top 10 {label.toLowerCase()} in {county}
+                        Ranked {label.toLowerCase()} in {county}
                       </Link>
                     </li>
                   );

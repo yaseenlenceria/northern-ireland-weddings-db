@@ -35,13 +35,14 @@ function buildCopy(opts: {
   priced: ReturnType<typeof priceGuide>;
 }) {
   const { plural, place, count, page, priced } = opts;
-  const ranked = count >= TOP_N;
+  const ranked = count > 0;
+  const listingCount = count.toLocaleString();
   const heading = ranked
-    ? `Top ${TOP_N} ${plural} in ${place} (${SEO_YEAR})`
+    ? `${listingCount} ${plural} in ${place} (${SEO_YEAR})`
     : `${plural} in ${place}`;
 
   const title = ranked
-    ? `Top ${TOP_N} ${plural} in ${place} ${SEO_YEAR} — Prices & Reviews`
+    ? `${listingCount} ${plural} in ${place} ${SEO_YEAR} - Prices & Reviews`
     : `${plural} in ${place} — ${count} Listed | Wedora Ireland`;
 
   const priceBit = priced ? ` Typical spend around ${euro(priced.median)}.` : "";
@@ -184,7 +185,7 @@ function DirectoryPage() {
   }
   faqs.push({
     q: `How many ${plural.toLowerCase()} are listed in ${place}?`,
-    a: `${total.toLocaleString()} ${plural.toLowerCase()} are listed in ${place} on Wedora Ireland. The top ${Math.min(TOP_N, total)} on this page are ranked on portfolio depth, published reviews and how complete the listing is.`,
+    a: `${total.toLocaleString()} ${plural.toLowerCase()} are listed in ${place} on Wedora Ireland. Listings are ordered by portfolio depth, published reviews and how complete the listing is.`,
   });
   faqs.push({
     q: `When should we book ${plural.toLowerCase()} in ${place}?`,
@@ -289,12 +290,8 @@ function DirectoryPage() {
         <>
           {page === 1 && rankedItems.length ? (
             <Section
-              title={
-                total >= TOP_N
-                  ? `The top ${TOP_N} ${plural.toLowerCase()} in ${place}`
-                  : `${plural} in ${place}`
-              }
-              description={`Ranked on portfolio depth, published review scores and how complete each listing is. ${total.toLocaleString()} businesses were considered.`}
+              title={`Ranked ${plural.toLowerCase()} in ${place}`}
+              description={`Showing the first ${rankedItems.length.toLocaleString()} of ${total.toLocaleString()} live listings from Neon, ordered by portfolio depth, published review scores and how complete each listing is.`}
             >
               <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {rankedVenues.map((venue, i) => (
