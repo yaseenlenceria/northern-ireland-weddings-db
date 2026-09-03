@@ -30,13 +30,14 @@ export function Header() {
           </span>
         </Link>
 
-        <nav className="hidden flex-1 items-center gap-1 lg:flex">
+        <nav aria-label="Main" className="hidden flex-1 items-center gap-1 lg:flex">
           {NAV.map((item) => (
             <Link
               key={item.to}
               to={item.to}
+              aria-current={pathname === item.to ? "page" : undefined}
               className={`rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground ${
-                pathname === item.to ? "text-primary" : "text-foreground/80"
+                pathname === item.to ? "font-medium text-primary" : "text-foreground/80"
               }`}
             >
               {item.label}
@@ -63,23 +64,30 @@ export function Header() {
 
         <button
           type="button"
-          aria-label="Toggle menu"
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          aria-controls="mobile-nav"
           onClick={() => setOpen((v) => !v)}
-          className="ml-auto inline-flex size-10 items-center justify-center rounded-md border border-border lg:hidden"
+          className="ml-auto inline-flex size-11 items-center justify-center rounded-md border border-border lg:hidden"
         >
-          {open ? <X className="size-5" /> : <Menu className="size-5" />}
+          {open ? (
+            <X className="size-5" aria-hidden="true" />
+          ) : (
+            <Menu className="size-5" aria-hidden="true" />
+          )}
         </button>
       </div>
 
       {open ? (
-        <div className="border-t border-border bg-background lg:hidden">
-          <nav className="mx-auto flex w-full max-w-7xl flex-col px-4 py-3 sm:px-6">
+        <div id="mobile-nav" className="border-t border-border bg-background lg:hidden">
+          <nav aria-label="Mobile" className="mx-auto flex w-full max-w-7xl flex-col px-4 py-3 sm:px-6">
             {NAV.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
                 onClick={() => setOpen(false)}
-                className="rounded-md px-2 py-3 text-sm text-foreground/85 hover:bg-accent"
+                aria-current={pathname === item.to ? "page" : undefined}
+                className="rounded-md px-2 py-3 text-base text-foreground/85 hover:bg-accent"
               >
                 {item.label}
               </Link>
