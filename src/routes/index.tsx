@@ -136,8 +136,13 @@ function HomePage() {
     "DJs",
     "Celebrants",
   ]);
-  const preferred = suppliers.filter((s) =>
-    (s.categories ?? []).some((c) => showcaseCategories.has(c)),
+  // Hen/stag entertainment is in the directory but is not the right first
+  // impression for a wedding homepage, so it is kept out of the showcase.
+  const excludedCategories = new Set(["Hens & Stags", "Hen & Stag"]);
+  const preferred = suppliers.filter(
+    (s) =>
+      (s.categories ?? []).some((c) => showcaseCategories.has(c)) &&
+      !(s.categories ?? []).some((c) => excludedCategories.has(c)),
   );
 
   const featuredSuppliers = (preferred.length >= 8 ? preferred : suppliers).slice(0, 8);
