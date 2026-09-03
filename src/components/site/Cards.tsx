@@ -38,7 +38,9 @@ export function SupplierCard({
       >
         <ListingImage
           src={cardImage(supplier.logo_image, supplier.gallery_images)}
-          alt={supplier.name}
+          alt={`${supplier.name}${primary ? ` — ${primary.label.toLowerCase()}` : ""}${
+            supplier.county ? ` in Co. ${supplier.county}` : ""
+          }`}
           className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </Link>
@@ -104,7 +106,7 @@ export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number 
       >
         <ListingImage
           src={cardImage(venue.logo_image, venue.gallery_images)}
-          alt={venue.name}
+          alt={`${venue.name}, wedding venue${venue.county ? ` in Co. ${venue.county}` : " in Ireland"}`}
           className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </Link>
