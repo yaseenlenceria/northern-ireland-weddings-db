@@ -187,29 +187,13 @@ function HomePage() {
               Wedding suppliers and venues across Ireland
             </h1>
             <p className="mt-5 max-w-xl text-lg text-muted-foreground">
-              {counts.suppliers.toLocaleString()} suppliers and {counts.venues.toLocaleString()}{" "}
-              venues, county by county — with real price guides, published reviews and enquiries
-              that go straight to the supplier.
+              Find the right people and places for your day, with real price guides, published
+              reviews and enquiries that go straight to the supplier.
             </p>
 
             <div className="mt-8">
               <SearchBar />
             </div>
-
-            <dl className="mt-10 flex flex-wrap gap-x-10 gap-y-4 text-sm">
-              <div>
-                <dt className="eyebrow text-muted-foreground">Suppliers listed</dt>
-                <dd className="font-serif text-2xl">{counts.suppliers.toLocaleString()}</dd>
-              </div>
-              <div>
-                <dt className="eyebrow text-muted-foreground">Venues listed</dt>
-                <dd className="font-serif text-2xl">{counts.venues.toLocaleString()}</dd>
-              </div>
-              <div>
-                <dt className="eyebrow text-muted-foreground">Wedding fairs</dt>
-                <dd className="font-serif text-2xl">{counts.fairs.toLocaleString()}</dd>
-              </div>
-            </dl>
           </div>
 
           <div className="relative">

@@ -29,6 +29,17 @@ const DESCRIPTION =
 
 const PER_PAGE = 24;
 
+const QUICK_CATEGORY_KEYS = [
+  "wedding-photographers",
+  "cakes-sweet-treats",
+  "wedding-florists",
+  "wedding-bands",
+  "wedding-videographers",
+  "wedding-djs",
+  "wedding-celebrants",
+  "wedding-planners",
+] as const;
+
 /** Filters live in the URL so results are shareable and the sitewide search action works. */
 const searchSchema = z.object({
   q: fallback(z.coerce.string(), "").optional(),
@@ -176,30 +187,43 @@ function FindSuppliersPage() {
           </Button>
         </form>
 
-        <p className="mt-6 text-sm text-muted-foreground" role="status" aria-live="polite">
-          {query.isPending
-            ? "Searching…"
-            : query.isError
-              ? "We couldn't load suppliers just now."
-              : `${total.toLocaleString()} suppliers match your filters.`}
-        </p>
-
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {CATEGORIES.map((item) => {
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          <p className="mr-2 text-sm text-muted-foreground" role="status" aria-live="polite">
+            {query.isPending
+              ? "Searching…"
+              : query.isError
+                ? "We couldn't load suppliers just now."
+                : `${total.toLocaleString()} suppliers found`}
+          </p>
+          <button
+            type="button"
+            onClick={() => update({ category: "all" })}
+            className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
+              category === "all"
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-card text-foreground/75 hover:border-primary/50 hover:text-primary"
+            }`}
+          >
+            All
+          </button>
+          {QUICK_CATEGORY_KEYS.map((key) => {
+            const item = CATEGORIES.find((c) => c.key === key);
+            if (!item) return null;
             const count = countByCategory.get(item.key) ?? 0;
             return (
               <button
                 key={item.key}
                 type="button"
                 onClick={() => update({ category: item.key })}
-                className={`rounded-xl border p-4 text-left transition-colors hover:border-primary/50 hover:bg-primary-soft ${
-                  category === item.key ? "border-primary bg-primary-soft" : "border-border bg-card"
+                className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
+                  category === item.key
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card text-foreground/75 hover:border-primary/50 hover:text-primary"
                 }`}
               >
-                <span className="block font-serif text-lg">{item.plural}</span>
-                <span className="mt-1 block text-xs text-muted-foreground">{item.blurb}</span>
-                <span className="mt-3 block text-sm text-primary">
-                  {categoryCounts.isPending ? "Loading" : `${count.toLocaleString()} listed`}
+                {item.label}{" "}
+                <span className={category === item.key ? "text-primary-foreground/80" : "text-muted-foreground"}>
+                  {categoryCounts.isPending ? "" : count.toLocaleString()}
                 </span>
               </button>
             );

@@ -417,6 +417,42 @@ export const getSupplierCategoryCounts = createServerFn({ method: "GET" }).handl
   }
 });
 
+export const getHeaderHighlights = createServerFn({ method: "GET" }).handler(async () => {
+  try {
+    const sql = await db();
+    const [venues, suppliers] = await Promise.all([
+      sql<{ slug: string; name: string; county: string | null; image: string | null }[]>`
+        SELECT slug, name, county, COALESCE(logo_image, gallery_images[1]) AS image
+        FROM venues
+        WHERE COALESCE(logo_image, gallery_images[1]) IS NOT NULL
+        ORDER BY featured DESC, rating DESC NULLS LAST, image_count DESC NULLS LAST, name ASC
+        LIMIT 2
+      `,
+      sql<{ slug: string; name: string; county: string | null; image: string | null; category: string | null }[]>`
+        SELECT slug, name, county, COALESCE(logo_image, gallery_images[1]) AS image, categories[1] AS category
+        FROM suppliers
+        WHERE COALESCE(logo_image, gallery_images[1]) IS NOT NULL
+          AND NOT categories @> ARRAY['hens-stags']::text[]
+        ORDER BY featured DESC, image_count DESC NULLS LAST, name ASC
+        LIMIT 2
+      `,
+    ]);
+    return { venues, suppliers };
+  } catch (error) {
+    logPublicDataError("getHeaderHighlights", error);
+    return {
+      venues: [] as { slug: string; name: string; county: string | null; image: string | null }[],
+      suppliers: [] as {
+        slug: string;
+        name: string;
+        county: string | null;
+        image: string | null;
+        category: string | null;
+      }[],
+    };
+  }
+});
+
 export const getGuideHighlights = createServerFn({ method: "GET" }).handler(async () => {
   try {
     const sql = await db();
