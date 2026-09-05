@@ -168,7 +168,12 @@ function HomePage() {
               "@id": absoluteUrl("/") + "#organization",
               url: absoluteUrl("/"),
               name: SITE_NAME,
-              logo: absoluteUrl("/logo.svg"),
+              logo: {
+                "@type": "ImageObject",
+                url: absoluteUrl("/logo.png"),
+                width: 679,
+                height: 214,
+              },
               description:
                 "Directory of wedding venues and suppliers across the Republic of Ireland.",
               areaServed: { "@type": "Country", name: "Ireland" },

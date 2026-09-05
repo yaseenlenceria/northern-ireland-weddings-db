@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { CATEGORIES, FEATURED_COUNTIES, VENUE_SLUG, countySlug } from "@/lib/taxonomy";
-import { BrandIcon, BrandWordmark } from "@/components/site/BrandMark";
+import { BrandLogo } from "@/components/site/BrandMark";
 import { SITE_NAME } from "@/lib/seo";
 
 export function Footer() {
@@ -10,10 +10,7 @@ export function Footer() {
     <footer className="mt-24 border-t border-border bg-ivory">
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-4">
         <div>
-          <div className="flex items-center gap-2">
-            <BrandIcon />
-            <BrandWordmark />
-          </div>
+          <BrandLogo className="h-14 w-auto" />
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">
             An Ireland-focused wedding directory: real venues, real suppliers, and free planning
             tools in one place.

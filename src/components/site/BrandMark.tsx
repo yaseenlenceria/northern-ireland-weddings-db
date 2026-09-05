@@ -1,16 +1,28 @@
 import { Link } from "@tanstack/react-router";
-import { Check } from "lucide-react";
 import { SITE_NAME } from "@/lib/seo";
+
+export function BrandLogo({ className = "h-10 w-auto" }: { className?: string }) {
+  return (
+    <img
+      src="/logo.png"
+      alt={SITE_NAME}
+      width={679}
+      height={214}
+      className={`${className} object-contain`}
+    />
+  );
+}
 
 export function BrandIcon({ className = "size-8" }: { className?: string }) {
   return (
-    <span
-      className={`${className} relative inline-flex shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-soft`}
+    <img
+      src="/favicon.png"
+      alt=""
+      width={32}
+      height={32}
+      className={`${className} shrink-0 object-contain`}
       aria-hidden="true"
-    >
-      <span className="font-serif text-[0.62em] font-bold leading-none">W</span>
-      <Check className="absolute -bottom-0.5 -right-0.5 size-[0.42em] rounded-full bg-gold p-[0.08em] text-gold-foreground" />
-    </span>
+    />
   );
 }
 
@@ -20,9 +32,8 @@ export function BrandWordmark({ className = "font-serif text-xl" }: { className?
 
 export function BrandLink({ onClick }: { onClick?: () => void }) {
   return (
-    <Link to="/" className="flex shrink-0 items-center gap-2" onClick={onClick}>
-      <BrandIcon />
-      <BrandWordmark className="font-serif text-xl leading-none tracking-tight" />
+    <Link to="/" className="flex shrink-0 items-center" aria-label={SITE_NAME} onClick={onClick}>
+      <BrandLogo className="h-10 w-auto sm:h-11" />
     </Link>
   );
 }
