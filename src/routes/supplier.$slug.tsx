@@ -28,8 +28,10 @@ import { SaveButton } from "@/components/site/SaveButton";
 import { Stars } from "@/components/site/Stars";
 import { ReviewList } from "@/components/site/Reviews";
 import { getSupplier } from "@/lib/directory.functions";
+import { firstImage, videoEmbed } from "@/lib/media";
 import { CATEGORY_BY_KEY, countySlug } from "@/lib/taxonomy";
 import {
+  absoluteUrl,
   aggregateRating,
   averageRating,
   canonical,
@@ -67,7 +69,7 @@ export const Route = createFileRoute("/supplier/$slug")({
         description,
         path,
         type: "profile",
-        image: s.logo_image ?? s.gallery_images?.[0] ?? null,
+        image: firstImage(s.banner_image, s.logo_image, s.gallery_images),
       }),
       links: canonical(path),
     };
@@ -134,8 +136,10 @@ function priceLabel(price: string | null | undefined, numericPrice: unknown) {
 function SupplierProfile() {
   const { supplier, reviews, sourcedReviews, similar } = Route.useLoaderData();
   const category = CATEGORY_BY_KEY.get(supplier.categories?.[0] ?? "");
-  const gallery = (supplier.gallery_images ?? []).slice(0, 9);
-  const hero = supplier.banner_image ?? supplier.logo_image ?? gallery[0] ?? null;
+  const gallery = (supplier.gallery_images ?? [])
+    .filter((src: string) => firstImage(src))
+    .slice(0, 9);
+  const hero = firstImage(supplier.banner_image, supplier.logo_image, gallery);
   const faqs = FAQS(supplier.name);
   const allScored = [
     ...reviews.map((r) => toNumber(r.rating)).filter((r): r is number => r !== null),
@@ -162,6 +166,14 @@ function SupplierProfile() {
     supplier.twitter_url ? { label: "X", href: supplier.twitter_url, icon: Globe } : null,
   ].filter(Boolean) as { label: string; href: string; icon: typeof Globe }[];
   const videos = (supplier.video_urls ?? []).filter(Boolean) as string[];
+  const embeddedVideos = Array.from(
+    new Map(
+      videos
+        .map((href) => videoEmbed(href))
+        .filter((video) => video !== null)
+        .map((video) => [video.embedUrl, video]),
+    ).values(),
+  );
 
   return (
     <SiteLayout>
@@ -210,6 +222,29 @@ function SupplierProfile() {
             : {}),
         }}
       />
+      {embeddedVideos.length ? (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@graph": embeddedVideos.slice(0, 6).map((video, index) => ({
+              "@type": "VideoObject",
+              name: `${supplier.name} wedding video ${index + 1}`,
+              description:
+                supplier.overview ??
+                supplier.description ??
+                `${supplier.name} wedding supplier video on Shortlist.ie.`,
+              thumbnailUrl: hero ? [hero] : undefined,
+              contentUrl: video?.originalUrl,
+              embedUrl: video?.embedUrl,
+              publisher: {
+                "@type": "Organization",
+                name: "Shortlist.ie",
+                url: absoluteUrl("/"),
+              },
+            })),
+          }}
+        />
+      ) : null}
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -308,7 +343,7 @@ function SupplierProfile() {
                 </div>
                 <div>
                   <dt className="eyebrow text-muted-foreground">Videos</dt>
-                  <dd className="mt-1">{videos.length || "Ask supplier"}</dd>
+                  <dd className="mt-1">{embeddedVideos.length || "Ask supplier"}</dd>
                 </div>
                 <div>
                   <dt className="eyebrow text-muted-foreground">Reviews</dt>
@@ -386,24 +421,49 @@ function SupplierProfile() {
             </section>
           ) : null}
 
-          {videos.length ? (
+          {embeddedVideos.length ? (
             <section>
               <h2 className="text-3xl">Videos and reels</h2>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {videos.slice(0, 12).map((href: string, index: number) => (
-                  <a
-                    key={href}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer nofollow"
-                    className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 text-sm transition-colors hover:border-primary hover:text-primary"
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                {embeddedVideos.slice(0, 12).map((video, index) => (
+                  <div
+                    key={video?.originalUrl ?? index}
+                    className="overflow-hidden rounded-xl border border-border bg-card shadow-soft"
                   >
-                    <span className="inline-flex items-center gap-2">
-                      <PlayCircle className="size-4" />
-                      {href.includes("instagram.com") ? "Watch reel" : "Watch video"} {index + 1}
-                    </span>
-                    <ExternalLink className="size-4" />
-                  </a>
+                    <div className="aspect-video bg-muted">
+                      {video?.kind === "video" ? (
+                        <video
+                          src={video.embedUrl}
+                          poster={hero ?? undefined}
+                          controls
+                          preload="metadata"
+                          className="size-full object-cover"
+                        />
+                      ) : (
+                        <iframe
+                          src={video?.embedUrl}
+                          title={`${supplier.name} ${video?.provider ?? "video"} ${index + 1}`}
+                          loading="lazy"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                          className="size-full border-0"
+                        />
+                      )}
+                    </div>
+                    <a
+                      href={video?.originalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                      className="flex items-center justify-between gap-3 px-4 py-3 text-sm transition-colors hover:text-primary"
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        <PlayCircle className="size-4" />
+                        {video?.provider} {video?.provider === "Instagram" ? "reel" : "video"}{" "}
+                        {index + 1}
+                      </span>
+                      <ExternalLink className="size-4" />
+                    </a>
+                  </div>
                 ))}
               </div>
             </section>

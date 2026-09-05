@@ -4,12 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ListingImage } from "./ListingImage";
 import { Stars } from "./Stars";
+import { firstImage } from "@/lib/media";
 import { CATEGORY_BY_KEY } from "@/lib/taxonomy";
 import type { SupplierCardRow, VenueCardRow } from "@/lib/directory.functions";
-
-function cardImage(logo?: string | null, gallery?: string[] | null, banner?: string | null) {
-  return banner || logo || gallery?.[0] || null;
-}
 
 function shortOverview(value: string | null | undefined, max = 180) {
   if (!value) return null;
@@ -50,8 +47,16 @@ function RankBadge({ rank }: { rank: number }) {
   );
 }
 
-export function SupplierCard({ supplier, rank }: { supplier: SupplierCardRow; rank?: number }) {
-  const primary = CATEGORY_BY_KEY.get(supplier.categories?.[0] ?? "");
+export function SupplierCard({
+  supplier,
+  rank,
+  categoryKey,
+}: {
+  supplier: SupplierCardRow;
+  rank?: number;
+  categoryKey?: string;
+}) {
+  const primary = CATEGORY_BY_KEY.get(categoryKey ?? supplier.categories?.[0] ?? "");
   const overview = shortOverview(supplier.overview);
   const rating = toNumber(supplier.rating);
   const reviewCount = toNumber(supplier.review_count);
@@ -64,7 +69,7 @@ export function SupplierCard({ supplier, rank }: { supplier: SupplierCardRow; ra
         className="block aspect-4/3 overflow-hidden bg-muted"
       >
         <ListingImage
-          src={cardImage(supplier.logo_image, supplier.gallery_images, supplier.banner_image)}
+          src={firstImage(supplier.banner_image, supplier.logo_image, supplier.gallery_images)}
           alt={`${supplier.name}${primary ? ` — ${primary.label.toLowerCase()}` : ""}${
             supplier.county ? ` in Co. ${supplier.county}` : ""
           }`}
@@ -150,7 +155,7 @@ export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number 
         className="block aspect-4/3 overflow-hidden bg-muted"
       >
         <ListingImage
-          src={cardImage(venue.logo_image, venue.gallery_images)}
+          src={firstImage(venue.logo_image, venue.gallery_images)}
           alt={`${venue.name}, wedding venue${venue.county ? ` in Co. ${venue.county}` : " in Ireland"}`}
           className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
         />

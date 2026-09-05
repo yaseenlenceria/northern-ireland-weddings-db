@@ -23,6 +23,7 @@ SOURCE_FILES = {
     "hitched": Path(r"C:\Users\Seenu\weddingdates-scrape\Hitched_Ireland.xlsx"),
     "hitched_top_50": Path(r"C:\Users\Seenu\weddingdates-scrape\Hitched_Ireland_Top50.xlsx"),
     "wedding_suppliers": Path(r"C:\Users\Seenu\weddingdates-scrape\WeddingSuppliers_Ireland.xlsx"),
+    "wedding_suppliers_2": Path(r"C:\Users\Seenu\weddingdates-scrape\WeddingSuppliers_Ireland2.xlsx"),
 }
 
 FULL_SUPPLIER_SHEETS = [
@@ -62,15 +63,18 @@ WEDDINGSONLINE_SUPPLIER_SHEETS = [
     "Photographers",
 ]
 
-WEDDING_SUPPLIERS_SHEETS = [
-    "Bands",
-    "DJs",
-    "Wedding Planners",
-    "Gifts & Favours",
-    "Wedding Music",
-]
+WEDDING_SUPPLIERS_SOURCE_KEYS = ["wedding_suppliers", "wedding_suppliers_2"]
 
 IMPORT_NAMESPACE = uuid.UUID("f907c78a-7915-41f0-8469-14fb7061deab")
+PLACEHOLDER_IMAGE_MARKERS = (
+    "image_placeholder",
+    "defaultnoimage",
+    "default-no-image",
+    "no-image",
+    "noimage",
+    "placeholder",
+    "undefined",
+)
 
 
 def load_env(path: Path) -> dict[str, str]:
@@ -151,11 +155,7 @@ def split_images(value: Any) -> list[str] | None:
     images = urls or split_list(text)
     if not images:
         return None
-    useful = [
-        image
-        for image in images
-        if "image_placeholder" not in image.lower() and not image.lower().endswith("/image_placeholder.png")
-    ]
+    useful = [image for image in (clean_image_url(image) for image in images) if image]
     return useful or None
 
 
@@ -209,6 +209,16 @@ def add_unique(target: dict[str, dict[str, Any]], record: dict[str, Any], kind: 
     return target[slug]
 
 
+def has_listing_image(record: dict[str, Any]) -> bool:
+    return bool(record.get("banner_image") or record.get("logo_image") or record.get("gallery_images"))
+
+
+def should_import_supplier(record: dict[str, Any]) -> bool:
+    if "wedding-cars" in (record.get("categories") or []) and not has_listing_image(record):
+        return False
+    return True
+
+
 def venue_from_weddingdates(row: dict[str, Any]) -> dict[str, Any] | None:
     name = clean_text(row.get("Venue Name"))
     if not name:
@@ -230,7 +240,7 @@ def venue_from_weddingdates(row: dict[str, Any]) -> dict[str, Any] | None:
         "review_count": integer(row.get("Review Count")),
         "overview": clean_text(row.get("Overview")),
         "description": clean_text(row.get("Description")),
-        "logo_image": clean_text(row.get("Logo Image")),
+        "logo_image": clean_image_url(row.get("Logo Image")),
         "gallery_images": gallery,
         "image_count": integer(row.get("Image Count")) or (len(gallery) if gallery else None),
         "venue_types": split_list(row.get("Venue Types")),
@@ -272,7 +282,7 @@ def venue_from_hitched(row: dict[str, Any]) -> dict[str, Any] | None:
         "review_count": integer(first(row.get("Review Count"), row.get("Reviews"))),
         "overview": first(row.get("Description (short")),
         "description": first(row.get("Description"), row.get("All FAQs")),
-        "logo_image": first(row.get("Logo Image"), row.get("Logo")),
+        "logo_image": clean_image_url(first(row.get("Logo Image"), row.get("Logo"))),
         "gallery_images": gallery,
         "image_count": integer(row.get("Image Count")) or (len(gallery) if gallery else None),
         "venue_types": split_list(first(row.get("Venue Types"), row.get("Venue Types / Services"))),
@@ -334,6 +344,16 @@ def clean_url(value: Any, host: str | None = None) -> str | None:
     return None
 
 
+def clean_image_url(value: Any) -> str | None:
+    url = clean_url(value)
+    if not url:
+        return None
+    lowered = url.lower()
+    if any(marker in lowered for marker in PLACEHOLDER_IMAGE_MARKERS):
+        return None
+    return url
+
+
 def split_urls(*values: Any) -> list[str] | None:
     combined: list[str] = []
     for value in values:
@@ -352,7 +372,7 @@ def split_urls(*values: Any) -> list[str] | None:
 
 def source_url_from_row(row: dict[str, Any]) -> str | None:
     for key in ["Profile URL", "Categories", "Source URL"]:
-        value = clean_text(row.get(key))
+        value = clean_url(row.get(key))
         if value and value.startswith("http"):
             return value
     return None
@@ -364,15 +384,22 @@ def category_from_sheet(sheet_name: str) -> str:
         "Beauty & Skincare": "Beauty Skincare",
         "Bridal Shops & Accessories": "Bridal Shops Accessories",
         "Bridesmaid Dresses": "Bridesmaid Dresses",
+        "Bridal Shops": "Bridal Shops Accessories",
         "DJs": "Wedding DJs",
         "Cakes & Accessories": "Cakes Sweet Treats",
         "Cakes & Sweet Treats": "Cakes Sweet Treats",
+        "Cakes & Toppers": "Cakes Sweet Treats",
+        "Catering & Bars": "Catering Wine",
         "Catering & Wine": "Catering Wine",
         "Celebrants": "Wedding Celebrants",
+        "Celebrants & Solemnisers": "Wedding Celebrants",
         "Childcare & Nannies": "Childcare Nannies",
         "Church Singers & Music": "Church Singers Music",
+        "Content Creators": "Wedding Content Creators",
+        "Decor & Event Styling": "Wedding Decor Lighting Styling",
         "Decor, Lighting & Styling": "Wedding Decor Lighting Styling",
         "Djs": "Wedding DJs",
+        "Entertainment": "Wedding Entertainment Photobooths",
         "Entertainment & Photobooths": "Wedding Entertainment Photobooths",
         "Florists": "Wedding Florists",
         "Gifts & Favours": "Wedding Gifts Favours",
@@ -382,6 +409,8 @@ def category_from_sheet(sheet_name: str) -> str:
         "Jewellers": "Wedding Jewellers",
         "Invitations & Stationery": "Wedding Invitations Stationery",
         "Make Up Artists, Beauty & Cosme": "Make Up Artists",
+        "Other Services": "Wedding Services",
+        "Photobooth & Selfie Mirrors": "Wedding Entertainment Photobooths",
         "Photographers": "Wedding Photographers",
         "Planners": "Wedding Planners",
         "Wedding Music": "Church Singers Music",
@@ -396,32 +425,67 @@ def category_from_sheet(sheet_name: str) -> str:
 CANONICAL_CATEGORY_ALIASES = {
     "accessories": "bridal-shops-accessories",
     "bands": "wedding-bands",
+    "bands-marquee-hire-in-ireland-private-and-exclusive-wedding-venues-castle-wedding-venues": "wedding-bands",
     "beauty-and-skincare": "beauty-skincare",
+    "beauty-and-make-up": "make-up-artists",
+    "beauty-make-up": "make-up-artists",
     "beauty-hair-and-make-up": "make-up-artists",
+    "bridal-shops": "bridal-shops-accessories",
     "cakes-and-accessories": "cakes-sweet-treats",
+    "cakes-and-toppers": "cakes-sweet-treats",
     "cakes-accessories": "cakes-sweet-treats",
     "cakes": "cakes-sweet-treats",
     "cars-and-travel": "wedding-cars",
+    "catering-and-bars": "catering-wine",
     "catering": "catering-wine",
     "ceremony-music": "church-singers-music",
     "celebrants": "wedding-celebrants",
+    "celebrants-and-solemnisers": "wedding-celebrants",
+    "content-creators": "wedding-content-creators",
+    "decor-and-event-styling": "wedding-decor-lighting-styling",
     "destinations": "honeymoon",
     "entertainment": "wedding-entertainment-photobooths",
     "favours": "wedding-gifts-favours",
     "florists": "wedding-florists",
     "groom-attire": "groomswear",
     "bridalwear-shops": "bridal-shops-accessories",
+    "catering-sweets": "catering-wine",
+    "ceremony-music-pre-dinner-music": "church-singers-music",
+    "childcare": "childcare-nannies",
+    "destination-weddings": "wedding-planners",
+    "entertainment-dj-s-and-sax": "wedding-djs",
+    "gifts-and-favours": "wedding-gifts-favours",
+    "grooms-wear-and-styling": "groomswear",
+    "hair-stylists": "wedding-hair-stylists",
+    "hen-party-and-stag-party": "hens-stags",
     "honeymoons": "honeymoon",
+    "irish-dancers": "wedding-entertainment-photobooths",
+    "invitations-and-stationery": "wedding-invitations-stationery",
+    "jewellers": "wedding-jewellers",
+    "magicians": "wedding-entertainment-photobooths",
     "mobile-bar-services": "catering-wine",
+    "mobile-bars-and-food-trucks": "catering-wine",
+    "mobile-bars-and-food-trucks-mobile-bars-and-food-trucks": "catering-wine",
     "music-and-djs": "wedding-djs",
     "dj-s-and-sax": "wedding-djs",
     "djs": "wedding-djs",
+    "other-service": "wedding-services",
+    "personalised-items": "wedding-gifts-favours",
     "photo-booths": "wedding-entertainment-photobooths",
+    "photobooth-and-selfie-mirrors": "wedding-entertainment-photobooths",
     "photographers": "wedding-photographers",
+    "pre-dinner-music": "church-singers-music",
     "something-different": "wedding-entertainment-photobooths",
     "stationery": "wedding-invitations-stationery",
+    "sweets": "cakes-sweet-treats",
+    "transport": "wedding-cars",
     "venue": "wedding-venues",
     "videographers": "wedding-videographers",
+    "wedding-candles": "wedding-decor-lighting-styling",
+    "wedding-invitations-and-stationery": "wedding-invitations-stationery",
+    "wedding-invitations-and-stationery-decor-and-event-styling": "wedding-invitations-stationery",
+    "wedding-planners-destination-weddings": "wedding-planners",
+    "wine-and-bubbles": "catering-wine",
 }
 
 
@@ -568,7 +632,7 @@ def venue_from_master(row: dict[str, Any]) -> dict[str, Any] | None:
         "review_count": integer(row.get("Review Count")),
         "overview": clean_mojibake(row.get("Description")),
         "description": first(clean_mojibake(row.get("Description")), clean_mojibake(row.get("Extra Info"))),
-        "logo_image": first(row.get("Logo Image"), row.get("Top Image")),
+        "logo_image": clean_image_url(first(row.get("Logo Image"), row.get("Top Image"))),
         "gallery_images": gallery,
         "image_count": integer(row.get("Image Count")) or (len(gallery) if gallery else None),
         "venue_types": split_list(row.get("Services / Venue Types")),
@@ -605,7 +669,7 @@ def supplier_from_master(row: dict[str, Any]) -> dict[str, Any] | None:
         "avg_price_num": number(row.get("Price From")),
         "overview": clean_mojibake(row.get("Description")),
         "description": first(clean_mojibake(row.get("Description")), clean_mojibake(row.get("Extra Info"))),
-        "logo_image": first(row.get("Logo Image"), row.get("Top Image")),
+        "logo_image": clean_image_url(first(row.get("Logo Image"), row.get("Top Image"))),
         "gallery_images": gallery,
         "featured": boolish(row.get("Premium")),
         "service_areas": split_list(row.get("Areas Served")),
@@ -615,7 +679,11 @@ def supplier_from_master(row: dict[str, Any]) -> dict[str, Any] | None:
         "longitude": number(row.get("Longitude")),
         "phone": clean_mojibake(row.get("Phone")),
         "source_url": profile_url_from_row(row),
+        "profile_url": clean_url(profile_url_from_row(row)),
         "website": clean_mojibake(row.get("Website")),
+        "facebook_url": clean_url(row.get("Facebook"), "www.facebook.com"),
+        "instagram_url": clean_url(row.get("Instagram"), "www.instagram.com"),
+        "twitter_url": clean_url(row.get("Twitter/X"), "twitter.com"),
     }
 
 
@@ -654,7 +722,7 @@ def supplier_from_weddingdates(row: dict[str, Any], sheet_name: str | None = Non
             useful_profile_text(row.get("Description")),
             useful_profile_text(row.get("Profile Text (excerpt)")),
         ),
-        "logo_image": first(row.get("Logo Image"), row.get("Logo"), row.get("Top Image")),
+        "logo_image": clean_image_url(first(row.get("Logo Image"), row.get("Logo"), row.get("Top Image"))),
         "gallery_images": gallery,
         "featured": False,
         "service_areas": None,
@@ -683,7 +751,7 @@ def supplier_from_planner(row: dict[str, Any]) -> dict[str, Any] | None:
         "avg_price_num": number(row.get("Avg Price")),
         "overview": clean_text(row.get("Overview")),
         "description": clean_text(row.get("Description")),
-        "logo_image": clean_text(row.get("Logo")),
+        "logo_image": clean_image_url(row.get("Logo")),
         "gallery_images": gallery,
         "featured": False,
         "service_areas": ["Ireland"],
@@ -710,7 +778,7 @@ def supplier_from_wedding_suppliers(row: dict[str, Any], sheet_name: str) -> dic
         key = category_key(raw_category)
         if key not in categories:
             categories.append(key)
-    banner = clean_url(row.get("Logo / Banner Image"))
+    banner = clean_image_url(row.get("Logo / Banner Image"))
     videos = split_urls(row.get("Videos"), row.get("Reels"))
     profile_url = clean_url(row.get("Profile URL"))
     avg_price_num = number(row.get("Avg Price"))
@@ -831,6 +899,17 @@ def frame(path_key: str, sheet_name: str) -> pd.DataFrame:
     return pd.read_excel(SOURCE_FILES[path_key], sheet_name=sheet_name)
 
 
+def workbook_sheets(path_key: str) -> list[str]:
+    path = SOURCE_FILES[path_key]
+    if not path.exists():
+        return []
+    return [
+        sheet_name
+        for sheet_name in pd.ExcelFile(path).sheet_names
+        if not sheet_name.lower().startswith("summary")
+    ]
+
+
 def build_payload() -> dict[str, list[dict[str, Any]]]:
     venues: dict[str, dict[str, Any]] = {}
     suppliers: dict[str, dict[str, Any]] = {}
@@ -852,7 +931,7 @@ def build_payload() -> dict[str, list[dict[str, Any]]]:
         for _, row in frame("master", "Suppliers (All)").iterrows():
             row_dict = row.to_dict()
             record = supplier_from_master(row_dict)
-            if record:
+            if record and should_import_supplier(record):
                 added = add_unique(suppliers, record, "supplier")
                 for review in review_records("supplier", added["id"], row_dict):
                     reviews[review["id"]] = review
@@ -880,14 +959,14 @@ def build_payload() -> dict[str, list[dict[str, Any]]]:
             for sheet_name in FULL_SUPPLIER_SHEETS:
                 for _, row in frame(primary_key, sheet_name).iterrows():
                     record = supplier_from_weddingdates(row.to_dict(), sheet_name)
-                    if record:
+                    if record and should_import_supplier(record):
                         added = add_unique(suppliers, record, "supplier")
                         for review in review_records("supplier", added["id"], row.to_dict()):
                             reviews[review["id"]] = review
         else:
             for _, row in frame("weddingdates", "Suppliers").iterrows():
                 record = supplier_from_weddingdates(row.to_dict())
-                if record:
+                if record and should_import_supplier(record):
                     added = add_unique(suppliers, record, "supplier")
                     for review in review_records("supplier", added["id"], row.to_dict()):
                         reviews[review["id"]] = review
@@ -895,7 +974,7 @@ def build_payload() -> dict[str, list[dict[str, Any]]]:
         if SOURCE_FILES["wedding_planners"].exists():
             for _, row in frame("wedding_planners", "Wedding Planners").iterrows():
                 record = supplier_from_planner(row.to_dict())
-                if record:
+                if record and should_import_supplier(record):
                     added = add_unique(suppliers, record, "supplier")
                     for review in review_records("supplier", added["id"], row.to_dict()):
                         reviews[review["id"]] = review
@@ -904,17 +983,17 @@ def build_payload() -> dict[str, list[dict[str, Any]]]:
             for sheet_name in WEDDINGSONLINE_SUPPLIER_SHEETS:
                 for _, row in frame("weddingsonline", sheet_name).iterrows():
                     record = supplier_from_weddingdates(row.to_dict(), sheet_name)
-                    if record:
+                    if record and should_import_supplier(record):
                         added = add_unique(suppliers, record, "supplier")
                         for review in review_records("supplier", added["id"], row.to_dict()):
                             reviews[review["id"]] = review
 
-    if SOURCE_FILES["wedding_suppliers"].exists():
-        for sheet_name in WEDDING_SUPPLIERS_SHEETS:
-            for _, row in frame("wedding_suppliers", sheet_name).iterrows():
+    for source_key in WEDDING_SUPPLIERS_SOURCE_KEYS:
+        for sheet_name in workbook_sheets(source_key):
+            for _, row in frame(source_key, sheet_name).iterrows():
                 row_dict = row.to_dict()
                 record = supplier_from_wedding_suppliers(row_dict, sheet_name)
-                if record:
+                if record and should_import_supplier(record):
                     added = add_unique(suppliers, record, "supplier")
                     for review in review_records("supplier", added["id"], row_dict):
                         reviews[review["id"]] = review

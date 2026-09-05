@@ -8,13 +8,7 @@ import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { SupplierCard, VenueCard } from "@/components/site/Cards";
 import { JsonLd } from "@/components/site/JsonLd";
 import { getDirectoryStats, listSuppliers, listVenues } from "@/lib/directory.functions";
-import {
-  CATEGORIES,
-  COUNTIES,
-  VENUE_SLUG,
-  countySlug,
-  parseDirectorySlug,
-} from "@/lib/taxonomy";
+import { CATEGORIES, COUNTIES, VENUE_SLUG, countySlug, parseDirectorySlug } from "@/lib/taxonomy";
 import { euro, priceGuide, weightedRating } from "@/lib/stats";
 import { SEO_YEAR, absoluteUrl, canonical, clamp, pageMeta } from "@/lib/seo";
 
@@ -304,6 +298,7 @@ function DirectoryPage() {
                     <SupplierCard
                       supplier={supplier}
                       rank={rankedVenues.length + i + 1}
+                      categoryKey={target.category?.key}
                     />
                   </li>
                 ))}
@@ -314,7 +309,9 @@ function DirectoryPage() {
           {restSuppliers.length || restVenues.length ? (
             <Section
               tone="ivory"
-              title={page > 1 ? `${plural} in ${place}` : `More ${plural.toLowerCase()} in ${place}`}
+              title={
+                page > 1 ? `${plural} in ${place}` : `More ${plural.toLowerCase()} in ${place}`
+              }
               description="Every remaining listing that matches, in the same ranking order."
             >
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -322,7 +319,11 @@ function DirectoryPage() {
                   <VenueCard key={venue.id} venue={venue} />
                 ))}
                 {restSuppliers.map((supplier) => (
-                  <SupplierCard key={supplier.id} supplier={supplier} />
+                  <SupplierCard
+                    key={supplier.id}
+                    supplier={supplier}
+                    categoryKey={target.category?.key}
+                  />
                 ))}
               </div>
 

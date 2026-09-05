@@ -142,6 +142,127 @@ async function upsertBatch(sql, table, rows, batchSize = 100) {
   }
 }
 
+async function cleanMediaPlaceholders(sql) {
+  const placeholderPredicate = (column) => `
+    ${column} IS NOT NULL AND (
+      ${column} !~* '^https?://' OR
+      lower(${column}) LIKE '%image_placeholder%' OR
+      lower(${column}) LIKE '%defaultnoimage%' OR
+      lower(${column}) LIKE '%default-no-image%' OR
+      lower(${column}) LIKE '%no-image%' OR
+      lower(${column}) LIKE '%noimage%' OR
+      lower(${column}) LIKE '%placeholder%' OR
+      lower(${column}) LIKE '%undefined%'
+    )
+  `;
+
+  await sql.unsafe(`
+    UPDATE venues
+    SET logo_image = NULL
+    WHERE ${placeholderPredicate("logo_image")}
+  `);
+  await sql.unsafe(`
+    UPDATE suppliers
+    SET logo_image = NULL
+    WHERE ${placeholderPredicate("logo_image")}
+  `);
+  await sql.unsafe(`
+    UPDATE suppliers
+    SET banner_image = NULL
+    WHERE ${placeholderPredicate("banner_image")}
+  `);
+  await sql.unsafe(`
+    UPDATE venues
+    SET gallery_images = NULLIF(
+      ARRAY(
+        SELECT image
+        FROM unnest(gallery_images) AS image
+        WHERE image IS NOT NULL
+          AND image <> ''
+          AND image ~* '^https?://'
+          AND lower(image) NOT LIKE '%image_placeholder%'
+          AND lower(image) NOT LIKE '%defaultnoimage%'
+          AND lower(image) NOT LIKE '%default-no-image%'
+          AND lower(image) NOT LIKE '%no-image%'
+          AND lower(image) NOT LIKE '%noimage%'
+          AND lower(image) NOT LIKE '%placeholder%'
+          AND lower(image) NOT LIKE '%undefined%'
+      ),
+      '{}'::text[]
+    )
+    WHERE gallery_images IS NOT NULL
+  `);
+  await sql.unsafe(`
+    UPDATE suppliers
+    SET gallery_images = NULLIF(
+      ARRAY(
+        SELECT image
+        FROM unnest(gallery_images) AS image
+        WHERE image IS NOT NULL
+          AND image <> ''
+          AND image ~* '^https?://'
+          AND lower(image) NOT LIKE '%image_placeholder%'
+          AND lower(image) NOT LIKE '%defaultnoimage%'
+          AND lower(image) NOT LIKE '%default-no-image%'
+          AND lower(image) NOT LIKE '%no-image%'
+          AND lower(image) NOT LIKE '%noimage%'
+          AND lower(image) NOT LIKE '%placeholder%'
+          AND lower(image) NOT LIKE '%undefined%'
+      ),
+      '{}'::text[]
+    )
+    WHERE gallery_images IS NOT NULL
+  `);
+
+  const removedTransport = await sql`
+    DELETE FROM suppliers
+    WHERE categories @> ARRAY['wedding-cars']::text[]
+      AND COALESCE(banner_image, logo_image, gallery_images[1]) IS NULL
+    RETURNING slug, name
+  `;
+  if (removedTransport.length) {
+    console.log(
+      JSON.stringify(
+        {
+          removed_transport_without_images: removedTransport.map((row) => row.slug),
+        },
+        null,
+        2,
+      ),
+    );
+  }
+}
+
+async function normalizeSupplierCategories(sql) {
+  await sql.unsafe(`
+    UPDATE suppliers AS s
+    SET categories = normalized.categories
+    FROM (
+      SELECT source.id,
+             ARRAY(
+               SELECT mapped
+               FROM (
+                 SELECT DISTINCT ON (mapped)
+                        CASE category
+                          WHEN 'bands-marquee-hire-in-ireland-private-and-exclusive-wedding-venues-castle-wedding-venues' THEN 'wedding-bands'
+                          WHEN 'entertainment-dj-s-and-sax' THEN 'wedding-djs'
+                          WHEN 'gifts-and-favours' THEN 'wedding-gifts-favours'
+                          WHEN 'wedding-planners-destination-weddings' THEN 'wedding-planners'
+                          ELSE category
+                        END AS mapped,
+                        ord
+                 FROM unnest(source.categories) WITH ORDINALITY AS c(category, ord)
+                 WHERE category IS NOT NULL AND category <> ''
+                 ORDER BY mapped, ord
+               ) deduped
+               ORDER BY ord
+             ) AS categories
+      FROM suppliers AS source
+    ) AS normalized
+    WHERE s.id = normalized.id
+  `);
+}
+
 const env = {
   ...(await fs
     .readFile(path.join(root, ".env"), "utf8")
@@ -191,6 +312,8 @@ try {
   for (const table of ["venues", "suppliers", "wedding_fairs", "imported_reviews"]) {
     await upsertBatch(sql, table, payload[table] ?? []);
   }
+  await cleanMediaPlaceholders(sql);
+  await normalizeSupplierCategories(sql);
   const [counts] = await sql`
     SELECT
       (SELECT count(*)::int FROM venues) AS venues,

@@ -108,7 +108,8 @@ export const listSuppliers = createServerFn({ method: "GET" })
         WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
           AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
           AND (${data.q ?? null}::text IS NULL OR name ILIKE ${`%${data.q ?? ""}%`})
-        ORDER BY featured DESC, award_winner DESC, rating DESC NULLS LAST, image_count DESC NULLS LAST, name ASC
+        ORDER BY (COALESCE(banner_image, logo_image, gallery_images[1]) IS NOT NULL) DESC,
+                 featured DESC, award_winner DESC, rating DESC NULLS LAST, image_count DESC NULLS LAST, name ASC
         LIMIT ${perPage} OFFSET ${offset}
       `) as SupplierCardRow[];
       const count = countValue(
@@ -154,7 +155,8 @@ export const listVenues = createServerFn({ method: "GET" })
           AND (${data.q ?? null}::text IS NULL OR name ILIKE ${`%${data.q ?? ""}%`})
           AND (${data.minCapacity ?? null}::integer IS NULL OR capacity_max >= ${data.minCapacity ?? 0})
           AND (${data.venueType ?? null}::text IS NULL OR venue_types @> ARRAY[${data.venueType ?? ""}]::text[])
-        ORDER BY featured DESC, rating DESC NULLS LAST, name ASC
+        ORDER BY (COALESCE(logo_image, gallery_images[1]) IS NOT NULL) DESC,
+                 featured DESC, rating DESC NULLS LAST, image_count DESC NULLS LAST, name ASC
         LIMIT ${perPage} OFFSET ${offset}
       `) as VenueCardRow[];
       const count = countValue(
@@ -204,7 +206,8 @@ export const getSupplier = createServerFn({ method: "GET" })
           WHERE id <> ${supplier.id}
             AND county IS NOT DISTINCT FROM ${supplier.county}
             AND categories && ${supplier.categories ?? []}::text[]
-          ORDER BY featured DESC, award_winner DESC, rating DESC NULLS LAST, image_count DESC NULLS LAST, name ASC
+          ORDER BY (COALESCE(banner_image, logo_image, gallery_images[1]) IS NOT NULL) DESC,
+                   featured DESC, award_winner DESC, rating DESC NULLS LAST, image_count DESC NULLS LAST, name ASC
           LIMIT 4
         `,
       ]);
@@ -245,7 +248,8 @@ export const getVenue = createServerFn({ method: "GET" })
           FROM venues
           WHERE id <> ${venue.id}
             AND county IS NOT DISTINCT FROM ${venue.county}
-          ORDER BY featured DESC, rating DESC NULLS LAST, name ASC
+          ORDER BY (COALESCE(logo_image, gallery_images[1]) IS NOT NULL) DESC,
+                   featured DESC, rating DESC NULLS LAST, image_count DESC NULLS LAST, name ASC
           LIMIT 4
         `,
       ]);

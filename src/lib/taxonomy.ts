@@ -60,6 +60,14 @@ export const CATEGORIES: CategoryDef[] = [
     blurb: "Cinematic films, highlight reels and full-day coverage.",
   },
   {
+    key: "wedding-content-creators",
+    slug: "wedding-content-creators",
+    label: "Content Creators",
+    plural: "Wedding Content Creators",
+    blurb:
+      "Short-form wedding content creators for social clips, reels and behind-the-scenes coverage.",
+  },
+  {
     key: "make-up-artists",
     slug: "wedding-makeup-artists",
     label: "Makeup Artists",
@@ -320,7 +328,6 @@ export function parseDirectorySlug(raw: string): DirectoryTarget | null {
     }
     return null;
   };
-
 
   const venueMatch = build(VENUE_SLUG, "venues");
   if (venueMatch) return venueMatch;

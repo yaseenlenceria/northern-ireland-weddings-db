@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ImageOff } from "lucide-react";
+import { cleanImageUrl } from "@/lib/media";
 
 /** Listing image with graceful fallback when the source URL fails. */
 export function ListingImage({
@@ -12,8 +13,9 @@ export function ListingImage({
   className?: string;
 }) {
   const [failed, setFailed] = useState(false);
+  const image = cleanImageUrl(src);
 
-  if (!src || failed) {
+  if (!image || failed) {
     return (
       <div
         className={`flex items-center justify-center bg-linear-to-br from-accent to-secondary text-muted-foreground ${className}`}
@@ -26,7 +28,7 @@ export function ListingImage({
 
   return (
     <img
-      src={src}
+      src={image}
       alt={alt}
       loading="lazy"
       decoding="async"
