@@ -13,8 +13,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
-import { Breadcrumbs } from "@/components/site/Breadcrumbs";
-import { canonical, pageMeta } from "@/lib/seo";
+import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
+import { JsonLd } from "@/components/site/JsonLd";
+import { SITE_NAME, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 
 const TITLE = "Wedding Checklist for Irish Weddings | Shortlist.ie";
 const DESCRIPTION =
@@ -75,6 +76,35 @@ function ChecklistPage() {
 
   return (
     <SiteLayout>
+      <JsonLd
+        data={breadcrumbSchema("", [
+          { name: "Home", path: "/" },
+          { name: "Planning Tools", path: "/planning-tools" },
+          { name: "Checklist", path: "/wedding-checklist" },
+        ])}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: "Wedding Checklist",
+          applicationCategory: "LifestyleApplication",
+          operatingSystem: "Web",
+          description: DESCRIPTION,
+          url: absoluteUrl("/wedding-checklist"),
+          isPartOf: {
+            "@type": "WebSite",
+            name: SITE_NAME,
+            url: absoluteUrl("/"),
+          },
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "EUR",
+          },
+        }}
+      />
+
       <PageHeader
         eyebrow="Planning tool"
         title="Wedding checklist"

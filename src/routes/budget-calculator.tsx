@@ -12,8 +12,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
-import { Breadcrumbs } from "@/components/site/Breadcrumbs";
-import { pageMeta, canonical } from "@/lib/seo";
+import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
+import { JsonLd } from "@/components/site/JsonLd";
+import { SITE_NAME, absoluteUrl, pageMeta, canonical } from "@/lib/seo";
 
 const TITLE = "Wedding Budget Calculator (Ireland) | Shortlist.ie";
 const DESCRIPTION =
@@ -93,6 +94,35 @@ function BudgetPage() {
 
   return (
     <SiteLayout>
+      <JsonLd
+        data={breadcrumbSchema("", [
+          { name: "Home", path: "/" },
+          { name: "Planning Tools", path: "/planning-tools" },
+          { name: "Budget Calculator", path: "/budget-calculator" },
+        ])}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: "Wedding Budget Calculator",
+          applicationCategory: "FinanceApplication",
+          operatingSystem: "Web",
+          description: DESCRIPTION,
+          url: absoluteUrl("/budget-calculator"),
+          isPartOf: {
+            "@type": "WebSite",
+            name: SITE_NAME,
+            url: absoluteUrl("/"),
+          },
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "EUR",
+          },
+        }}
+      />
+
       <PageHeader
         eyebrow="Planning tool"
         title="Wedding budget calculator"

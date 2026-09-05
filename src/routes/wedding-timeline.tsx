@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
-import { Breadcrumbs } from "@/components/site/Breadcrumbs";
+import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { JsonLd } from "@/components/site/JsonLd";
 import { Button } from "@/components/ui/button";
 import { pageMeta, canonical } from "@/lib/seo";
@@ -71,6 +71,13 @@ function TimelinePage() {
 
   return (
     <SiteLayout>
+      <JsonLd
+        data={breadcrumbSchema("", [
+          { name: "Home", path: "/" },
+          { name: "Planning Tools", path: "/planning-tools" },
+          { name: "Timeline", path: "/wedding-timeline" },
+        ])}
+      />
       <JsonLd
         data={{
           "@context": "https://schema.org",
