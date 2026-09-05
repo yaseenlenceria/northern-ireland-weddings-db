@@ -16,7 +16,7 @@ import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { canonical, pageMeta } from "@/lib/seo";
 
-const TITLE = "Wedding Checklist for Irish Weddings | Niamh Weddings";
+const TITLE = "Wedding Checklist for Irish Weddings | Shortlist.ie";
 const DESCRIPTION =
   "A free wedding checklist for Irish couples. Tick off booking, legal, guest, styling and final-week tasks in your browser.";
 const STORAGE_KEY = "niamh-weddings-checklist-items";

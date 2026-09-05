@@ -5,7 +5,7 @@
  * so crawlers and social scrapers resolve one authoritative URL per page.
  */
 
-export const SITE_NAME = "Niamh Weddings";
+export const SITE_NAME = "Shortlist.ie";
 
 /** Public origin used for canonical, og:url and sitemap entries. */
 export const SITE_URL =

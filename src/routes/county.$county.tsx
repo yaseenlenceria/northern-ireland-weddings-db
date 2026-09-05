@@ -25,7 +25,7 @@ export const Route = createFileRoute("/county/$county")({
       return { meta: [{ title: "County not found" }, { name: "robots", content: "noindex" }] };
     }
     const { stats } = loaderData;
-    const title = `Wedding Venues & Suppliers in Co. ${county} (${SEO_YEAR}) | Niamh Weddings`;
+    const title = `Wedding Venues & Suppliers in Co. ${county} (${SEO_YEAR}) | Shortlist.ie`;
     const description = clamp(
       `${stats.venues} wedding venues and ${stats.suppliers} suppliers listed in Co. ${county}. Compare capacity, per-person prices and reviews, then enquire free.`,
     );

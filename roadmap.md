@@ -1,4 +1,4 @@
-# Niamh Weddings — Roadmap
+# Shortlist.ie — Roadmap
 
 ## Tasks
 - [x] Enable Lovable Cloud

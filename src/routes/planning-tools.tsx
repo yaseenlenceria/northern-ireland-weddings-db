@@ -4,7 +4,7 @@ import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { canonical, pageMeta } from "@/lib/seo";
 
-const TITLE = "Free Wedding Planning Tools for Irish Couples | Niamh Weddings";
+const TITLE = "Free Wedding Planning Tools for Irish Couples | Shortlist.ie";
 const DESCRIPTION =
   "Checklist, budget calculator, guest list planner and running order — free wedding planning tools that work in your browser.";
 

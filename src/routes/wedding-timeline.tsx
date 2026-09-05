@@ -5,7 +5,7 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { Button } from "@/components/ui/button";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Wedding Day Timeline Template (Ireland) | Niamh Weddings";
+const TITLE = "Wedding Day Timeline Template (Ireland) | Shortlist.ie";
 const DESCRIPTION =
   "A realistic Irish wedding day running order, from bridal prep to the last dance — with the timings photographers, bands and venues actually work to.";
 

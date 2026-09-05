@@ -10,7 +10,7 @@ import { neonAuth } from "@/integrations/neon/auth-client";
 import { useAuth } from "@/hooks/useAuth";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "My Wedding Dashboard | Niamh Weddings";
+const TITLE = "My Wedding Dashboard | Shortlist.ie";
 const DESCRIPTION =
   "Your browser-saved shortlist, quick links to wedding planning tools and account controls.";
 

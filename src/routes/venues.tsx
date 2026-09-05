@@ -23,7 +23,7 @@ import { listVenues } from "@/lib/directory.functions";
 import { COUNTIES } from "@/lib/taxonomy";
 import { canonical, pageMeta } from "@/lib/seo";
 
-const TITLE = "Wedding Venues Ireland — Search Every County | Niamh Weddings";
+const TITLE = "Wedding Venues Ireland — Search Every County | Shortlist.ie";
 const DESCRIPTION =
   "Browse Irish wedding venues by county, guest capacity and style. Compare per-person pricing, read details and enquire directly with the venue.";
 

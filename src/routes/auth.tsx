@@ -10,9 +10,9 @@ import { isNeonAuthConfigured, neonAuth } from "@/integrations/neon/auth-client"
 import { useAuth } from "@/hooks/useAuth";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Sign In or Create a Free Account | Niamh Weddings";
+const TITLE = "Sign In or Create a Free Account | Shortlist.ie";
 const DESCRIPTION =
-  "Create a free Niamh Weddings account to shortlist suppliers, send enquiries and save your wedding checklist, budget and guest list.";
+  "Create a free Shortlist.ie account to shortlist suppliers, send enquiries and save your wedding checklist, budget and guest list.";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -96,7 +96,7 @@ function AuthPage() {
     <SiteLayout>
       <Section>
         <div className="mx-auto max-w-md">
-          <h1 className="text-center text-3xl">Your Niamh Weddings account</h1>
+          <h1 className="text-center text-3xl">Your Shortlist.ie account</h1>
           <p className="mt-2 text-center text-sm text-muted-foreground">
             Free for couples. Shortlist suppliers, track enquiries and keep your planning tools in
             one place.

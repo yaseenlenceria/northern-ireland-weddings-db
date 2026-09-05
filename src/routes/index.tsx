@@ -23,7 +23,7 @@ import { GUIDES } from "@/lib/guides";
 import { SITE_NAME, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 import heroImage from "@/assets/hero-wedding-ireland.jpg";
 
-const TITLE = "Wedding Suppliers & Venues in Ireland | Niamh Weddings";
+const TITLE = "Wedding Suppliers & Venues in Ireland | Shortlist.ie";
 const DESCRIPTION =
   "Compare Irish wedding suppliers and venues across every county. Live directory counts, real prices, reviews and free direct enquiries.";
 
@@ -379,7 +379,7 @@ function HomePage() {
       {/* Why */}
       <Section
         tone="ivory"
-        title="Why couples use Niamh Weddings"
+        title="Why couples use Shortlist.ie"
         description="A directory built to be read, not clicked through."
       >
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">

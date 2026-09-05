@@ -15,7 +15,7 @@ import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Wedding Budget Calculator (Ireland) | Niamh Weddings";
+const TITLE = "Wedding Budget Calculator (Ireland) | Shortlist.ie";
 const DESCRIPTION =
   "Free wedding budget calculator for Irish couples. Add quotes, track deposits and see what is left to pay without needing an account.";
 const STORAGE_KEY = "niamh-weddings-budget-items";
