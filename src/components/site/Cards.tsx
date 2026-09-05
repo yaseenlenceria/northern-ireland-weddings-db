@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin } from "lucide-react";
+import { Award, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ListingImage } from "./ListingImage";
@@ -7,16 +7,38 @@ import { Stars } from "./Stars";
 import { CATEGORY_BY_KEY } from "@/lib/taxonomy";
 import type { SupplierCardRow, VenueCardRow } from "@/lib/directory.functions";
 
-function cardImage(logo?: string | null, gallery?: string[] | null) {
-  return logo || gallery?.[0] || null;
+function cardImage(logo?: string | null, gallery?: string[] | null, banner?: string | null) {
+  return banner || logo || gallery?.[0] || null;
 }
 
 function shortOverview(value: string | null | undefined, max = 180) {
   if (!value) return null;
   const clean = value.replace(/\s+/g, " ").trim();
   if (clean.length <= max) return clean;
-  const sentence = clean.slice(0, max).replace(/[.!?][^.!?]*$/, "").trim();
+  const sentence = clean
+    .slice(0, max)
+    .replace(/[.!?][^.!?]*$/, "")
+    .trim();
   return `${(sentence.length > 80 ? sentence : clean.slice(0, max)).trim()}...`;
+}
+
+function toNumber(value: unknown) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function priceLabel(price: string | null | undefined, numericPrice: unknown) {
+  const parsed = toNumber(numericPrice);
+  if (parsed !== null && parsed <= 0) return "Request pricing";
+  if (!price || /^0(?:\.0+)?$/.test(price.trim())) return "Request pricing";
+  if (/^\d+(?:\.\d+)?$/.test(price.trim())) {
+    return `€${Math.round(Number(price)).toLocaleString("en-IE")}`;
+  }
+  return price;
 }
 
 /** Numbered ranking badge used on ranked directory cards. */
@@ -28,15 +50,11 @@ function RankBadge({ rank }: { rank: number }) {
   );
 }
 
-export function SupplierCard({
-  supplier,
-  rank,
-}: {
-  supplier: SupplierCardRow;
-  rank?: number;
-}) {
+export function SupplierCard({ supplier, rank }: { supplier: SupplierCardRow; rank?: number }) {
   const primary = CATEGORY_BY_KEY.get(supplier.categories?.[0] ?? "");
   const overview = shortOverview(supplier.overview);
+  const rating = toNumber(supplier.rating);
+  const reviewCount = toNumber(supplier.review_count);
   return (
     <article className="card-lift group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
       {rank ? <RankBadge rank={rank} /> : null}
@@ -46,7 +64,7 @@ export function SupplierCard({
         className="block aspect-4/3 overflow-hidden bg-muted"
       >
         <ListingImage
-          src={cardImage(supplier.logo_image, supplier.gallery_images)}
+          src={cardImage(supplier.logo_image, supplier.gallery_images, supplier.banner_image)}
           alt={`${supplier.name}${primary ? ` — ${primary.label.toLowerCase()}` : ""}${
             supplier.county ? ` in Co. ${supplier.county}` : ""
           }`}
@@ -64,10 +82,19 @@ export function SupplierCard({
           {supplier.featured ? (
             <Badge className="bg-gold text-gold-foreground hover:bg-gold">Featured</Badge>
           ) : null}
+          {supplier.award_winner ? (
+            <Badge variant="outline" className="border-gold text-foreground">
+              <Award className="size-3" /> Award winner
+            </Badge>
+          ) : null}
         </div>
 
         <h3 className="mt-2 font-serif text-lg font-semibold leading-snug tracking-tight">
-          <Link to="/supplier/$slug" params={{ slug: supplier.slug }} className="hover:text-primary">
+          <Link
+            to="/supplier/$slug"
+            params={{ slug: supplier.slug }}
+            className="hover:text-primary"
+          >
             {supplier.name}
           </Link>
         </h3>
@@ -78,17 +105,21 @@ export function SupplierCard({
           </p>
         ) : null}
 
+        {rating && reviewCount ? (
+          <div className="mt-2">
+            <Stars rating={rating} count={reviewCount} />
+          </div>
+        ) : null}
+
         {overview ? (
-          <p className="line-clamp-3 mt-2 mb-4 text-sm text-muted-foreground">
-            {overview}
-          </p>
+          <p className="line-clamp-3 mt-2 mb-4 text-sm text-muted-foreground">{overview}</p>
         ) : (
           <div className="mb-4" />
         )}
 
         <div className="mt-auto flex items-center justify-between gap-2 border-t border-border pt-3">
           <span className="text-xs text-muted-foreground">
-            {supplier.avg_price ? supplier.avg_price : "Request pricing"}
+            {priceLabel(supplier.avg_price, supplier.avg_price_num)}
           </span>
           <div className="flex gap-2">
             <Button asChild size="sm" variant="outline">

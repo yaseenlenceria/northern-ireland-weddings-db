@@ -12,7 +12,10 @@ function loadEnv(text) {
     const line = rawLine.trim();
     if (!line || line.startsWith("#") || !line.includes("=")) continue;
     const [key, ...rest] = line.split("=");
-    env[key.trim()] = rest.join("=").trim().replace(/^['"]|['"]$/g, "");
+    env[key.trim()] = rest
+      .join("=")
+      .trim()
+      .replace(/^['"]|['"]$/g, "");
   }
   return env;
 }
@@ -26,7 +29,7 @@ function databaseUrl(env) {
     "DATABASE_URL_UNPOOLED",
   ]) {
     const value = env[key] || process.env[key];
-    if (value && value !== "\"\"" && value !== "''" && value.includes("postgres")) {
+    if (value && value !== '""' && value !== "''" && value.includes("postgres")) {
       return value;
     }
   }
@@ -35,7 +38,8 @@ function databaseUrl(env) {
 
 async function pythonCommand() {
   if (process.env.PYTHON) return process.env.PYTHON;
-  const bundled = "C:\\Users\\Seenu\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe";
+  const bundled =
+    "C:\\Users\\Seenu\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe";
   try {
     await fs.access(bundled);
     return bundled;
@@ -61,16 +65,19 @@ function assignmentFor(table, column) {
     END`;
   }
 
-  if ([
-    "gallery_images",
-    "venue_types",
-    "styles",
-    "facilities",
-    "service_areas",
-    "brochures",
-    "real_weddings",
-    "categories",
-  ].includes(column)) {
+  if (
+    [
+      "gallery_images",
+      "venue_types",
+      "styles",
+      "facilities",
+      "service_areas",
+      "brochures",
+      "real_weddings",
+      "categories",
+      "video_urls",
+    ].includes(column)
+  ) {
     return `${quoteIdentifier(column)} = CASE
       WHEN ${incoming} IS NULL OR cardinality(${incoming}) = 0 THEN ${target}
       WHEN ${target} IS NULL OR cardinality(${target}) = 0 THEN ${incoming}
@@ -82,8 +89,16 @@ function assignmentFor(table, column) {
     return `${quoteIdentifier(column)} = GREATEST(COALESCE(${target}, 0), COALESCE(${incoming}, 0))`;
   }
 
-  if (["rating", "avg_price_num", "per_person_price_num", "capacity_min", "capacity_max"].includes(column)) {
+  if (
+    ["rating", "avg_price_num", "per_person_price_num", "capacity_min", "capacity_max"].includes(
+      column,
+    )
+  ) {
     return `${quoteIdentifier(column)} = COALESCE(${incoming}, ${target})`;
+  }
+
+  if (["featured", "award_winner"].includes(column)) {
+    return `${quoteIdentifier(column)} = COALESCE(${target}, false) OR COALESCE(${incoming}, false)`;
   }
 
   return `${quoteIdentifier(column)} = COALESCE(NULLIF(${incoming}::text, '')::${columnType(column)}, ${target})`;
@@ -91,7 +106,7 @@ function assignmentFor(table, column) {
 
 function columnType(column) {
   if (["venue_id", "supplier_id"].includes(column)) return "uuid";
-  if (["featured"].includes(column)) return "boolean";
+  if (["featured", "award_winner"].includes(column)) return "boolean";
   if (["latitude", "longitude"].includes(column)) return "numeric";
   if (["review_date"].includes(column)) return "date";
   return "text";
@@ -101,12 +116,18 @@ async function upsertBatch(sql, table, rows, batchSize = 100) {
   if (!rows.length) return;
   const columns = [...new Set(rows.flatMap((row) => Object.keys(row)))];
   const normalizedRows = rows.map((row) =>
-    Object.fromEntries(columns.map((column) => [column, row[column] === undefined ? null : row[column]])),
+    Object.fromEntries(
+      columns.map((column) => {
+        const value = row[column];
+        if ((value === undefined || value === null) && columnType(column) === "boolean") {
+          return [column, false];
+        }
+        return [column, value === undefined ? null : value];
+      }),
+    ),
   );
   const updateColumns = columns.filter((key) => key !== "id" && key !== "created_at");
-  const assignments = updateColumns
-    .map((column) => assignmentFor(table, column))
-    .join(", ");
+  const assignments = updateColumns.map((column) => assignmentFor(table, column)).join(", ");
 
   for (let offset = 0; offset < normalizedRows.length; offset += batchSize) {
     const batch = normalizedRows.slice(offset, offset + batchSize);
@@ -115,28 +136,45 @@ async function upsertBatch(sql, table, rows, batchSize = 100) {
       ON CONFLICT (id) DO UPDATE SET
       ${sql.unsafe(assignments)}
     `;
-    console.log(`Imported ${table}: ${Math.min(offset + batchSize, normalizedRows.length)}/${normalizedRows.length}`);
+    console.log(
+      `Imported ${table}: ${Math.min(offset + batchSize, normalizedRows.length)}/${normalizedRows.length}`,
+    );
   }
 }
 
 const env = {
-  ...(await fs.readFile(path.join(root, ".env"), "utf8").then(loadEnv).catch(() => ({}))),
-  ...(await fs.readFile(path.join(root, ".env.local"), "utf8").then(loadEnv).catch(() => ({}))),
-  ...(await fs.readFile(path.join(root, ".env.development.local"), "utf8").then(loadEnv).catch(() => ({}))),
+  ...(await fs
+    .readFile(path.join(root, ".env"), "utf8")
+    .then(loadEnv)
+    .catch(() => ({}))),
+  ...(await fs
+    .readFile(path.join(root, ".env.local"), "utf8")
+    .then(loadEnv)
+    .catch(() => ({}))),
+  ...(await fs
+    .readFile(path.join(root, ".env.development.local"), "utf8")
+    .then(loadEnv)
+    .catch(() => ({}))),
   ...process.env,
 };
 const url = databaseUrl(env);
 
 if (!url) {
-  console.error("Missing Postgres URL. Add POSTGRES_URL or DATABASE_URL, then run this script again.");
+  console.error(
+    "Missing Postgres URL. Add POSTGRES_URL or DATABASE_URL, then run this script again.",
+  );
   process.exit(2);
 }
 
 const python = await pythonCommand();
-const build = spawnSync(python, ["scripts/import_directory_data.py", "--dry-run", "--out", payloadPath], {
-  cwd: root,
-  stdio: "inherit",
-});
+const build = spawnSync(
+  python,
+  ["scripts/import_directory_data.py", "--dry-run", "--out", payloadPath],
+  {
+    cwd: root,
+    stdio: "inherit",
+  },
+);
 if (build.status !== 0) process.exit(build.status ?? 1);
 
 const payload = JSON.parse(await fs.readFile(payloadPath, "utf8"));

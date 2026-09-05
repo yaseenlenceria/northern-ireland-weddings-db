@@ -22,6 +22,7 @@ SOURCE_FILES = {
     "weddingdates": Path(r"C:\Users\Seenu\weddingdates-scrape\WeddingDates_Directory_Complete.xlsx"),
     "hitched": Path(r"C:\Users\Seenu\weddingdates-scrape\Hitched_Ireland.xlsx"),
     "hitched_top_50": Path(r"C:\Users\Seenu\weddingdates-scrape\Hitched_Ireland_Top50.xlsx"),
+    "wedding_suppliers": Path(r"C:\Users\Seenu\weddingdates-scrape\WeddingSuppliers_Ireland.xlsx"),
 }
 
 FULL_SUPPLIER_SHEETS = [
@@ -59,6 +60,14 @@ WEDDINGSONLINE_SUPPLIER_SHEETS = [
     "Cakes & Accessories",
     "Ceremony Music",
     "Photographers",
+]
+
+WEDDING_SUPPLIERS_SHEETS = [
+    "Bands",
+    "DJs",
+    "Wedding Planners",
+    "Gifts & Favours",
+    "Wedding Music",
 ]
 
 IMPORT_NAMESPACE = uuid.UUID("f907c78a-7915-41f0-8469-14fb7061deab")
@@ -168,9 +177,9 @@ def best_record(existing: dict[str, Any] | None, incoming: dict[str, Any]) -> di
         old = result.get(key)
         if old in (None, "", []):
             result[key] = value
-        elif key in {"description", "overview"} and isinstance(value, str) and isinstance(old, str) and len(value) > len(old):
+        elif key in {"description", "overview", "slogan"} and isinstance(value, str) and isinstance(old, str) and len(value) > len(old):
             result[key] = value
-        elif key in {"gallery_images", "venue_types", "styles", "facilities", "service_areas", "brochures", "real_weddings", "categories"}:
+        elif key in {"gallery_images", "venue_types", "styles", "facilities", "service_areas", "brochures", "real_weddings", "categories", "video_urls"}:
             combined = []
             for item in [*(old or []), *(value or [])]:
                 if item not in combined:
@@ -178,6 +187,12 @@ def best_record(existing: dict[str, Any] | None, incoming: dict[str, Any]) -> di
             result[key] = combined
         elif key == "image_count" and isinstance(value, int) and (not isinstance(old, int) or value > old):
             result[key] = value
+        elif key == "review_count" and isinstance(value, int) and (not isinstance(old, int) or value > old):
+            result[key] = value
+        elif key in {"rating", "avg_price_num"} and isinstance(value, (int, float)) and old in (None, "", []):
+            result[key] = value
+        elif key in {"featured", "award_winner"} and isinstance(value, bool):
+            result[key] = bool(old) or value
     return result
 
 
@@ -287,6 +302,54 @@ def clean_mojibake(value: Any) -> str | None:
     )
 
 
+def clean_phone(value: Any) -> str | None:
+    text = clean_mojibake(value)
+    if not text:
+        return None
+    if re.fullmatch(r"\d+\.0", text):
+        text = text[:-2]
+    digits = re.sub(r"\D+", "", text)
+    if digits.startswith("353"):
+        return f"+{digits}"
+    if len(digits) == 9 and digits.startswith("8"):
+        return f"0{digits}"
+    return text
+
+
+def clean_url(value: Any, host: str | None = None) -> str | None:
+    text = clean_mojibake(value)
+    if not text:
+        return None
+    text = text.strip()
+    if text.startswith("@"):
+        text = text[1:]
+    if text.lower() in {"n/a", "na", "none", "no", "0"}:
+        return None
+    if text.startswith(("http://", "https://")):
+        return text
+    if host and " " not in text and "." not in text:
+        return f"https://{host}/{text.strip('/')}"
+    if re.match(r"^(?:www\.|[a-z0-9-]+\.)", text, flags=re.I):
+        return f"https://{text}"
+    return None
+
+
+def split_urls(*values: Any) -> list[str] | None:
+    combined: list[str] = []
+    for value in values:
+        text = clean_mojibake(value)
+        if not text:
+            continue
+        urls = re.findall(r"https?://[^\s,;|]+", text)
+        if not urls:
+            urls = [item for item in (split_list(text) or []) if item.startswith(("http://", "https://"))]
+        for url in urls:
+            cleaned = clean_url(url)
+            if cleaned and cleaned not in combined:
+                combined.append(cleaned)
+    return combined or None
+
+
 def source_url_from_row(row: dict[str, Any]) -> str | None:
     for key in ["Profile URL", "Categories", "Source URL"]:
         value = clean_text(row.get(key))
@@ -301,6 +364,7 @@ def category_from_sheet(sheet_name: str) -> str:
         "Beauty & Skincare": "Beauty Skincare",
         "Bridal Shops & Accessories": "Bridal Shops Accessories",
         "Bridesmaid Dresses": "Bridesmaid Dresses",
+        "DJs": "Wedding DJs",
         "Cakes & Accessories": "Cakes Sweet Treats",
         "Cakes & Sweet Treats": "Cakes Sweet Treats",
         "Catering & Wine": "Catering Wine",
@@ -320,6 +384,8 @@ def category_from_sheet(sheet_name: str) -> str:
         "Make Up Artists, Beauty & Cosme": "Make Up Artists",
         "Photographers": "Wedding Photographers",
         "Planners": "Wedding Planners",
+        "Wedding Music": "Church Singers Music",
+        "Wedding Planners": "Wedding Planners",
         "Services": "Wedding Services",
         "Transport": "Wedding Cars",
         "Videographers": "Wedding Videographers",
@@ -329,6 +395,7 @@ def category_from_sheet(sheet_name: str) -> str:
 
 CANONICAL_CATEGORY_ALIASES = {
     "accessories": "bridal-shops-accessories",
+    "bands": "wedding-bands",
     "beauty-and-skincare": "beauty-skincare",
     "beauty-hair-and-make-up": "make-up-artists",
     "cakes-and-accessories": "cakes-sweet-treats",
@@ -347,6 +414,8 @@ CANONICAL_CATEGORY_ALIASES = {
     "honeymoons": "honeymoon",
     "mobile-bar-services": "catering-wine",
     "music-and-djs": "wedding-djs",
+    "dj-s-and-sax": "wedding-djs",
+    "djs": "wedding-djs",
     "photo-booths": "wedding-entertainment-photobooths",
     "photographers": "wedding-photographers",
     "something-different": "wedding-entertainment-photobooths",
@@ -442,6 +511,27 @@ def parse_review_blob(value: Any) -> list[dict[str, Any]]:
                 "rating": None,
                 "body": chunk,
             })
+    return reviews
+
+
+def parse_review_titles_dates(value: Any) -> list[dict[str, Any]]:
+    text = clean_mojibake(value)
+    if not text:
+        return []
+    reviews = []
+    for chunk in [part.strip() for part in text.split("|") if part.strip()]:
+        match = re.match(r"(?P<title>.+?)\s*\((?P<date>[^()]*)\)\s*$", chunk)
+        title = clean_review_title(match.group("title") if match else chunk)
+        date = clean_text(match.group("date")) if match else None
+        if not title:
+            continue
+        reviews.append({
+            "title": title,
+            "author_name": None,
+            "review_date": date_iso(date),
+            "rating": None,
+            "body": title,
+        })
     return reviews
 
 
@@ -607,6 +697,62 @@ def supplier_from_planner(row: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
+def supplier_from_wedding_suppliers(row: dict[str, Any], sheet_name: str) -> dict[str, Any] | None:
+    name = clean_mojibake(row.get("Name"))
+    if not name:
+        return None
+    county = county_from_row(row)
+    gallery = split_images(row.get("Gallery Images (all)"))
+    category = category_from_sheet(sheet_name)
+    raw_category = clean_mojibake(row.get("Category"))
+    categories = [category_key(category)]
+    if raw_category:
+        key = category_key(raw_category)
+        if key not in categories:
+            categories.append(key)
+    banner = clean_url(row.get("Logo / Banner Image"))
+    videos = split_urls(row.get("Videos"), row.get("Reels"))
+    profile_url = clean_url(row.get("Profile URL"))
+    avg_price_num = number(row.get("Avg Price"))
+    avg_price = clean_mojibake(row.get("Avg Price")) if avg_price_num and avg_price_num > 0 else None
+    return {
+        "slug": slugify(f"{name}-{county or ''}"),
+        "name": name,
+        "categories": categories,
+        "county": county,
+        "avg_price": avg_price,
+        "avg_price_num": avg_price_num if avg_price_num and avg_price_num > 0 else None,
+        "rating": number(row.get("Rating (out of 5)")),
+        "review_count": integer(row.get("Review Count")),
+        "overview": first(row.get("Overview / Slogan"), row.get("Description (About)")),
+        "description": useful_profile_text(row.get("Description (About)")),
+        "slogan": clean_mojibake(row.get("Overview / Slogan")),
+        "logo_image": banner,
+        "banner_image": banner,
+        "gallery_images": gallery,
+        "video_urls": videos,
+        "featured": boolish(row.get("Featured")),
+        "award_winner": boolish(row.get("Award Winner")),
+        "package_plan": clean_mojibake(row.get("Plan / Package")),
+        "service_areas": split_list(row.get("Counties Served")),
+        "image_count": integer(row.get("Image Count")) or (len(gallery) if gallery else None),
+        "address": clean_mojibake(row.get("Address / Location")),
+        "latitude": number(row.get("Latitude")),
+        "longitude": number(row.get("Longitude")),
+        "phone": clean_phone(row.get("Phone")),
+        "email": clean_mojibake(row.get("Email")),
+        "contact_person": clean_mojibake(row.get("Contact Person")),
+        "source_url": profile_url,
+        "profile_url": profile_url,
+        "website": clean_url(row.get("Website")),
+        "facebook_url": clean_url(row.get("Facebook"), "www.facebook.com"),
+        "instagram_url": clean_url(row.get("Instagram"), "www.instagram.com"),
+        "tiktok_url": clean_url(row.get("TikTok"), "www.tiktok.com"),
+        "youtube_url": clean_url(row.get("YouTube"), "www.youtube.com"),
+        "twitter_url": clean_url(row.get("Twitter/X"), "twitter.com"),
+    }
+
+
 def fair_from_weddingdates(row: dict[str, Any]) -> dict[str, Any] | None:
     name = clean_text(row.get("Event Name"))
     if not name:
@@ -663,6 +809,19 @@ def review_records(parent_kind: str, parent_id: str, row: dict[str, Any]) -> lis
             "body": review["body"],
             "review_date": review.get("review_date"),
             "source_name": clean_text(row.get("Source Site")) or clean_text(row.get("Listed On (sites)")) or "Imported spreadsheet",
+            "source_url": source_url,
+        })
+    for index, review in enumerate(parse_review_titles_dates(row.get("Reviews (titles & dates)"))[:30], start=1):
+        out.append({
+            "id": stable_id("review", f"{parent_id}:title-date:{index}:{review.get('title') or ''}:{review['body'][:80]}"),
+            "venue_id": parent_id if parent_kind == "venue" else None,
+            "supplier_id": parent_id if parent_kind == "supplier" else None,
+            "author_name": review.get("author_name"),
+            "rating": review.get("rating") or number(row.get("Rating (out of 5)")) or number(row.get("Rating")),
+            "title": review.get("title"),
+            "body": review["body"],
+            "review_date": review.get("review_date"),
+            "source_name": clean_text(row.get("Source Site")) or "WeddingSuppliers.ie",
             "source_url": source_url,
         })
     return out
@@ -749,6 +908,16 @@ def build_payload() -> dict[str, list[dict[str, Any]]]:
                         added = add_unique(suppliers, record, "supplier")
                         for review in review_records("supplier", added["id"], row.to_dict()):
                             reviews[review["id"]] = review
+
+    if SOURCE_FILES["wedding_suppliers"].exists():
+        for sheet_name in WEDDING_SUPPLIERS_SHEETS:
+            for _, row in frame("wedding_suppliers", sheet_name).iterrows():
+                row_dict = row.to_dict()
+                record = supplier_from_wedding_suppliers(row_dict, sheet_name)
+                if record:
+                    added = add_unique(suppliers, record, "supplier")
+                    for review in review_records("supplier", added["id"], row_dict):
+                        reviews[review["id"]] = review
 
     for _, row in frame(primary_key, "Wedding Fairs").iterrows():
         record = fair_from_weddingdates(row.to_dict())

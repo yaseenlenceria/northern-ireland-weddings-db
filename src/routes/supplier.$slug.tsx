@@ -1,5 +1,15 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Globe, Mail, MapPin, Phone } from "lucide-react";
+import {
+  Award,
+  BadgeCheck,
+  ExternalLink,
+  Globe,
+  Instagram,
+  Mail,
+  MapPin,
+  Phone,
+  PlayCircle,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -102,21 +112,56 @@ const FAQS = (name: string) => [
   },
 ];
 
+function toNumber(value: unknown) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function priceLabel(price: string | null | undefined, numericPrice: unknown) {
+  const parsed = toNumber(numericPrice);
+  if (parsed !== null && parsed <= 0) return "Request pricing";
+  if (!price || /^0(?:\.0+)?$/.test(price.trim())) return "Request pricing";
+  if (/^\d+(?:\.\d+)?$/.test(price.trim())) {
+    return `€${Math.round(Number(price)).toLocaleString("en-IE")}`;
+  }
+  return price;
+}
+
 function SupplierProfile() {
   const { supplier, reviews, sourcedReviews, similar } = Route.useLoaderData();
   const category = CATEGORY_BY_KEY.get(supplier.categories?.[0] ?? "");
   const gallery = (supplier.gallery_images ?? []).slice(0, 9);
-  const hero = supplier.logo_image ?? gallery[0] ?? null;
+  const hero = supplier.banner_image ?? supplier.logo_image ?? gallery[0] ?? null;
   const faqs = FAQS(supplier.name);
   const allScored = [
-    ...reviews.filter((r) => typeof r.rating === "number").map((r) => r.rating as number),
-    ...sourcedReviews.filter((r) => typeof r.rating === "number").map((r) => r.rating as number),
+    ...reviews.map((r) => toNumber(r.rating)).filter((r): r is number => r !== null),
+    ...sourcedReviews.map((r) => toNumber(r.rating)).filter((r): r is number => r !== null),
   ];
+  const supplierRating = toNumber(supplier.rating);
+  const supplierReviewCount = toNumber(supplier.review_count);
+  const supplierPrice = priceLabel(supplier.avg_price, supplier.avg_price_num);
   const avg = allScored.length
     ? allScored.reduce((s, r) => s + r, 0) / allScored.length
-    : averageRating(reviews);
-  const ratingNode = aggregateRating(avg, allScored.length);
+    : (supplierRating ?? averageRating(reviews));
+  const displayReviewCount = supplierReviewCount ?? allScored.length;
+  const ratingNode = aggregateRating(avg, displayReviewCount);
   const profileReviews = [...reviews, ...sourcedReviews];
+  const socialLinks = [
+    supplier.facebook_url ? { label: "Facebook", href: supplier.facebook_url, icon: Globe } : null,
+    supplier.instagram_url
+      ? { label: "Instagram", href: supplier.instagram_url, icon: Instagram }
+      : null,
+    supplier.tiktok_url ? { label: "TikTok", href: supplier.tiktok_url, icon: PlayCircle } : null,
+    supplier.youtube_url
+      ? { label: "YouTube", href: supplier.youtube_url, icon: PlayCircle }
+      : null,
+    supplier.twitter_url ? { label: "X", href: supplier.twitter_url, icon: Globe } : null,
+  ].filter(Boolean) as { label: string; href: string; icon: typeof Globe }[];
+  const videos = (supplier.video_urls ?? []).filter(Boolean) as string[];
 
   return (
     <SiteLayout>
@@ -124,9 +169,7 @@ function SupplierProfile() {
         data={breadcrumbSchema("", [
           { name: "Home", path: "/" },
           { name: "Find Suppliers", path: "/find-suppliers" },
-          ...(category
-            ? [{ name: category.plural, path: `/${category.slug}-ireland` }]
-            : []),
+          ...(category ? [{ name: category.plural, path: `/${category.slug}-ireland` }] : []),
           { name: supplier.name, path: `/supplier/${supplier.slug}` },
         ])}
       />
@@ -138,7 +181,9 @@ function SupplierProfile() {
           description: supplier.overview ?? supplier.description ?? undefined,
           image: hero ?? undefined,
           telephone: supplier.phone ?? undefined,
+          email: supplier.email ?? undefined,
           url: supplier.website ?? undefined,
+          sameAs: socialLinks.length ? socialLinks.map((link) => link.href) : undefined,
           address: {
             "@type": "PostalAddress",
             streetAddress: supplier.address ?? undefined,
@@ -212,16 +257,37 @@ function SupplierProfile() {
                 {supplier.categories?.map((key) => {
                   const c = CATEGORY_BY_KEY.get(key);
                   return c ? (
-                    <Badge key={key} variant="secondary" className="bg-accent text-accent-foreground">
+                    <Badge
+                      key={key}
+                      variant="secondary"
+                      className="bg-accent text-accent-foreground"
+                    >
                       {c.label}
                     </Badge>
                   ) : null;
                 })}
               </div>
               <h1 className="mt-3 text-4xl leading-tight">{supplier.name}</h1>
+              {supplier.slogan ? (
+                <p className="mt-3 max-w-2xl text-lg leading-7 text-muted-foreground">
+                  {supplier.slogan}
+                </p>
+              ) : null}
+              <div className="mt-3 flex flex-wrap gap-2">
+                {supplier.award_winner ? (
+                  <Badge className="bg-gold text-gold-foreground hover:bg-gold">
+                    <Award className="size-3.5" /> Award winner
+                  </Badge>
+                ) : null}
+                {supplier.package_plan ? (
+                  <Badge variant="outline">
+                    <BadgeCheck className="size-3.5" /> {supplier.package_plan}
+                  </Badge>
+                ) : null}
+              </div>
               {avg ? (
                 <div className="mt-2">
-                  <Stars rating={avg} count={profileReviews.length} />
+                  <Stars rating={avg} count={displayReviewCount || profileReviews.length} />
                 </div>
               ) : null}
               {supplier.county ? (
@@ -234,11 +300,21 @@ function SupplierProfile() {
               <dl className="mt-5 grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <dt className="eyebrow text-muted-foreground">Price guide</dt>
-                  <dd className="mt-1">{supplier.avg_price ?? "Request pricing"}</dd>
+                  <dd className="mt-1">{supplierPrice}</dd>
                 </div>
                 <div>
                   <dt className="eyebrow text-muted-foreground">Photos</dt>
                   <dd className="mt-1">{supplier.image_count ?? gallery.length}</dd>
+                </div>
+                <div>
+                  <dt className="eyebrow text-muted-foreground">Videos</dt>
+                  <dd className="mt-1">{videos.length || "Ask supplier"}</dd>
+                </div>
+                <div>
+                  <dt className="eyebrow text-muted-foreground">Reviews</dt>
+                  <dd className="mt-1">
+                    {displayReviewCount || profileReviews.length || "Coming in"}
+                  </dd>
                 </div>
               </dl>
 
@@ -310,6 +386,29 @@ function SupplierProfile() {
             </section>
           ) : null}
 
+          {videos.length ? (
+            <section>
+              <h2 className="text-3xl">Videos and reels</h2>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {videos.slice(0, 12).map((href: string, index: number) => (
+                  <a
+                    key={href}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 text-sm transition-colors hover:border-primary hover:text-primary"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <PlayCircle className="size-4" />
+                      {href.includes("instagram.com") ? "Watch reel" : "Watch video"} {index + 1}
+                    </span>
+                    <ExternalLink className="size-4" />
+                  </a>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
           <section id="reviews" className="scroll-mt-24">
             <h2 className="text-3xl">Reviews</h2>
             <ReviewList
@@ -320,14 +419,14 @@ function SupplierProfile() {
                   <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-ivory p-4">
                     <Stars rating={avg} count={profileReviews.length} />
                     <span className="text-sm text-muted-foreground">
-                      {avg.toFixed(1)}/5 from {profileReviews.length.toLocaleString()} imported written reviews
+                      {avg.toFixed(1)}/5 from {profileReviews.length.toLocaleString()} imported
+                      written reviews
                     </span>
                   </div>
                 ) : null
               }
             />
           </section>
-
 
           <section>
             <h2 className="text-3xl">Frequently asked questions</h2>
@@ -358,6 +457,20 @@ function SupplierProfile() {
                   </a>
                 </li>
               ) : null}
+              {supplier.email ? (
+                <li className="flex items-center gap-2">
+                  <Mail className="size-4 text-primary" />
+                  <a href={`mailto:${supplier.email}`} className="truncate hover:text-primary">
+                    {supplier.email}
+                  </a>
+                </li>
+              ) : null}
+              {supplier.contact_person ? (
+                <li className="flex items-center gap-2 text-muted-foreground">
+                  <BadgeCheck className="size-4 text-primary" />
+                  <span>{supplier.contact_person}</span>
+                </li>
+              ) : null}
               {supplier.website ? (
                 <li className="flex items-center gap-2">
                   <Globe className="size-4 text-primary" />
@@ -386,6 +499,32 @@ function SupplierProfile() {
               </Button>
             ) : null}
           </div>
+
+          {socialLinks.length || supplier.profile_url ? (
+            <div className="rounded-xl border border-border bg-card p-6">
+              <h3 className="font-serif text-xl">Online profiles</h3>
+              <div className="mt-4 grid gap-2">
+                {socialLinks.map(({ label, href, icon: Icon }) => (
+                  <Button key={href} asChild variant="outline" className="justify-start">
+                    <a href={href} target="_blank" rel="noopener noreferrer nofollow">
+                      <Icon className="size-4" /> {label}
+                    </a>
+                  </Button>
+                ))}
+                {supplier.profile_url ? (
+                  <Button asChild variant="outline" className="justify-start">
+                    <a
+                      href={supplier.profile_url}
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                    >
+                      <ExternalLink className="size-4" /> Source profile
+                    </a>
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
         </aside>
       </div>
 

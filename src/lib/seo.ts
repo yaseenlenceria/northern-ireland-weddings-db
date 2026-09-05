@@ -15,8 +15,6 @@ export const SITE_URL =
 export const absoluteUrl = (path: string) =>
   `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`.replace(/\/$/, "") || SITE_URL;
 
-
-
 /** Current year, used in directory titles and guide pages. */
 export const SEO_YEAR = new Date().getFullYear();
 
@@ -70,12 +68,14 @@ export const clamp = (text: string, max = 155) =>
   text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
 
 /** AggregateRating node, or undefined when there is no real rating to show. */
-export function aggregateRating(rating?: number | null, count?: number | null) {
-  if (!rating || !count || count < 1) return undefined;
+export function aggregateRating(rating?: number | string | null, count?: number | string | null) {
+  const numericRating = typeof rating === "string" ? Number(rating) : rating;
+  const numericCount = typeof count === "string" ? Number(count) : count;
+  if (!numericRating || !numericCount || numericCount < 1) return undefined;
   return {
     "@type": "AggregateRating",
-    ratingValue: Number(rating.toFixed(1)),
-    reviewCount: count,
+    ratingValue: Number(numericRating.toFixed(1)),
+    reviewCount: numericCount,
     bestRating: 5,
     worstRating: 1,
   };
@@ -84,7 +84,7 @@ export function aggregateRating(rating?: number | null, count?: number | null) {
 export type ReviewRow = {
   id: string;
   author_name: string | null;
-  rating: number | null;
+  rating: number | string | null;
   title: string | null;
   body: string | null;
   created_at: string;
@@ -113,7 +113,7 @@ export function reviewSchema(reviews: ReviewRow[]) {
 export type SourcedReviewRow = {
   id: string;
   author_name: string | null;
-  rating: number | null;
+  rating: number | string | null;
   title: string | null;
   body: string;
   review_date: string | null;
@@ -132,9 +132,7 @@ export function sourcedReviewSchema(reviews: SourcedReviewRow[]) {
       reviewBody: r.body,
       ...(r.review_date ? { datePublished: r.review_date } : {}),
       author: { "@type": "Person", name: r.author_name || "Verified couple" },
-      ...(r.source_name
-        ? { publisher: { "@type": "Organization", name: r.source_name } }
-        : {}),
+      ...(r.source_name ? { publisher: { "@type": "Organization", name: r.source_name } } : {}),
       reviewRating: {
         "@type": "Rating",
         ratingValue: r.rating,
@@ -146,7 +144,9 @@ export function sourcedReviewSchema(reviews: SourcedReviewRow[]) {
 
 /** Average of stored review ratings. */
 export function averageRating(reviews: ReviewRow[]) {
-  const scored = reviews.filter((r) => typeof r.rating === "number");
+  const scored = reviews
+    .map((r) => (typeof r.rating === "string" ? Number(r.rating) : r.rating))
+    .filter((rating): rating is number => typeof rating === "number" && Number.isFinite(rating));
   if (!scored.length) return null;
-  return scored.reduce((sum, r) => sum + (r.rating ?? 0), 0) / scored.length;
+  return scored.reduce((sum, rating) => sum + rating, 0) / scored.length;
 }

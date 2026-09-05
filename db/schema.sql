@@ -46,22 +46,53 @@ CREATE TABLE IF NOT EXISTS suppliers (
   county text,
   avg_price text,
   avg_price_num numeric,
+  rating numeric,
+  review_count integer,
   overview text,
   description text,
+  slogan text,
   logo_image text,
+  banner_image text,
   gallery_images text[],
+  video_urls text[],
   featured boolean NOT NULL DEFAULT false,
+  award_winner boolean NOT NULL DEFAULT false,
+  package_plan text,
   service_areas text[],
   image_count integer,
   address text,
   latitude numeric,
   longitude numeric,
   phone text,
+  email text,
+  contact_person text,
   source_url text,
+  profile_url text,
   website text,
+  facebook_url text,
+  instagram_url text,
+  tiktok_url text,
+  youtube_url text,
+  twitter_url text,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS rating numeric;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS review_count integer;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS slogan text;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS banner_image text;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS video_urls text[];
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS award_winner boolean NOT NULL DEFAULT false;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS package_plan text;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS email text;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS contact_person text;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS profile_url text;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS facebook_url text;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS instagram_url text;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS tiktok_url text;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS youtube_url text;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS twitter_url text;
 
 CREATE TABLE IF NOT EXISTS wedding_fairs (
   id uuid PRIMARY KEY,
@@ -119,6 +150,8 @@ CREATE INDEX IF NOT EXISTS venues_types_idx ON venues USING gin (venue_types);
 
 CREATE INDEX IF NOT EXISTS suppliers_county_idx ON suppliers(county);
 CREATE INDEX IF NOT EXISTS suppliers_featured_idx ON suppliers(featured);
+CREATE INDEX IF NOT EXISTS suppliers_award_winner_idx ON suppliers(award_winner);
+CREATE INDEX IF NOT EXISTS suppliers_rating_idx ON suppliers(rating DESC NULLS LAST);
 CREATE INDEX IF NOT EXISTS suppliers_categories_idx ON suppliers USING gin (categories);
 CREATE INDEX IF NOT EXISTS suppliers_name_trgm_idx ON suppliers USING gin (name gin_trgm_ops);
 
