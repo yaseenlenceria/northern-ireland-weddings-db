@@ -18,7 +18,8 @@ import { pageMeta, canonical } from "@/lib/seo";
 const TITLE = "Wedding Budget Calculator (Ireland) | Shortlist.ie";
 const DESCRIPTION =
   "Free wedding budget calculator for Irish couples. Add quotes, track deposits and see what is left to pay without needing an account.";
-const STORAGE_KEY = "niamh-weddings-budget-items";
+const STORAGE_KEY = "shortlist-ie-budget-items";
+const LEGACY_STORAGE_KEY = "niamh-weddings-budget-items";
 
 const CATEGORIES = [
   "Venue & catering",
@@ -75,7 +76,8 @@ function BudgetPage() {
   const [estimated, setEstimated] = useState("");
 
   useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
+    const saved =
+      window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_STORAGE_KEY);
     if (saved) setRows(JSON.parse(saved));
   }, []);
 

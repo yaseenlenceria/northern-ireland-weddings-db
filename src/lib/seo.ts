@@ -53,7 +53,10 @@ export function pageMeta({
     meta.push({ property: "og:image", content: image });
     meta.push({ name: "twitter:image", content: image });
   }
-  if (noindex) meta.push({ name: "robots", content: "noindex, follow" });
+  meta.push({
+    name: "robots",
+    content: noindex ? "noindex, follow" : "index, follow, max-image-preview:large",
+  });
   return meta;
 }
 

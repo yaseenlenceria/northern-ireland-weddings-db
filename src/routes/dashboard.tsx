@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { ListingImage } from "@/components/site/ListingImage";
-import { getShortlistItems, type ShortlistItem } from "@/components/site/SaveButton";
+import {
+  SHORTLIST_STORAGE_EVENT,
+  getShortlistItems,
+  type ShortlistItem,
+} from "@/components/site/SaveButton";
 import { neonAuth } from "@/integrations/neon/auth-client";
 import { useAuth } from "@/hooks/useAuth";
 import { pageMeta, canonical } from "@/lib/seo";
@@ -55,10 +59,10 @@ function DashboardPage() {
   useEffect(() => {
     const sync = () => setShortlist(getShortlistItems());
     sync();
-    window.addEventListener("niamh-weddings-shortlist-updated", sync);
+    window.addEventListener(SHORTLIST_STORAGE_EVENT, sync);
     window.addEventListener("storage", sync);
     return () => {
-      window.removeEventListener("niamh-weddings-shortlist-updated", sync);
+      window.removeEventListener(SHORTLIST_STORAGE_EVENT, sync);
       window.removeEventListener("storage", sync);
     };
   }, []);

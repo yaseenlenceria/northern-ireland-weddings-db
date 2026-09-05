@@ -3,7 +3,9 @@ import { Heart } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
-const STORAGE_KEY = "niamh-weddings-shortlist";
+const STORAGE_KEY = "shortlist-ie-shortlist";
+const LEGACY_STORAGE_KEY = "niamh-weddings-shortlist";
+export const SHORTLIST_STORAGE_EVENT = "shortlist-ie-shortlist-updated";
 
 export type ShortlistItem = {
   id: string;
@@ -18,7 +20,11 @@ export type ShortlistItem = {
 function readShortlist(): ShortlistItem[] {
   if (typeof window === "undefined") return [];
   try {
-    const parsed = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "[]");
+    const saved =
+      window.localStorage.getItem(STORAGE_KEY) ??
+      window.localStorage.getItem(LEGACY_STORAGE_KEY) ??
+      "[]";
+    const parsed = JSON.parse(saved);
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
@@ -72,7 +78,7 @@ export function SaveButton({
       ...items,
     ].slice(0, 100);
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    window.dispatchEvent(new Event("niamh-weddings-shortlist-updated"));
+    window.dispatchEvent(new Event(SHORTLIST_STORAGE_EVENT));
     setSaved(true);
     toast.success("Added to your shortlist.");
   };

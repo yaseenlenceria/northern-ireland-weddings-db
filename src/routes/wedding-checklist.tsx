@@ -19,7 +19,8 @@ import { canonical, pageMeta } from "@/lib/seo";
 const TITLE = "Wedding Checklist for Irish Weddings | Shortlist.ie";
 const DESCRIPTION =
   "A free wedding checklist for Irish couples. Tick off booking, legal, guest, styling and final-week tasks in your browser.";
-const STORAGE_KEY = "niamh-weddings-checklist-items";
+const STORAGE_KEY = "shortlist-ie-checklist-items";
+const LEGACY_STORAGE_KEY = "niamh-weddings-checklist-items";
 const PHASES = ["12+ months", "9-12 months", "6-9 months", "3-6 months", "1-3 months", "Final month"];
 
 type ChecklistItem = { id: string; title: string; category: string; done: boolean };
@@ -59,7 +60,8 @@ function ChecklistPage() {
   const [phase, setPhase] = useState(PHASES[0]!);
 
   useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
+    const saved =
+      window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_STORAGE_KEY);
     if (saved) setRows(JSON.parse(saved));
   }, []);
 

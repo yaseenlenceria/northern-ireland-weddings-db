@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
-import { Breadcrumbs } from "@/components/site/Breadcrumbs";
+import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
+import { JsonLd } from "@/components/site/JsonLd";
 import { GUIDES } from "@/lib/guides";
 import { ArrowRight } from "lucide-react";
-import { canonical, pageMeta } from "@/lib/seo";
+import { SITE_NAME, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 
 const TITLE = "Wedding Guides for Irish Couples | Shortlist.ie";
 const DESCRIPTION =
@@ -20,6 +21,34 @@ export const Route = createFileRoute("/wedding-guides/")({
 function GuidesIndex() {
   return (
     <SiteLayout>
+      <JsonLd
+        data={breadcrumbSchema("", [
+          { name: "Home", path: "/" },
+          { name: "Wedding Guides", path: "/wedding-guides" },
+        ])}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "Wedding guides for Irish couples",
+          description: DESCRIPTION,
+          url: absoluteUrl("/wedding-guides"),
+          isPartOf: {
+            "@type": "WebSite",
+            name: SITE_NAME,
+            url: absoluteUrl("/"),
+          },
+          itemListElement: GUIDES.map((guide, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            url: absoluteUrl(`/wedding-guides/${guide.slug}`),
+            name: guide.title,
+            description: guide.excerpt,
+          })),
+        }}
+      />
+
       <PageHeader
         eyebrow="Reading"
         title="Wedding guides"

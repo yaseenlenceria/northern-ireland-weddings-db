@@ -18,7 +18,8 @@ import { pageMeta, canonical } from "@/lib/seo";
 const TITLE = "Wedding Guest List Planner | Shortlist.ie";
 const DESCRIPTION =
   "Free guest list planner for Irish weddings. Track names, sides, seats and RSVPs with a live headcount in your browser.";
-const STORAGE_KEY = "niamh-weddings-guest-list";
+const STORAGE_KEY = "shortlist-ie-guest-list";
+const LEGACY_STORAGE_KEY = "niamh-weddings-guest-list";
 const SIDES = ["Bride", "Groom", "Both", "Other"];
 const RSVPS = ["pending", "yes", "no"];
 
@@ -39,7 +40,8 @@ function GuestListPage() {
   const [partySize, setPartySize] = useState("1");
 
   useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
+    const saved =
+      window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_STORAGE_KEY);
     if (saved) setRows(JSON.parse(saved));
   }, []);
 

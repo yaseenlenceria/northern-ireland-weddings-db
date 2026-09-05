@@ -18,6 +18,8 @@ const STATIC_PATHS: SitemapEntry[] = [
   { path: "/wedding-fairs", changefreq: "weekly", priority: "0.7" },
   { path: "/wedding-guides", changefreq: "monthly", priority: "0.7" },
   { path: "/planning-tools", changefreq: "monthly", priority: "0.6" },
+  { path: "/budget-calculator", changefreq: "monthly", priority: "0.6" },
+  { path: "/guest-list", changefreq: "monthly", priority: "0.6" },
   { path: "/wedding-checklist", changefreq: "monthly", priority: "0.6" },
   { path: "/wedding-timeline", changefreq: "monthly", priority: "0.6" },
   { path: "/list-your-business", changefreq: "monthly", priority: "0.6" },

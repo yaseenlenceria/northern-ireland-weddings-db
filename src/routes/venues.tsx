@@ -17,11 +17,12 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
-import { Breadcrumbs } from "@/components/site/Breadcrumbs";
+import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { VenueCard } from "@/components/site/Cards";
+import { JsonLd } from "@/components/site/JsonLd";
 import { listVenues } from "@/lib/directory.functions";
 import { COUNTIES } from "@/lib/taxonomy";
-import { canonical, pageMeta } from "@/lib/seo";
+import { SITE_NAME, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 
 const TITLE = "Wedding Venues Ireland — Search Every County | Shortlist.ie";
 const DESCRIPTION =
@@ -115,6 +116,31 @@ function VenuesPage() {
 
   return (
     <SiteLayout>
+      <JsonLd
+        data={breadcrumbSchema("", [
+          { name: "Home", path: "/" },
+          { name: "Venues", path: "/venues" },
+        ])}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Wedding venues in Ireland",
+          description: DESCRIPTION,
+          url: absoluteUrl("/venues"),
+          isPartOf: {
+            "@type": "WebSite",
+            name: SITE_NAME,
+            url: absoluteUrl("/"),
+          },
+          about: {
+            "@type": "Place",
+            name: "Wedding venues in Ireland",
+          },
+        }}
+      />
+
       <PageHeader
         eyebrow="Venues"
         title="Wedding venues in Ireland"

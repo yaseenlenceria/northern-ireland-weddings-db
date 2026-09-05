@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Calculator, CalendarCheck, ClipboardList, Heart, Users } from "lucide-react";
 import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
-import { Breadcrumbs } from "@/components/site/Breadcrumbs";
-import { canonical, pageMeta } from "@/lib/seo";
+import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
+import { JsonLd } from "@/components/site/JsonLd";
+import { SITE_NAME, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 
 const TITLE = "Free Wedding Planning Tools for Irish Couples | Shortlist.ie";
 const DESCRIPTION =
@@ -52,6 +53,34 @@ export const Route = createFileRoute("/planning-tools")({
 function PlanningToolsPage() {
   return (
     <SiteLayout>
+      <JsonLd
+        data={breadcrumbSchema("", [
+          { name: "Home", path: "/" },
+          { name: "Planning Tools", path: "/planning-tools" },
+        ])}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "Free wedding planning tools for Irish couples",
+          description: DESCRIPTION,
+          url: absoluteUrl("/planning-tools"),
+          isPartOf: {
+            "@type": "WebSite",
+            name: SITE_NAME,
+            url: absoluteUrl("/"),
+          },
+          itemListElement: TOOLS.map((tool, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            url: absoluteUrl(tool.to),
+            name: tool.title,
+            description: tool.copy,
+          })),
+        }}
+      />
+
       <PageHeader
         eyebrow="Planning"
         title="Wedding planning tools"
