@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ListingImage } from "./ListingImage";
 import { Stars } from "./Stars";
-import { firstImage } from "@/lib/media";
 import { CATEGORY_BY_KEY } from "@/lib/taxonomy";
 import type { SupplierCardRow, VenueCardRow } from "@/lib/directory.functions";
 
@@ -69,7 +68,7 @@ export function SupplierCard({
         className="block aspect-4/3 overflow-hidden bg-muted"
       >
         <ListingImage
-          src={firstImage(supplier.banner_image, supplier.logo_image, supplier.gallery_images)}
+          src={[supplier.banner_image, supplier.logo_image, ...(supplier.gallery_images ?? [])]}
           alt={`${supplier.name}${primary ? ` — ${primary.label.toLowerCase()}` : ""}${
             supplier.county ? ` in Co. ${supplier.county}` : ""
           }`}
@@ -155,7 +154,7 @@ export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number 
         className="block aspect-4/3 overflow-hidden bg-muted"
       >
         <ListingImage
-          src={firstImage(venue.logo_image, venue.gallery_images)}
+          src={[venue.logo_image, ...(venue.gallery_images ?? [])]}
           alt={`${venue.name}, wedding venue${venue.county ? ` in Co. ${venue.county}` : " in Ireland"}`}
           className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
         />

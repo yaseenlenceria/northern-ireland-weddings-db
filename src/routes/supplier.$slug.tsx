@@ -55,7 +55,7 @@ export const Route = createFileRoute("/supplier/$slug")({
     const category = CATEGORY_BY_KEY.get(s.categories?.[0] ?? "")?.label ?? "Wedding supplier";
     const place = s.county ? `Co. ${s.county}` : "Ireland";
     const avg = averageRating(loaderData.reviews);
-    const title = `${s.name} — ${category}, ${place} | Shortlist.ie`;
+    const title = `${s.name} — ${category}, ${place} | Wedlist.ie`;
     const ratingBit = avg
       ? `Rated ${avg.toFixed(1)}/5 from ${loaderData.reviews.length} reviews. `
       : "";
@@ -98,7 +98,7 @@ export const Route = createFileRoute("/supplier/$slug")({
 const FAQS = (name: string) => [
   {
     q: `How do I check availability with ${name}?`,
-    a: `Send an enquiry through the form on this page with your wedding date and rough guest numbers. ${name} replies to you directly by email — Shortlist.ie does not sit in the middle or charge a booking fee.`,
+    a: `Send an enquiry through the form on this page with your wedding date and rough guest numbers. ${name} replies to you directly by email — Wedlist.ie does not sit in the middle or charge a booking fee.`,
   },
   {
     q: "How far in advance should I book?",
@@ -232,13 +232,13 @@ function SupplierProfile() {
               description:
                 supplier.overview ??
                 supplier.description ??
-                `${supplier.name} wedding supplier video on Shortlist.ie.`,
+                `${supplier.name} wedding supplier video on Wedlist.ie.`,
               thumbnailUrl: hero ? [hero] : undefined,
               contentUrl: video?.originalUrl,
               embedUrl: video?.embedUrl,
               publisher: {
                 "@type": "Organization",
-                name: "Shortlist.ie",
+                name: "Wedlist.ie",
                 url: absoluteUrl("/"),
               },
             })),
@@ -279,7 +279,7 @@ function SupplierProfile() {
           <div className="mt-6 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
             <div className="overflow-hidden rounded-2xl border border-border bg-card">
               <ListingImage
-                src={hero}
+                src={[supplier.banner_image, supplier.logo_image, ...gallery]}
                 alt={`${supplier.name}${category ? ` — ${category.label.toLowerCase()}` : ""}${
                   supplier.county ? ` in Co. ${supplier.county}` : ""
                 }`}

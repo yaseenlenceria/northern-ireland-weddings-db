@@ -5,11 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Shortlist.ie design system.
+ * Wedlist.ie design system.
  * Palette: ivory / soft white grounds, sage green primary, muted gold accent,
  * charcoal text. Type: Outfit for headings and display, Figtree for body.
  */
-
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -63,7 +62,6 @@
   --shadow-soft: var(--shadow-soft-v);
   --shadow-lift: var(--shadow-lift-v);
   --shadow-glow: var(--shadow-glow-v);
-
 }
 
 :root {

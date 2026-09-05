@@ -8,26 +8,43 @@ const PLACEHOLDER_MARKERS = [
   "undefined",
 ];
 
+function isKnownUnavailableImage(url: string) {
+  const lowered = url.toLowerCase();
+  return (
+    lowered.includes("://cdn0.hitched.ie/") ||
+    lowered.includes("://cdn0.hitched.co.uk/") ||
+    lowered.includes("://www.weddingsuppliers.ie/uploads/") ||
+    lowered.includes("://www.weddingsuppliers.ie/public/uploads/")
+  );
+}
+
 export function cleanImageUrl(value?: string | null) {
   const url = value?.trim();
   if (!url) return null;
   if (!/^https?:\/\//i.test(url) && !url.startsWith("/")) return null;
   const lowered = url.toLowerCase();
   if (PLACEHOLDER_MARKERS.some((marker) => lowered.includes(marker))) return null;
+  if (isKnownUnavailableImage(url)) return null;
   return url;
 }
 
-export function firstImage(...values: Array<string | string[] | null | undefined>) {
+export function imageCandidates(...values: Array<string | string[] | null | undefined>) {
+  const candidates: string[] = [];
   for (const value of values) {
     if (Array.isArray(value)) {
-      const found = value.map(cleanImageUrl).find(Boolean);
-      if (found) return found;
+      candidates.push(
+        ...value.map(cleanImageUrl).filter((image): image is string => Boolean(image)),
+      );
       continue;
     }
     const image = cleanImageUrl(value);
-    if (image) return image;
+    if (image) candidates.push(image);
   }
-  return null;
+  return [...new Set(candidates)];
+}
+
+export function firstImage(...values: Array<string | string[] | null | undefined>) {
+  return imageCandidates(...values)[0] ?? null;
 }
 
 function youtubeId(url: URL) {

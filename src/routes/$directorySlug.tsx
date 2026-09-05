@@ -37,7 +37,7 @@ function buildCopy(opts: {
 
   const title = ranked
     ? `${listingCount} ${plural} in ${place} ${SEO_YEAR} - Prices & Reviews`
-    : `${plural} in ${place} — ${count} Listed | Shortlist.ie`;
+    : `${plural} in ${place} — ${count} Listed | Wedlist.ie`;
 
   const priceBit = priced ? ` Typical spend around ${euro(priced.median)}.` : "";
   const description = clamp(
@@ -179,7 +179,7 @@ function DirectoryPage() {
   }
   faqs.push({
     q: `How many ${plural.toLowerCase()} are listed in ${place}?`,
-    a: `${total.toLocaleString()} ${plural.toLowerCase()} are listed in ${place} on Shortlist.ie. Listings are ordered by portfolio depth, published reviews and how complete the listing is.`,
+    a: `${total.toLocaleString()} ${plural.toLowerCase()} are listed in ${place} on Wedlist.ie. Listings are ordered by portfolio depth, published reviews and how complete the listing is.`,
   });
   faqs.push({
     q: `When should we book ${plural.toLowerCase()} in ${place}?`,

@@ -24,9 +24,9 @@ import { getSupplierCategoryCounts, listSuppliers } from "@/lib/directory.functi
 import { CATEGORIES, COUNTIES } from "@/lib/taxonomy";
 import { SITE_NAME, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 
-const TITLE = "Find Wedding Suppliers in Ireland | Shortlist.ie";
+const TITLE = "Find Wedding Suppliers in Ireland | Wedlist.ie";
 const DESCRIPTION =
-  "Search every wedding supplier on Shortlist.ie by category, county and name — photographers, bands, florists, planners, celebrants and more.";
+  "Search every wedding supplier on Wedlist.ie by category, county and name — photographers, bands, florists, planners, celebrants and more.";
 
 const PER_PAGE = 24;
 
@@ -113,7 +113,9 @@ function FindSuppliersPage() {
     queryKey: ["supplier-category-counts"],
     queryFn: () => fetchCategoryCounts(),
   });
-  const countByCategory = new Map((categoryCounts.data ?? []).map((row) => [row.category, row.count]));
+  const countByCategory = new Map(
+    (categoryCounts.data ?? []).map((row) => [row.category, row.count]),
+  );
 
   const total = query.data?.count ?? 0;
   const rows = query.data?.rows ?? [];
@@ -248,7 +250,11 @@ function FindSuppliersPage() {
                 }`}
               >
                 {item.label}{" "}
-                <span className={category === item.key ? "text-primary-foreground/80" : "text-muted-foreground"}>
+                <span
+                  className={
+                    category === item.key ? "text-primary-foreground/80" : "text-muted-foreground"
+                  }
+                >
                   {categoryCounts.isPending ? "" : count.toLocaleString()}
                 </span>
               </button>

@@ -8,7 +8,7 @@ export function BrandIcon({ className = "size-8" }: { className?: string }) {
       className={`${className} relative inline-flex shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-soft`}
       aria-hidden="true"
     >
-      <span className="font-serif text-[0.62em] font-bold leading-none">S</span>
+      <span className="font-serif text-[0.62em] font-bold leading-none">W</span>
       <Check className="absolute -bottom-0.5 -right-0.5 size-[0.42em] rounded-full bg-gold p-[0.08em] text-gold-foreground" />
     </span>
   );

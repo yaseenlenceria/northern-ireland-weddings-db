@@ -18,6 +18,7 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { SaveButton } from "@/components/site/SaveButton";
 import { ReviewList } from "@/components/site/Reviews";
 import { getVenue } from "@/lib/directory.functions";
+import { firstImage } from "@/lib/media";
 import { VENUE_SLUG, countySlug } from "@/lib/taxonomy";
 import { canonical, clamp, pageMeta, reviewSchema, sourcedReviewSchema } from "@/lib/seo";
 
@@ -46,7 +47,7 @@ export const Route = createFileRoute("/venue/$slug")({
         title,
         description: clamp(bits.join(" ")),
         path,
-        image: v.logo_image ?? v.gallery_images?.[0] ?? null,
+        image: firstImage(v.logo_image, v.gallery_images),
       }),
       links: canonical(path),
     };
@@ -94,8 +95,8 @@ const FAQS = (name: string, capacity: string | null) => [
 
 function VenueProfile() {
   const { venue, reviews, sourcedReviews, similar } = Route.useLoaderData();
-  const gallery = (venue.gallery_images ?? []).slice(0, 12);
-  const hero = venue.logo_image ?? gallery[0] ?? null;
+  const gallery = (venue.gallery_images ?? []).filter((src) => firstImage(src)).slice(0, 12);
+  const hero = firstImage(venue.logo_image, gallery);
   const faqs = FAQS(venue.name, venue.guest_capacity);
   const profileReviews = [...reviews, ...sourcedReviews];
 
@@ -194,7 +195,7 @@ function VenueProfile() {
           <div className="mt-6 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
             <div className="overflow-hidden rounded-2xl border border-border bg-card">
               <ListingImage
-                src={hero}
+                src={[venue.logo_image, ...gallery]}
                 alt={`${venue.name}, wedding venue${venue.county ? ` in Co. ${venue.county}` : " in Ireland"}`}
                 className="aspect-16/10 w-full object-cover"
               />
@@ -329,7 +330,6 @@ function VenueProfile() {
               }
             />
           </section>
-
 
           <section>
             <h2 className="text-3xl">Frequently asked questions</h2>

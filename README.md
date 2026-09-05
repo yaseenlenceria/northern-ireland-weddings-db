@@ -1,4 +1,4 @@
-# Shortlist.ie Ireland Directory
+# Wedlist.ie Ireland Directory
 
 TanStack Start and React directory website for Irish wedding venues, suppliers, wedding fairs, planning tools, and enquiries.
 

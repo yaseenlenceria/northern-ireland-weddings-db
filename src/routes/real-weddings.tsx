@@ -7,7 +7,7 @@ import { VenueCard } from "@/components/site/Cards";
 import { listVenues } from "@/lib/directory.functions";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Real Weddings in Ireland — Submit Yours | Shortlist.ie";
+const TITLE = "Real Weddings in Ireland — Submit Yours | Wedlist.ie";
 const DESCRIPTION =
   "Real Irish weddings, told by the couples who had them. We're building this section now — submit your wedding, or browse the venues couples are booking.";
 
@@ -54,7 +54,10 @@ function RealWeddingsPage() {
               <Link to="/contact">Submit your wedding</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link to="/$directorySlug" params={{ directorySlug: "wedding-photographers-ireland" }}>
+              <Link
+                to="/$directorySlug"
+                params={{ directorySlug: "wedding-photographers-ireland" }}
+              >
                 Browse photographers
               </Link>
             </Button>

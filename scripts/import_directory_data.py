@@ -75,6 +75,12 @@ PLACEHOLDER_IMAGE_MARKERS = (
     "placeholder",
     "undefined",
 )
+UNAVAILABLE_IMAGE_MARKERS = (
+    "://cdn0.hitched.ie/",
+    "://cdn0.hitched.co.uk/",
+    "://www.weddingsuppliers.ie/uploads/",
+    "://www.weddingsuppliers.ie/public/uploads/",
+)
 
 
 def load_env(path: Path) -> dict[str, str]:
@@ -350,6 +356,8 @@ def clean_image_url(value: Any) -> str | None:
         return None
     lowered = url.lower()
     if any(marker in lowered for marker in PLACEHOLDER_IMAGE_MARKERS):
+        return None
+    if any(marker in lowered for marker in UNAVAILABLE_IMAGE_MARKERS):
         return None
     return url
 

@@ -23,7 +23,7 @@ import { GUIDES } from "@/lib/guides";
 import { SITE_NAME, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 import heroImage from "@/assets/hero-wedding-ireland.jpg";
 
-const TITLE = "Wedding Suppliers & Venues in Ireland | Shortlist.ie";
+const TITLE = "Wedding Suppliers & Venues in Ireland | Wedlist.ie";
 const DESCRIPTION =
   "Compare Irish wedding suppliers and venues across every county. Live directory counts, real prices, reviews and free direct enquiries.";
 
@@ -139,7 +139,6 @@ function HomePage() {
     (s) => !(s.categories ?? []).some((c) => excludedCategories.has(c)),
   );
   const featuredSuppliers = (preferred.length >= 4 ? preferred : wedding).slice(0, 4);
-
 
   return (
     <SiteLayout>
@@ -275,7 +274,7 @@ function HomePage() {
             const blurb = category
               ? category.blurb
               : "Ceremony and reception venues across Ireland.";
-            const count = category ? countByCategory.get(category.key) ?? 0 : counts.venues;
+            const count = category ? (countByCategory.get(category.key) ?? 0) : counts.venues;
             return (
               <Link
                 key={slug}
@@ -379,7 +378,7 @@ function HomePage() {
       {/* Why */}
       <Section
         tone="ivory"
-        title="Why couples use Shortlist.ie"
+        title="Why couples use Wedlist.ie"
         description="A directory built to be read, not clicked through."
       >
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">

@@ -16,7 +16,7 @@ import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { JsonLd } from "@/components/site/JsonLd";
 import { SITE_NAME, absoluteUrl, pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Wedding Guest List Planner | Shortlist.ie";
+const TITLE = "Wedding Guest List Planner | Wedlist.ie";
 const DESCRIPTION =
   "Free guest list planner for Irish weddings. Track names, sides, seats and RSVPs with a live headcount in your browser.";
 const STORAGE_KEY = "shortlist-ie-guest-list";
@@ -52,8 +52,12 @@ function GuestListPage() {
 
   const stats = useMemo(() => {
     const invited = rows.reduce((sum, row) => sum + row.partySize, 0);
-    const attending = rows.filter((row) => row.rsvp === "yes").reduce((sum, row) => sum + row.partySize, 0);
-    const declined = rows.filter((row) => row.rsvp === "no").reduce((sum, row) => sum + row.partySize, 0);
+    const attending = rows
+      .filter((row) => row.rsvp === "yes")
+      .reduce((sum, row) => sum + row.partySize, 0);
+    const declined = rows
+      .filter((row) => row.rsvp === "no")
+      .reduce((sum, row) => sum + row.partySize, 0);
     return { invited, attending, declined, awaiting: Math.max(invited - attending - declined, 0) };
   }, [rows]);
 
@@ -93,7 +97,9 @@ function GuestListPage() {
         title="Guest list planner"
         description="Build the list, track RSVPs and keep a running seat count for your venue."
       >
-        <Breadcrumbs items={[{ label: "Planning Tools", to: "/planning-tools" }, { label: "Guest List" }]} />
+        <Breadcrumbs
+          items={[{ label: "Planning Tools", to: "/planning-tools" }, { label: "Guest List" }]}
+        />
       </PageHeader>
 
       <Section>
@@ -138,15 +144,32 @@ function GuestListPage() {
             <div className="grid gap-1.5">
               <Label>Side</Label>
               <Select value={side} onValueChange={setSide}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{SIDES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SIDES.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="guest-party">Seats</Label>
-              <Input id="guest-party" type="number" min={1} value={partySize} onChange={(e) => setPartySize(e.target.value)} className="sm:w-24" />
+              <Input
+                id="guest-party"
+                type="number"
+                min={1}
+                value={partySize}
+                onChange={(e) => setPartySize(e.target.value)}
+                className="sm:w-24"
+              />
             </div>
-            <Button type="submit" className="self-end"><Plus className="size-4" /> Add</Button>
+            <Button type="submit" className="self-end">
+              <Plus className="size-4" /> Add
+            </Button>
           </form>
 
           {rows.length ? (
@@ -155,15 +178,43 @@ function GuestListPage() {
                 <li key={row.id} className="flex flex-wrap items-center gap-3 p-4">
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">{row.name}</p>
-                    <p className="text-xs text-muted-foreground">{row.side} side · {row.partySize} seat{row.partySize > 1 ? "s" : ""}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {row.side} side · {row.partySize} seat{row.partySize > 1 ? "s" : ""}
+                    </p>
                   </div>
-                  <Select value={row.rsvp} onValueChange={(value) => setRows((current) => current.map((item) => item.id === row.id ? { ...item, rsvp: value } : item))}>
-                    <SelectTrigger className="w-32" aria-label={`RSVP for ${row.name}`}><SelectValue /></SelectTrigger>
+                  <Select
+                    value={row.rsvp}
+                    onValueChange={(value) =>
+                      setRows((current) =>
+                        current.map((item) =>
+                          item.id === row.id ? { ...item, rsvp: value } : item,
+                        ),
+                      )
+                    }
+                  >
+                    <SelectTrigger className="w-32" aria-label={`RSVP for ${row.name}`}>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
-                      {RSVPS.map((rsvp) => <SelectItem key={rsvp} value={rsvp}>{rsvp === "pending" ? "Pending" : rsvp === "yes" ? "Attending" : "Declined"}</SelectItem>)}
+                      {RSVPS.map((rsvp) => (
+                        <SelectItem key={rsvp} value={rsvp}>
+                          {rsvp === "pending"
+                            ? "Pending"
+                            : rsvp === "yes"
+                              ? "Attending"
+                              : "Declined"}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
-                  <button type="button" aria-label={`Remove ${row.name}`} onClick={() => setRows((current) => current.filter((item) => item.id !== row.id))} className="text-muted-foreground hover:text-destructive">
+                  <button
+                    type="button"
+                    aria-label={`Remove ${row.name}`}
+                    onClick={() =>
+                      setRows((current) => current.filter((item) => item.id !== row.id))
+                    }
+                    className="text-muted-foreground hover:text-destructive"
+                  >
                     <Trash2 className="size-4" />
                   </button>
                 </li>

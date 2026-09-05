@@ -24,7 +24,7 @@ import { listVenues } from "@/lib/directory.functions";
 import { COUNTIES } from "@/lib/taxonomy";
 import { SITE_NAME, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 
-const TITLE = "Wedding Venues Ireland — Search Every County | Shortlist.ie";
+const TITLE = "Wedding Venues Ireland — Search Every County | Wedlist.ie";
 const DESCRIPTION =
   "Browse Irish wedding venues by county, guest capacity and style. Compare per-person pricing, read details and enquire directly with the venue.";
 
@@ -91,8 +91,7 @@ function VenuesPage() {
     navigate({
       to: ".",
       // Defaults are stripped so shared URLs stay clean.
-      search: (prev) =>
-        cleanSearch({ ...prev, page: 1, ...next }),
+      search: (prev) => cleanSearch({ ...prev, page: 1, ...next }),
       resetScroll: false,
     });
 

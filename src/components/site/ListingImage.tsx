@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ImageOff } from "lucide-react";
-import { cleanImageUrl } from "@/lib/media";
+import { imageCandidates } from "@/lib/media";
 
 /** Listing image with graceful fallback when the source URL fails. */
 export function ListingImage({
@@ -8,14 +8,20 @@ export function ListingImage({
   alt,
   className = "",
 }: {
-  src?: string | null;
+  src?: string | string[] | null;
   alt: string;
   className?: string;
 }) {
-  const [failed, setFailed] = useState(false);
-  const image = cleanImageUrl(src);
+  const [failedIndex, setFailedIndex] = useState(0);
+  const images = imageCandidates(src);
+  const imageKey = images.join("|");
+  const image = images[failedIndex] ?? null;
 
-  if (!image || failed) {
+  useEffect(() => {
+    setFailedIndex(0);
+  }, [imageKey]);
+
+  if (!image) {
     return (
       <div
         className={`flex items-center justify-center bg-linear-to-br from-accent to-secondary text-muted-foreground ${className}`}
@@ -32,7 +38,7 @@ export function ListingImage({
       alt={alt}
       loading="lazy"
       decoding="async"
-      onError={() => setFailed(true)}
+      onError={() => setFailedIndex((index) => index + 1)}
       className={className}
     />
   );

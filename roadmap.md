@@ -1,6 +1,7 @@
-# Shortlist.ie — Roadmap
+# Wedlist.ie — Roadmap
 
 ## Tasks
+
 - [x] Enable Lovable Cloud
 - [ ] Schema + seed all 1,010 records from Excel (venues 206, suppliers 785, fairs 19)
 - [ ] Design system: ivory/sage/gold/charcoal, serif+sans
@@ -24,5 +25,6 @@
 - [ ] SEO pass: titles, descriptions, OG, LocalBusiness/FAQ/Breadcrumb schema
 
 ## Notes
+
 - WordPress theme/plugin not possible; built as React/TanStack app (user approved).
 - Images use the source CDN URLs from the spreadsheet.

@@ -112,6 +112,31 @@ function columnType(column) {
   return "text";
 }
 
+function unavailableImagePredicate(column) {
+  return `
+    lower(${column}) LIKE '%://cdn0.hitched.ie/%' OR
+    lower(${column}) LIKE '%://cdn0.hitched.co.uk/%' OR
+    lower(${column}) LIKE '%://www.weddingsuppliers.ie/uploads/%' OR
+    lower(${column}) LIKE '%://www.weddingsuppliers.ie/public/uploads/%'
+  `;
+}
+
+function validImagePredicate(column) {
+  return `
+    ${column} IS NOT NULL
+    AND ${column} <> ''
+    AND ${column} ~* '^https?://'
+    AND lower(${column}) NOT LIKE '%image_placeholder%'
+    AND lower(${column}) NOT LIKE '%defaultnoimage%'
+    AND lower(${column}) NOT LIKE '%default-no-image%'
+    AND lower(${column}) NOT LIKE '%no-image%'
+    AND lower(${column}) NOT LIKE '%noimage%'
+    AND lower(${column}) NOT LIKE '%placeholder%'
+    AND lower(${column}) NOT LIKE '%undefined%'
+    AND NOT (${unavailableImagePredicate(column)})
+  `;
+}
+
 async function upsertBatch(sql, table, rows, batchSize = 100) {
   if (!rows.length) return;
   const columns = [...new Set(rows.flatMap((row) => Object.keys(row)))];
@@ -152,7 +177,8 @@ async function cleanMediaPlaceholders(sql) {
       lower(${column}) LIKE '%no-image%' OR
       lower(${column}) LIKE '%noimage%' OR
       lower(${column}) LIKE '%placeholder%' OR
-      lower(${column}) LIKE '%undefined%'
+      lower(${column}) LIKE '%undefined%' OR
+      ${unavailableImagePredicate(column)}
     )
   `;
 
@@ -177,16 +203,7 @@ async function cleanMediaPlaceholders(sql) {
       ARRAY(
         SELECT image
         FROM unnest(gallery_images) AS image
-        WHERE image IS NOT NULL
-          AND image <> ''
-          AND image ~* '^https?://'
-          AND lower(image) NOT LIKE '%image_placeholder%'
-          AND lower(image) NOT LIKE '%defaultnoimage%'
-          AND lower(image) NOT LIKE '%default-no-image%'
-          AND lower(image) NOT LIKE '%no-image%'
-          AND lower(image) NOT LIKE '%noimage%'
-          AND lower(image) NOT LIKE '%placeholder%'
-          AND lower(image) NOT LIKE '%undefined%'
+        WHERE ${validImagePredicate("image")}
       ),
       '{}'::text[]
     )
@@ -198,16 +215,7 @@ async function cleanMediaPlaceholders(sql) {
       ARRAY(
         SELECT image
         FROM unnest(gallery_images) AS image
-        WHERE image IS NOT NULL
-          AND image <> ''
-          AND image ~* '^https?://'
-          AND lower(image) NOT LIKE '%image_placeholder%'
-          AND lower(image) NOT LIKE '%defaultnoimage%'
-          AND lower(image) NOT LIKE '%default-no-image%'
-          AND lower(image) NOT LIKE '%no-image%'
-          AND lower(image) NOT LIKE '%noimage%'
-          AND lower(image) NOT LIKE '%placeholder%'
-          AND lower(image) NOT LIKE '%undefined%'
+        WHERE ${validImagePredicate("image")}
       ),
       '{}'::text[]
     )

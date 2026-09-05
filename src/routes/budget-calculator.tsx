@@ -16,7 +16,7 @@ import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { JsonLd } from "@/components/site/JsonLd";
 import { SITE_NAME, absoluteUrl, pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Wedding Budget Calculator (Ireland) | Shortlist.ie";
+const TITLE = "Wedding Budget Calculator (Ireland) | Wedlist.ie";
 const DESCRIPTION =
   "Free wedding budget calculator for Irish couples. Add quotes, track deposits and see what is left to pay without needing an account.";
 const STORAGE_KEY = "shortlist-ie-budget-items";
@@ -45,21 +45,46 @@ type BudgetItem = {
 };
 
 const STARTER: BudgetItem[] = [
-  { id: "venue-meal", label: "Venue and meal", category: "Venue & catering", estimated: 12000, actual: 0 },
-  { id: "drinks", label: "Drinks reception", category: "Venue & catering", estimated: 1200, actual: 0 },
-  { id: "photographer", label: "Photographer", category: "Photography", estimated: 2200, actual: 0 },
+  {
+    id: "venue-meal",
+    label: "Venue and meal",
+    category: "Venue & catering",
+    estimated: 12000,
+    actual: 0,
+  },
+  {
+    id: "drinks",
+    label: "Drinks reception",
+    category: "Venue & catering",
+    estimated: 1200,
+    actual: 0,
+  },
+  {
+    id: "photographer",
+    label: "Photographer",
+    category: "Photography",
+    estimated: 2200,
+    actual: 0,
+  },
   { id: "video", label: "Videographer", category: "Videography", estimated: 1800, actual: 0 },
   { id: "band", label: "Band", category: "Music & entertainment", estimated: 1600, actual: 0 },
   { id: "dj", label: "DJ / afters", category: "Music & entertainment", estimated: 450, actual: 0 },
   { id: "flowers", label: "Florals", category: "Flowers & styling", estimated: 1200, actual: 0 },
-  { id: "dress", label: "Dress and accessories", category: "Attire & beauty", estimated: 2000, actual: 0 },
+  {
+    id: "dress",
+    label: "Dress and accessories",
+    category: "Attire & beauty",
+    estimated: 2000,
+    actual: 0,
+  },
   { id: "suits", label: "Suits", category: "Attire & beauty", estimated: 700, actual: 0 },
   { id: "cake", label: "Cake", category: "Cake", estimated: 400, actual: 0 },
   { id: "cars", label: "Cars", category: "Transport", estimated: 500, actual: 0 },
   { id: "rings", label: "Wedding rings", category: "Rings", estimated: 1200, actual: 0 },
 ];
 
-const euro = (n: number) => `€${Math.max(n, 0).toLocaleString("en-IE", { maximumFractionDigits: 0 })}`;
+const euro = (n: number) =>
+  `€${Math.max(n, 0).toLocaleString("en-IE", { maximumFractionDigits: 0 })}`;
 const safeNumber = (value: string) => Math.max(Number(value) || 0, 0);
 
 export const Route = createFileRoute("/budget-calculator")({
@@ -128,7 +153,12 @@ function BudgetPage() {
         title="Wedding budget calculator"
         description="Add real supplier quotes, update deposits as you pay them, and keep the whole budget in this browser."
       >
-        <Breadcrumbs items={[{ label: "Planning Tools", to: "/planning-tools" }, { label: "Budget Calculator" }]} />
+        <Breadcrumbs
+          items={[
+            { label: "Planning Tools", to: "/planning-tools" },
+            { label: "Budget Calculator" },
+          ]}
+        />
       </PageHeader>
 
       <Section>
@@ -153,7 +183,13 @@ function BudgetPage() {
               if (!label.trim()) return;
               setRows((current) => [
                 ...current,
-                { id: crypto.randomUUID(), label: label.trim(), category, estimated: safeNumber(estimated), actual: 0 },
+                {
+                  id: crypto.randomUUID(),
+                  label: label.trim(),
+                  category,
+                  estimated: safeNumber(estimated),
+                  actual: 0,
+                },
               ]);
               setLabel("");
               setEstimated("");
@@ -166,17 +202,32 @@ function BudgetPage() {
             <div className="grid gap-1.5">
               <Label>Category</Label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}
+                  {CATEGORIES.map((item) => (
+                    <SelectItem key={item} value={item}>
+                      {item}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="budget-estimate">Estimate €</Label>
-              <Input id="budget-estimate" type="number" min={0} value={estimated} onChange={(e) => setEstimated(e.target.value)} className="sm:w-28" />
+              <Input
+                id="budget-estimate"
+                type="number"
+                min={0}
+                value={estimated}
+                onChange={(e) => setEstimated(e.target.value)}
+                className="sm:w-28"
+              />
             </div>
-            <Button type="submit" className="self-end"><Plus className="size-4" /> Add</Button>
+            <Button type="submit" className="self-end">
+              <Plus className="size-4" /> Add
+            </Button>
           </form>
 
           <div className="mt-8 overflow-x-auto rounded-xl border border-border bg-card">
@@ -184,10 +235,18 @@ function BudgetPage() {
               <caption className="sr-only">Wedding budget calculator lines</caption>
               <thead className="bg-ivory text-left">
                 <tr>
-                  <th scope="col" className="p-3 font-medium">Item</th>
-                  <th scope="col" className="p-3 font-medium">Category</th>
-                  <th scope="col" className="p-3 font-medium">Estimate</th>
-                  <th scope="col" className="p-3 font-medium">Paid</th>
+                  <th scope="col" className="p-3 font-medium">
+                    Item
+                  </th>
+                  <th scope="col" className="p-3 font-medium">
+                    Category
+                  </th>
+                  <th scope="col" className="p-3 font-medium">
+                    Estimate
+                  </th>
+                  <th scope="col" className="p-3 font-medium">
+                    Paid
+                  </th>
                   <th scope="col" className="p-3" />
                 </tr>
               </thead>
@@ -202,7 +261,15 @@ function BudgetPage() {
                         type="number"
                         min={0}
                         value={row.estimated}
-                        onChange={(e) => setRows((current) => current.map((item) => item.id === row.id ? { ...item, estimated: safeNumber(e.target.value) } : item))}
+                        onChange={(e) =>
+                          setRows((current) =>
+                            current.map((item) =>
+                              item.id === row.id
+                                ? { ...item, estimated: safeNumber(e.target.value) }
+                                : item,
+                            ),
+                          )
+                        }
                         className="h-9 w-28"
                       />
                     </td>
@@ -212,12 +279,27 @@ function BudgetPage() {
                         type="number"
                         min={0}
                         value={row.actual}
-                        onChange={(e) => setRows((current) => current.map((item) => item.id === row.id ? { ...item, actual: safeNumber(e.target.value) } : item))}
+                        onChange={(e) =>
+                          setRows((current) =>
+                            current.map((item) =>
+                              item.id === row.id
+                                ? { ...item, actual: safeNumber(e.target.value) }
+                                : item,
+                            ),
+                          )
+                        }
                         className="h-9 w-28"
                       />
                     </td>
                     <td className="p-3 text-right">
-                      <button type="button" aria-label={`Delete ${row.label}`} onClick={() => setRows((current) => current.filter((item) => item.id !== row.id))} className="text-muted-foreground hover:text-destructive">
+                      <button
+                        type="button"
+                        aria-label={`Delete ${row.label}`}
+                        onClick={() =>
+                          setRows((current) => current.filter((item) => item.id !== row.id))
+                        }
+                        className="text-muted-foreground hover:text-destructive"
+                      >
                         <Trash2 className="size-4" />
                       </button>
                     </td>

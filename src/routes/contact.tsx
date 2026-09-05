@@ -13,9 +13,9 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { submitEnquiry } from "@/lib/enquiries.functions";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Contact Shortlist.ie";
+const TITLE = "Contact Wedlist.ie";
 const DESCRIPTION =
-  "Get in touch with Shortlist.ie — listing questions, profile claims, corrections to a supplier entry, or help using the planning tools.";
+  "Get in touch with Wedlist.ie — listing questions, profile claims, corrections to a supplier entry, or help using the planning tools.";
 
 const FAQS = [
   {
@@ -24,7 +24,7 @@ const FAQS = [
   },
   {
     q: "Does it cost anything to be listed?",
-    a: "No. Listing your wedding business and receiving enquiries through Shortlist.ie is free.",
+    a: "No. Listing your wedding business and receiving enquiries through Wedlist.ie is free.",
   },
   {
     q: "How do enquiries reach suppliers?",
@@ -90,7 +90,7 @@ function ContactPage() {
 
       <PageHeader
         eyebrow="Contact"
-        title="Talk to Shortlist.ie"
+        title="Talk to Wedlist.ie"
         description="Listing questions, corrections, profile claims or help with the planning tools — this reaches us directly."
       >
         <Breadcrumbs items={[{ label: "Contact" }]} />
@@ -122,8 +122,8 @@ function ContactPage() {
               <div>
                 <h2 className="font-serif text-lg">Couples</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  For supplier availability and pricing, use the enquiry form on their profile —
-                  it goes straight to them and gets a faster answer.
+                  For supplier availability and pricing, use the enquiry form on their profile — it
+                  goes straight to them and gets a faster answer.
                 </p>
               </div>
             </div>

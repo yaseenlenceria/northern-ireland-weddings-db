@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://northern-ireland-weddings-db.vercel.app/sitemap.xml
+Sitemap: https://wedlist.ie/sitemap.xml
