@@ -6,8 +6,8 @@
 
 /*
  * Wedlist.ie design system.
- * Palette: ivory / soft white grounds, sage green primary, muted gold accent,
- * charcoal text. Type: Outfit for headings and display, Figtree for body.
+ * Palette: warm ivory grounds, graphite primary, antique gold accents,
+ * restrained sage support. Type: Outfit for headings and display, Figtree for body.
  */
 
 @theme inline {
@@ -67,62 +67,62 @@
 :root {
   --radius: 0.5rem;
 
-  --background: oklch(0.988 0.006 95);
-  --foreground: oklch(0.255 0.012 60);
+  --background: oklch(0.988 0.008 92);
+  --foreground: oklch(0.205 0.008 78);
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.255 0.012 60);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.255 0.012 60);
+  --card: oklch(0.998 0.004 92);
+  --card-foreground: oklch(0.205 0.008 78);
+  --popover: oklch(0.998 0.004 92);
+  --popover-foreground: oklch(0.205 0.008 78);
 
-  /* sage green */
-  --primary: oklch(0.505 0.045 150);
+  /* graphite from the logo */
+  --primary: oklch(0.255 0.01 82);
   --primary-foreground: oklch(0.985 0.006 95);
-  --primary-soft: oklch(0.935 0.021 150);
+  --primary-soft: oklch(0.925 0.025 83);
 
-  --secondary: oklch(0.955 0.012 95);
-  --secondary-foreground: oklch(0.305 0.014 60);
+  --secondary: oklch(0.936 0.017 145);
+  --secondary-foreground: oklch(0.275 0.028 142);
 
-  --muted: oklch(0.955 0.011 95);
-  --muted-foreground: oklch(0.505 0.012 70);
+  --muted: oklch(0.955 0.011 90);
+  --muted-foreground: oklch(0.48 0.012 72);
 
-  --accent: oklch(0.935 0.021 150);
-  --accent-foreground: oklch(0.335 0.038 150);
+  --accent: oklch(0.915 0.034 82);
+  --accent-foreground: oklch(0.255 0.01 82);
 
-  /* muted gold */
-  --gold: oklch(0.735 0.088 85);
-  --gold-foreground: oklch(0.265 0.03 80);
+  /* antique gold from the logo */
+  --gold: oklch(0.68 0.09 82);
+  --gold-foreground: oklch(0.205 0.008 78);
 
-  --ivory: oklch(0.968 0.012 92);
+  --ivory: oklch(0.965 0.018 90);
 
   --destructive: oklch(0.545 0.185 26);
   --destructive-foreground: oklch(0.985 0.006 95);
 
-  --border: oklch(0.905 0.011 92);
-  --input: oklch(0.895 0.012 92);
-  --ring: oklch(0.505 0.045 150);
+  --border: oklch(0.885 0.014 86);
+  --input: oklch(0.875 0.014 86);
+  --ring: oklch(0.68 0.09 82);
 
-  --chart-1: oklch(0.505 0.045 150);
-  --chart-2: oklch(0.735 0.088 85);
+  --chart-1: oklch(0.255 0.01 82);
+  --chart-2: oklch(0.68 0.09 82);
   --chart-3: oklch(0.625 0.042 200);
-  --chart-4: oklch(0.685 0.075 40);
+  --chart-4: oklch(0.52 0.045 145);
   --chart-5: oklch(0.435 0.035 300);
 
-  --sidebar: oklch(0.968 0.012 92);
-  --sidebar-foreground: oklch(0.255 0.012 60);
-  --sidebar-primary: oklch(0.505 0.045 150);
+  --sidebar: oklch(0.965 0.018 90);
+  --sidebar-foreground: oklch(0.205 0.008 78);
+  --sidebar-primary: oklch(0.255 0.01 82);
   --sidebar-primary-foreground: oklch(0.985 0.006 95);
-  --sidebar-accent: oklch(0.935 0.021 150);
-  --sidebar-accent-foreground: oklch(0.335 0.038 150);
-  --sidebar-border: oklch(0.905 0.011 92);
-  --sidebar-ring: oklch(0.505 0.045 150);
+  --sidebar-accent: oklch(0.915 0.034 82);
+  --sidebar-accent-foreground: oklch(0.255 0.01 82);
+  --sidebar-border: oklch(0.885 0.014 86);
+  --sidebar-ring: oklch(0.68 0.09 82);
 
-  --shadow-soft-v: 0 1px 2px oklch(0.255 0.012 60 / 0.04), 0 4px 16px oklch(0.255 0.012 60 / 0.05);
-  --shadow-lift-v: 0 2px 6px oklch(0.255 0.012 60 / 0.06), 0 18px 44px oklch(0.255 0.012 60 / 0.11);
-  --shadow-glow-v: 0 10px 34px oklch(0.505 0.045 150 / 0.18);
+  --shadow-soft-v: 0 1px 2px oklch(0.205 0.008 78 / 0.05), 0 5px 18px oklch(0.205 0.008 78 / 0.06);
+  --shadow-lift-v: 0 2px 8px oklch(0.205 0.008 78 / 0.08), 0 20px 48px oklch(0.205 0.008 78 / 0.13);
+  --shadow-glow-v: 0 10px 34px oklch(0.68 0.09 82 / 0.2);
 
-  --gradient-ivory: linear-gradient(180deg, var(--ivory) 0%, var(--background) 100%);
-  --gradient-sage: linear-gradient(135deg, oklch(0.505 0.045 150) 0%, oklch(0.585 0.058 158) 100%);
+  --gradient-ivory: linear-gradient(180deg, oklch(0.971 0.017 88) 0%, var(--background) 100%);
+  --gradient-sage: linear-gradient(135deg, oklch(0.255 0.01 82) 0%, oklch(0.39 0.028 105) 100%);
 }
 
 .dark {

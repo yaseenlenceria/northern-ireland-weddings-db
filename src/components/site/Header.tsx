@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { BrandLink } from "@/components/site/BrandMark";
 import { getHeaderHighlights } from "@/lib/directory.functions";
-import { CATEGORIES, CATEGORY_BY_KEY, FEATURED_COUNTIES, VENUE_SLUG, countySlug } from "@/lib/taxonomy";
+import {
+  CATEGORIES,
+  CATEGORY_BY_KEY,
+  FEATURED_COUNTIES,
+  VENUE_SLUG,
+  countySlug,
+} from "@/lib/taxonomy";
 
 const NAV = [
   { to: "/find-suppliers", label: "Suppliers" },
@@ -44,7 +50,7 @@ export function Header() {
   ].slice(0, 3);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/70 bg-background/90 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-gold/25 bg-background/92 backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center gap-6 px-4 sm:px-6">
         <BrandLink onClick={() => setOpen(false)} />
 
@@ -63,7 +69,9 @@ export function Header() {
                   <div className="mt-3 grid gap-2">
                     {QUICK_CATEGORIES.map((slug) => {
                       const isVenue = slug === VENUE_SLUG;
-                      const category = isVenue ? null : CATEGORIES.find((item) => item.slug === slug);
+                      const category = isVenue
+                        ? null
+                        : CATEGORIES.find((item) => item.slug === slug);
                       return (
                         <Link
                           key={slug}
@@ -117,7 +125,9 @@ export function Header() {
                           </span>
                         )}
                         <span>
-                          <span className="line-clamp-1 block text-sm font-medium">{item.name}</span>
+                          <span className="line-clamp-1 block text-sm font-medium">
+                            {item.name}
+                          </span>
                           <span className="line-clamp-1 block text-xs text-muted-foreground">
                             {item.kind === "venue"
                               ? `Venue${item.county ? ` in Co. ${item.county}` : ""}`
@@ -180,7 +190,10 @@ export function Header() {
 
       {open ? (
         <div id="mobile-nav" className="border-t border-border bg-background lg:hidden">
-          <nav aria-label="Mobile" className="mx-auto flex w-full max-w-7xl flex-col px-4 py-3 sm:px-6">
+          <nav
+            aria-label="Mobile"
+            className="mx-auto flex w-full max-w-7xl flex-col px-4 py-3 sm:px-6"
+          >
             {NAV.map((item) => (
               <Link
                 key={item.to}
