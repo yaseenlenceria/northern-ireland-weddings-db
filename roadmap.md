@@ -1,4 +1,4 @@
-# Wedlist.ie — Roadmap
+# WedHQ — Roadmap
 
 ## Tasks
 

@@ -3,9 +3,9 @@ import { Heart } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
-const STORAGE_KEY = "shortlist-ie-shortlist";
-const LEGACY_STORAGE_KEY = "niamh-weddings-shortlist";
-export const SHORTLIST_STORAGE_EVENT = "shortlist-ie-shortlist-updated";
+const STORAGE_KEY = "wedhq-shortlist";
+const LEGACY_STORAGE_KEYS = ["shortlist-ie-shortlist", "niamh-weddings-shortlist"];
+export const SHORTLIST_STORAGE_EVENT = "wedhq-shortlist-updated";
 
 export type ShortlistItem = {
   id: string;
@@ -22,7 +22,9 @@ function readShortlist(): ShortlistItem[] {
   try {
     const saved =
       window.localStorage.getItem(STORAGE_KEY) ??
-      window.localStorage.getItem(LEGACY_STORAGE_KEY) ??
+      LEGACY_STORAGE_KEYS.map((key) => window.localStorage.getItem(key)).find(
+        (value): value is string => Boolean(value),
+      ) ??
       "[]";
     const parsed = JSON.parse(saved);
     return Array.isArray(parsed) ? parsed : [];

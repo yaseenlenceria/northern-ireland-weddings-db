@@ -4,10 +4,10 @@ import { SITE_NAME } from "@/lib/seo";
 export function BrandLogo({ className = "h-10 w-auto" }: { className?: string }) {
   return (
     <img
-      src="/logo.png"
+      src="/logo.svg"
       alt={SITE_NAME}
-      width={679}
-      height={214}
+      width={420}
+      height={120}
       className={`${className} object-contain`}
     />
   );
@@ -16,7 +16,7 @@ export function BrandLogo({ className = "h-10 w-auto" }: { className?: string })
 export function BrandIcon({ className = "size-8" }: { className?: string }) {
   return (
     <img
-      src="/favicon.png"
+      src="/favicon.svg"
       alt=""
       width={32}
       height={32}

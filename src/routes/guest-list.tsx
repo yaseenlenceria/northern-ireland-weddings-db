@@ -16,11 +16,11 @@ import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { JsonLd } from "@/components/site/JsonLd";
 import { SITE_NAME, absoluteUrl, pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Wedding Guest List Planner | Wedlist.ie";
+const TITLE = "Wedding Guest List Planner | WedHQ";
 const DESCRIPTION =
   "Free guest list planner for Irish weddings. Track names, sides, seats and RSVPs with a live headcount in your browser.";
-const STORAGE_KEY = "shortlist-ie-guest-list";
-const LEGACY_STORAGE_KEY = "niamh-weddings-guest-list";
+const STORAGE_KEY = "wedhq-guest-list";
+const LEGACY_STORAGE_KEYS = ["shortlist-ie-guest-list", "niamh-weddings-guest-list"];
 const SIDES = ["Bride", "Groom", "Both", "Other"];
 const RSVPS = ["pending", "yes", "no"];
 
@@ -42,7 +42,10 @@ function GuestListPage() {
 
   useEffect(() => {
     const saved =
-      window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_STORAGE_KEY);
+      window.localStorage.getItem(STORAGE_KEY) ??
+      LEGACY_STORAGE_KEYS.map((key) => window.localStorage.getItem(key)).find(
+        (value): value is string => Boolean(value),
+      );
     if (saved) setRows(JSON.parse(saved));
   }, []);
 

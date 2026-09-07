@@ -7,7 +7,7 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { listFairs } from "@/lib/directory.functions";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Wedding Fairs & Showcases in Ireland | Wedlist.ie";
+const TITLE = "Wedding Fairs & Showcases in Ireland | WedHQ";
 const DESCRIPTION =
   "Wedding fairs, open days and showcases across Ireland — see venues dressed, meet suppliers in person and book on the day.";
 

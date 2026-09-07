@@ -17,11 +17,11 @@ import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { JsonLd } from "@/components/site/JsonLd";
 import { SITE_NAME, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 
-const TITLE = "Wedding Checklist for Irish Weddings | Wedlist.ie";
+const TITLE = "Wedding Checklist for Irish Weddings | WedHQ";
 const DESCRIPTION =
   "A free wedding checklist for Irish couples. Tick off booking, legal, guest, styling and final-week tasks in your browser.";
-const STORAGE_KEY = "shortlist-ie-checklist-items";
-const LEGACY_STORAGE_KEY = "niamh-weddings-checklist-items";
+const STORAGE_KEY = "wedhq-checklist-items";
+const LEGACY_STORAGE_KEYS = ["shortlist-ie-checklist-items", "niamh-weddings-checklist-items"];
 const PHASES = [
   "12+ months",
   "9-12 months",
@@ -69,7 +69,10 @@ function ChecklistPage() {
 
   useEffect(() => {
     const saved =
-      window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_STORAGE_KEY);
+      window.localStorage.getItem(STORAGE_KEY) ??
+      LEGACY_STORAGE_KEYS.map((key) => window.localStorage.getItem(key)).find(
+        (value): value is string => Boolean(value),
+      );
     if (saved) setRows(JSON.parse(saved));
   }, []);
 

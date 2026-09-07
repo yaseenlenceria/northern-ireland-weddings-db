@@ -13,9 +13,9 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { submitEnquiry } from "@/lib/enquiries.functions";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Contact Wedlist.ie";
+const TITLE = "Contact WedHQ";
 const DESCRIPTION =
-  "Get in touch with Wedlist.ie — listing questions, profile claims, corrections to a supplier entry, or help using the planning tools.";
+  "Get in touch with WedHQ — listing questions, profile claims, corrections to a supplier entry, or help using the planning tools.";
 
 const FAQS = [
   {
@@ -24,7 +24,7 @@ const FAQS = [
   },
   {
     q: "Does it cost anything to be listed?",
-    a: "No. Listing your wedding business and receiving enquiries through Wedlist.ie is free.",
+    a: "No. Listing your wedding business and receiving enquiries through WedHQ is free.",
   },
   {
     q: "How do enquiries reach suppliers?",
@@ -90,7 +90,7 @@ function ContactPage() {
 
       <PageHeader
         eyebrow="Contact"
-        title="Talk to Wedlist.ie"
+        title="Talk to WedHQ"
         description="Listing questions, corrections, profile claims or help with the planning tools — this reaches us directly."
       >
         <Breadcrumbs items={[{ label: "Contact" }]} />

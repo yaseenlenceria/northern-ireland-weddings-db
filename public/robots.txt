@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://wedlist.ie/sitemap.xml
+Sitemap: https://wedhq.co.uk/sitemap.xml

@@ -16,11 +16,11 @@ import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { JsonLd } from "@/components/site/JsonLd";
 import { SITE_NAME, absoluteUrl, pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Wedding Budget Calculator (Ireland) | Wedlist.ie";
+const TITLE = "Wedding Budget Calculator (Ireland) | WedHQ";
 const DESCRIPTION =
   "Free wedding budget calculator for Irish couples. Add quotes, track deposits and see what is left to pay without needing an account.";
-const STORAGE_KEY = "shortlist-ie-budget-items";
-const LEGACY_STORAGE_KEY = "niamh-weddings-budget-items";
+const STORAGE_KEY = "wedhq-budget-items";
+const LEGACY_STORAGE_KEYS = ["shortlist-ie-budget-items", "niamh-weddings-budget-items"];
 
 const CATEGORIES = [
   "Venue & catering",
@@ -103,7 +103,10 @@ function BudgetPage() {
 
   useEffect(() => {
     const saved =
-      window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_STORAGE_KEY);
+      window.localStorage.getItem(STORAGE_KEY) ??
+      LEGACY_STORAGE_KEYS.map((key) => window.localStorage.getItem(key)).find(
+        (value): value is string => Boolean(value),
+      );
     if (saved) setRows(JSON.parse(saved));
   }, []);
 

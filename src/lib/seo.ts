@@ -5,10 +5,10 @@
  * so crawlers and social scrapers resolve one authoritative URL per page.
  */
 
-export const SITE_NAME = "Wedlist.ie";
+export const SITE_NAME = "WedHQ";
 
 /** Public origin used for canonical, og:url and sitemap entries. */
-export const SITE_URL = import.meta.env["VITE_SITE_URL"] ?? "https://wedlist.ie";
+export const SITE_URL = import.meta.env["VITE_SITE_URL"] ?? "https://wedhq.co.uk";
 
 /** Absolute URL for a site-relative path. */
 export const absoluteUrl = (path: string) =>

@@ -5,7 +5,7 @@ import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { JsonLd } from "@/components/site/JsonLd";
 import { SITE_NAME, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 
-const TITLE = "Free Wedding Planning Tools for Irish Couples | Wedlist.ie";
+const TITLE = "Free Wedding Planning Tools for Irish Couples | WedHQ";
 const DESCRIPTION =
   "Checklist, budget calculator, guest list planner and running order — free wedding planning tools that work in your browser.";
 

@@ -1,18 +1,12 @@
 {
-  "name": "Wedlist.ie",
-  "short_name": "Wedlist.ie",
+  "name": "WedHQ",
+  "short_name": "WedHQ",
   "description": "Ireland wedding venue and supplier directory with reviews, prices and free planning tools.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fffaf0",
   "theme_color": "#5f7b61",
   "icons": [
-    {
-      "src": "/favicon.png",
-      "sizes": "32x32",
-      "type": "image/png",
-      "purpose": "any"
-    },
     {
       "src": "/favicon.svg",
       "sizes": "any",

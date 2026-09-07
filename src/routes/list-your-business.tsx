@@ -21,7 +21,7 @@ import { submitEnquiry } from "@/lib/enquiries.functions";
 import { CATEGORIES, COUNTIES } from "@/lib/taxonomy";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "List Your Wedding Business on Wedlist.ie";
+const TITLE = "List Your Wedding Business on WedHQ";
 const DESCRIPTION =
   "Get your wedding business in front of Irish couples. Free listing, your own profile page, county and category pages that rank, and enquiries straight to your inbox.";
 
@@ -114,7 +114,7 @@ function ListBusinessPage() {
 
       <PageHeader
         eyebrow="For suppliers"
-        title="List your wedding business on Wedlist.ie"
+        title="List your wedding business on WedHQ"
         description="Couples plan their wedding by county and by category. Get listed where they're already looking, and let them enquire in two minutes."
       >
         <Breadcrumbs items={[{ label: "List Your Business" }]} />
