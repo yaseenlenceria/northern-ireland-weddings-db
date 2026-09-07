@@ -170,7 +170,7 @@ function HomePage() {
               name: SITE_NAME,
               logo: {
                 "@type": "ImageObject",
-                url: absoluteUrl("/logo.svg"),
+                url: absoluteUrl("/logo.png"),
                 width: 679,
                 height: 214,
               },
