@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import {
   CATEGORIES,
-  FEATURED_LOCATIONS,
+  IRELAND_COUNTIES,
+  UK_REGIONS,
   VENUE_SLUG,
   countySlug,
   listingLocationLabel,
@@ -11,10 +12,14 @@ import { SITE_NAME } from "@/lib/seo";
 
 export function Footer() {
   const topCategories = CATEGORIES.slice(0, 8);
+  const irishLocations = IRELAND_COUNTIES.slice(0, 6);
+  const ukLocations = ["London", "Essex", "Kent", "Surrey", "Berkshire", "Cheshire"].filter(
+    (location) => UK_REGIONS.some((item) => item === location),
+  );
 
   return (
     <footer className="mt-24 border-t border-border bg-ivory">
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-[1.1fr_1fr_1.35fr_1fr]">
         <div>
           <BrandLogo className="h-14 w-auto" />
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">
@@ -46,19 +51,40 @@ export function Footer() {
           <h3 id="footer-counties" className="eyebrow text-muted-foreground">
             Venues by location
           </h3>
-          <ul className="mt-4 grid grid-cols-2 gap-2 text-sm">
-            {FEATURED_LOCATIONS.slice(0, 10).map((county) => (
-              <li key={county}>
-                <Link
-                  to="/$directorySlug"
-                  params={{ directorySlug: `${VENUE_SLUG}-${countySlug(county)}` }}
-                  className="text-foreground/80 hover:text-primary"
-                >
-                  {listingLocationLabel(county)}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <div className="mt-4 grid grid-cols-2 gap-5 text-sm">
+            <div>
+              <p className="mb-2 font-medium text-foreground">Ireland</p>
+              <ul className="space-y-2">
+                {irishLocations.map((county) => (
+                  <li key={county}>
+                    <Link
+                      to="/$directorySlug"
+                      params={{ directorySlug: `${VENUE_SLUG}-${countySlug(county)}` }}
+                      className="text-foreground/80 hover:text-primary"
+                    >
+                      {listingLocationLabel(county, "Ireland")}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="mb-2 font-medium text-foreground">United Kingdom</p>
+              <ul className="space-y-2">
+                {ukLocations.map((location) => (
+                  <li key={location}>
+                    <Link
+                      to="/$directorySlug"
+                      params={{ directorySlug: `${VENUE_SLUG}-${countySlug(location)}` }}
+                      className="text-foreground/80 hover:text-primary"
+                    >
+                      {listingLocationLabel(location, "United Kingdom")}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </nav>
 
         <nav aria-labelledby="footer-plan">

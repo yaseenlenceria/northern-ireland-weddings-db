@@ -10,7 +10,8 @@ import { getHeaderHighlights } from "@/lib/directory.functions";
 import {
   CATEGORIES,
   CATEGORY_BY_KEY,
-  FEATURED_LOCATIONS,
+  IRELAND_COUNTIES,
+  UK_REGIONS,
   VENUE_SLUG,
   countySlug,
   listingLocationLabel,
@@ -32,6 +33,18 @@ const QUICK_CATEGORIES = [
   "wedding-makeup-artists",
   "wedding-planners",
 ] as const;
+
+const FEATURED_IRISH_LOCATIONS = IRELAND_COUNTIES.slice(0, 8);
+const FEATURED_UK_LOCATIONS = [
+  "London",
+  "West London",
+  "Berkshire",
+  "Cheshire",
+  "Essex",
+  "Kent",
+  "Surrey",
+  "West Sussex",
+].filter((location) => UK_REGIONS.some((item) => item === location));
 
 export function Header() {
   const [open, setOpen] = useState(false);
@@ -89,17 +102,33 @@ export function Header() {
 
                 <div>
                   <p className="eyebrow text-muted-foreground">Locations</p>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    {FEATURED_LOCATIONS.slice(0, 10).map((county) => (
-                      <Link
-                        key={county}
-                        to="/county/$county"
-                        params={{ county: countySlug(county) }}
-                        className="rounded-md px-2 py-1.5 text-sm text-foreground/80 hover:bg-primary-soft hover:text-primary"
-                      >
-                        {listingLocationLabel(county)}
-                      </Link>
-                    ))}
+                  <div className="mt-3 grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <p className="text-xs font-medium text-foreground">Ireland</p>
+                      {FEATURED_IRISH_LOCATIONS.slice(0, 6).map((county) => (
+                        <Link
+                          key={county}
+                          to="/county/$county"
+                          params={{ county: countySlug(county) }}
+                          className="rounded-md px-2 py-1.5 text-sm text-foreground/80 hover:bg-primary-soft hover:text-primary"
+                        >
+                          {listingLocationLabel(county, "Ireland")}
+                        </Link>
+                      ))}
+                    </div>
+                    <div className="grid gap-2">
+                      <p className="text-xs font-medium text-foreground">United Kingdom</p>
+                      {FEATURED_UK_LOCATIONS.slice(0, 6).map((location) => (
+                        <Link
+                          key={location}
+                          to="/$directorySlug"
+                          params={{ directorySlug: `${VENUE_SLUG}-${countySlug(location)}` }}
+                          className="rounded-md px-2 py-1.5 text-sm text-foreground/80 hover:bg-primary-soft hover:text-primary"
+                        >
+                          {listingLocationLabel(location, "United Kingdom")}
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
@@ -230,6 +259,24 @@ export function Header() {
                   </Link>
                 );
               })}
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <Link
+                to="/$directorySlug"
+                params={{ directorySlug: `${VENUE_SLUG}-ireland` }}
+                onClick={() => setOpen(false)}
+                className="rounded-md border border-border px-3 py-2 text-sm text-foreground/85"
+              >
+                Ireland venues
+              </Link>
+              <Link
+                to="/$directorySlug"
+                params={{ directorySlug: `${VENUE_SLUG}-uk` }}
+                onClick={() => setOpen(false)}
+                className="rounded-md border border-border px-3 py-2 text-sm text-foreground/85"
+              >
+                UK venues
+              </Link>
             </div>
             <div className="mt-3 flex gap-2">
               <Button asChild variant="outline" className="flex-1" onClick={() => setOpen(false)}>

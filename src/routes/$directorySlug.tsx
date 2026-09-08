@@ -10,10 +10,12 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { getDirectoryStats, listSuppliers, listVenues } from "@/lib/directory.functions";
 import {
   CATEGORIES,
-  LOCATIONS,
+  IRELAND_COUNTIES,
+  UK_REGIONS,
   VENUE_SLUG,
   countySlug,
   listingLocationLabel,
+  locationCountry,
   parseDirectorySlug,
 } from "@/lib/taxonomy";
 import { euro, priceGuide, weightedRating } from "@/lib/stats";
@@ -63,6 +65,120 @@ const searchSchema = z.object({
   date: fallback(z.string(), "").optional(),
 });
 
+const BALANCED_LOCATIONS = [
+  "Dublin",
+  "Cork",
+  "Galway",
+  "Kerry",
+  "Limerick",
+  "Wicklow",
+  "London",
+  "Essex",
+  "Kent",
+  "Surrey",
+  "Berkshire",
+  "Cheshire",
+];
+
+const CATEGORY_SEO: Record<string, { compare: string; ask: string; timing: string }> = {
+  "wedding-photographers": {
+    compare:
+      "Compare full galleries, editing style, backup plans, second-shooter options and delivery timelines before choosing a photographer.",
+    ask: "Ask to see a complete wedding gallery in similar light and weather, not only a short portfolio selection.",
+    timing: "Book early for peak-season Saturdays because experienced photographers are usually one of the first suppliers couples reserve.",
+  },
+  "wedding-venues": {
+    compare:
+      "Compare ceremony rooms, reception flow, food options, accommodation, accessibility, parking and wet-weather photo locations.",
+    ask: "Ask for a full quote with minimum numbers, corkage, late bar, setup time, supplier restrictions and every extra charge shown.",
+    timing:
+      "Popular venues can book twelve to eighteen months ahead, especially for summer Saturdays and bank-holiday weekends.",
+  },
+  "wedding-djs": {
+    compare:
+      "Compare setup quality, music planning, MC style, lighting, insurance, backup equipment and how requests are handled on the night.",
+    ask: "Ask whether the named DJ attends personally and what happens if equipment or illness causes a last-minute problem.",
+    timing: "Book once your venue confirms access, finish time and sound-limit rules.",
+  },
+  "wedding-bands": {
+    compare:
+      "Compare live videos, set length, first-dance options, DJ add-ons, travel costs and the amount of space the band needs.",
+    ask: "Ask for a live performance video from a real wedding or event, plus a written list of what is included.",
+    timing: "Strong live bands often book well ahead for Friday and Saturday dates.",
+  },
+  "wedding-florists": {
+    compare:
+      "Compare bouquet style, ceremony installations, table florals, delivery times, repurposing options and seasonal flower advice.",
+    ask: "Ask what can be reused from ceremony to reception and what flowers are realistic for your wedding month.",
+    timing: "Book after the venue and colour direction are clear, then finalise exact stems closer to the wedding.",
+  },
+  "make-up-artists": {
+    compare:
+      "Compare trial availability, morning schedule, skin preparation, bridal-party numbers, travel fees and product style.",
+    ask: "Ask how long each person takes on the wedding morning and whether touch-up kits or second artists are available.",
+    timing: "Book early for peak mornings, especially when hair and makeup teams need to coordinate.",
+  },
+  "wedding-videographers": {
+    compare:
+      "Compare highlight length, full-film options, audio capture, drone rules, delivery times and how the videographer works with your photographer.",
+    ask: "Ask to watch a full wedding film so you can judge sound, pacing and ceremony coverage.",
+    timing: "Book alongside photography when possible so the two teams can work smoothly together.",
+  },
+  "wedding-planners": {
+    compare:
+      "Compare full planning, partial planning, styling, supplier sourcing, budget management and on-the-day coordination separately.",
+    ask: "Ask what decisions remain with you and how supplier payments, contracts and timelines are tracked.",
+    timing: "Book at the start for full planning or at least several months out for coordination.",
+  },
+};
+
+function seoAdvice(categoryKey: string | undefined, plural: string, singular: string, place: string) {
+  const fallback = CATEGORY_SEO[categoryKey ?? ""] ?? {
+    compare: `Compare portfolios, availability, travel terms, review quality and exactly what is included before choosing ${plural.toLowerCase()} in ${place}.`,
+    ask: "Ask for a written quote, clear payment terms, setup requirements and recent examples from weddings similar to yours.",
+    timing:
+      "Book key suppliers as soon as your date and venue are confirmed, especially for peak-season weekends.",
+  };
+  return [
+    {
+      title: `How to compare ${plural.toLowerCase()} in ${place}`,
+      body: fallback.compare,
+    },
+    {
+      title: `Questions to ask each ${singular.toLowerCase()}`,
+      body: fallback.ask,
+    },
+    {
+      title: `When to enquire in ${place}`,
+      body: fallback.timing,
+    },
+  ];
+}
+
+function locationGroupsFor(target: ReturnType<typeof parseDirectorySlug>) {
+  if (!target) return [];
+  if (target.country === "United Kingdom") {
+    return [{ label: "United Kingdom", country: "United Kingdom" as const, locations: UK_REGIONS }];
+  }
+  if (target.country === "Ireland") {
+    return [{ label: "Ireland", country: "Ireland" as const, locations: IRELAND_COUNTIES }];
+  }
+  return [
+    {
+      label: "Ireland",
+      country: "Ireland" as const,
+      locations: BALANCED_LOCATIONS.filter((location) => locationCountry(location) === "Ireland"),
+    },
+    {
+      label: "United Kingdom",
+      country: "United Kingdom" as const,
+      locations: BALANCED_LOCATIONS.filter(
+        (location) => locationCountry(location) === "United Kingdom",
+      ),
+    },
+  ];
+}
+
 /** Copy for the page title / H1 / meta, driven by the real listing count. */
 function buildCopy(opts: {
   plural: string;
@@ -85,7 +201,7 @@ function buildCopy(opts: {
 
   const priceBit = priced ? ` Typical spend around ${euro(priced.median)}.` : "";
   const description = clamp(
-    `Compare ${count.toLocaleString()} ${plural.toLowerCase()} in ${place}, ranked and reviewed.${priceBit} See galleries, real details and enquire directly — free.`,
+    `Compare ${count.toLocaleString()} ${plural.toLowerCase()} in ${place}, ranked with live reviews, images, prices and enquiry links.${priceBit}`,
   );
 
   return {
@@ -222,11 +338,13 @@ function DirectoryPage() {
         ? "ireland"
         : "uk-and-ireland";
   const plural = target.category?.plural ?? "Wedding Venues";
-  const singular = target.category?.label ?? "venue";
+  const singular = countLabel(plural, 1);
 
   const priced = priceGuide(stats.prices);
   const rating = weightedRating(stats.rated);
   const copy = buildCopy({ plural, place, count: total, page, priced });
+  const advice = seoAdvice(target.category?.key ?? (target.kind === "venues" ? VENUE_SLUG : undefined), plural, singular, place);
+  const locationGroups = locationGroupsFor(target);
 
   const rankedSuppliers = page === 1 ? supplierRows.slice(0, TOP_N) : [];
   const rankedVenues = page === 1 ? venueRows.slice(0, TOP_N) : [];
@@ -267,6 +385,39 @@ function DirectoryPage() {
           { name: "Home", path: "/" },
           { name: copy.h1, path: `/${directorySlug}` },
         ])}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: copy.h1,
+          description: copy.description,
+          url: absoluteUrl(`/${directorySlug}`),
+          isPartOf: {
+            "@type": "WebSite",
+            name: "WedHQ",
+            url: absoluteUrl("/"),
+          },
+          about: target.category?.plural ?? "Wedding Venues",
+          areaServed:
+            target.scope === "all"
+              ? ["Ireland", "United Kingdom"]
+              : target.country === "United Kingdom"
+                ? "United Kingdom"
+                : target.country === "Ireland"
+                  ? "Ireland"
+                  : place,
+          mainEntity: {
+            "@type": "ItemList",
+            numberOfItems: total,
+            itemListElement: rankedItems.map((item, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              name: item.name,
+              url: absoluteUrl(item.path),
+            })),
+          },
+        }}
       />
       {rankedItems.length ? (
         <JsonLd
@@ -440,8 +591,20 @@ function DirectoryPage() {
         </>
       )}
 
-      <Section title={`Choosing ${plural.toLowerCase()} in ${place}`}>
-        <div className="grid gap-6 md:grid-cols-2">
+      <Section
+        title={`Choosing ${plural.toLowerCase()} in ${place}`}
+        description={`Use this page to compare live listings in ${place} by photos, review signals, pricing notes, capacity and direct enquiry options.`}
+      >
+        <div className="grid gap-6 lg:grid-cols-3">
+          {advice.map((item) => (
+            <div key={item.title} className="rounded-xl border border-border bg-card p-6">
+              <h3 className="font-serif text-lg">{item.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.body}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
           <div className="rounded-xl border border-border bg-card p-6">
             <h3 className="flex items-center gap-2 font-serif text-lg">
               <Award className="size-4 text-primary" /> What to ask before you book
@@ -469,16 +632,23 @@ function DirectoryPage() {
       </Section>
 
       <Section tone="ivory" title={`${plural} by location`}>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-          {LOCATIONS.map((county) => (
-            <Link
-              key={county}
-              to="/$directorySlug"
-              params={{ directorySlug: `${baseSlug}-${countySlug(county)}` }}
-              className="rounded-lg border border-border bg-card px-3 py-3 text-center text-sm shadow-soft hover:border-primary/40 hover:text-primary"
-            >
-              {listingLocationLabel(county)}
-            </Link>
+        <div className="grid gap-8 lg:grid-cols-2">
+          {locationGroups.map((group) => (
+            <div key={group.label}>
+              <h3 className="font-serif text-xl">{group.label}</h3>
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {group.locations.map((county) => (
+                  <Link
+                    key={county}
+                    to="/$directorySlug"
+                    params={{ directorySlug: `${baseSlug}-${countySlug(county)}` }}
+                    className="rounded-lg border border-border bg-card px-3 py-3 text-center text-sm shadow-soft hover:border-primary/40 hover:text-primary"
+                  >
+                    {listingLocationLabel(county, group.country)}
+                  </Link>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </Section>

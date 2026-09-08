@@ -46,9 +46,10 @@ export function pageMeta({
     { property: "og:url", content: absoluteUrl(path) },
     { name: "twitter:card", content: "summary_large_image" },
   ];
-  if (image && image.startsWith("https://")) {
-    meta.push({ property: "og:image", content: image });
-    meta.push({ name: "twitter:image", content: image });
+  if (image && (image.startsWith("https://") || image.startsWith("/"))) {
+    const imageUrl = image.startsWith("/") ? absoluteUrl(image) : image;
+    meta.push({ property: "og:image", content: imageUrl });
+    meta.push({ name: "twitter:image", content: imageUrl });
   }
   meta.push({
     name: "robots",
