@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS venues (
   longitude numeric,
   google_maps_url text,
   phone text,
+  email text,
   source_url text,
   source_site text,
   website text,
@@ -113,6 +114,7 @@ ALTER TABLE venues ADD COLUMN IF NOT EXISTS country text NOT NULL DEFAULT 'Irela
 ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS country text NOT NULL DEFAULT 'Ireland';
 ALTER TABLE venues ADD COLUMN IF NOT EXISTS town_city text;
 ALTER TABLE venues ADD COLUMN IF NOT EXISTS google_maps_url text;
+ALTER TABLE venues ADD COLUMN IF NOT EXISTS email text;
 ALTER TABLE venues ADD COLUMN IF NOT EXISTS source_site text;
 ALTER TABLE venues ADD COLUMN IF NOT EXISTS facebook_url text;
 ALTER TABLE venues ADD COLUMN IF NOT EXISTS instagram_url text;
@@ -171,9 +173,15 @@ CREATE TABLE IF NOT EXISTS enquiries (
   guest_count integer,
   message text NOT NULL,
   metadata jsonb NOT NULL DEFAULT '{}',
+  email_status text NOT NULL DEFAULT 'pending',
+  email_sent_at timestamptz,
+  email_error text,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 ALTER TABLE wedding_fairs ADD COLUMN IF NOT EXISTS country text NOT NULL DEFAULT 'Ireland';
+ALTER TABLE enquiries ADD COLUMN IF NOT EXISTS email_status text NOT NULL DEFAULT 'pending';
+ALTER TABLE enquiries ADD COLUMN IF NOT EXISTS email_sent_at timestamptz;
+ALTER TABLE enquiries ADD COLUMN IF NOT EXISTS email_error text;
 
 CREATE INDEX IF NOT EXISTS venues_country_idx ON venues(country);
 CREATE INDEX IF NOT EXISTS venues_county_idx ON venues(county);
@@ -196,4 +204,6 @@ CREATE INDEX IF NOT EXISTS imported_reviews_venue_idx ON imported_reviews(venue_
 CREATE INDEX IF NOT EXISTS imported_reviews_supplier_idx ON imported_reviews(supplier_id);
 CREATE INDEX IF NOT EXISTS enquiries_supplier_idx ON enquiries(supplier_id);
 CREATE INDEX IF NOT EXISTS enquiries_venue_idx ON enquiries(venue_id);
+CREATE INDEX IF NOT EXISTS enquiries_kind_idx ON enquiries(kind);
+CREATE INDEX IF NOT EXISTS enquiries_email_status_idx ON enquiries(email_status);
 CREATE INDEX IF NOT EXISTS enquiries_created_at_idx ON enquiries(created_at DESC);

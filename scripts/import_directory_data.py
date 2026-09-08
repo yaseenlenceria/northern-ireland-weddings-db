@@ -291,6 +291,7 @@ def venue_from_weddingdates(row: dict[str, Any]) -> dict[str, Any] | None:
         "latitude": number(row.get("Latitude")),
         "longitude": number(row.get("Longitude")),
         "phone": clean_text(row.get("Phone")),
+        "email": clean_text(row.get("Email")),
         "source_url": clean_text(row.get("Profile URL")),
         "website": clean_text(row.get("Website")),
     }
@@ -329,6 +330,7 @@ def venue_from_hitched(row: dict[str, Any]) -> dict[str, Any] | None:
         "latitude": number(row.get("Latitude")),
         "longitude": number(row.get("Longitude")),
         "phone": clean_text(row.get("Phone")),
+        "email": clean_text(row.get("Email")),
         "source_url": clean_text(row.get("Profile URL")),
         "website": clean_text(row.get("Website")),
     }
@@ -714,6 +716,7 @@ def venue_from_master(row: dict[str, Any]) -> dict[str, Any] | None:
         "latitude": number(row.get("Latitude")),
         "longitude": number(row.get("Longitude")),
         "phone": clean_mojibake(row.get("Phone")),
+        "email": clean_mojibake(row.get("Email")),
         "source_url": profile_url_from_row(row),
         "website": clean_mojibake(row.get("Website")),
     }
@@ -939,6 +942,7 @@ def venue_from_hitched_uk(row: dict[str, Any]) -> dict[str, Any] | None:
         "longitude": number(row.get("Longitude")),
         "google_maps_url": clean_url(row.get("Google Maps URL")),
         "phone": clean_phone(row.get("Phone")),
+        "email": clean_mojibake(row.get("Email")),
         "source_url": source_url,
         "source_site": clean_mojibake(row.get("Source Site")) or "hitched.co.uk",
         "website": clean_url(row.get("Website")),

@@ -66,6 +66,7 @@ function ListBusinessPage() {
   const sendEnquiry = useServerFn(submitEnquiry);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState("");
   const [category, setCategory] = useState(CATEGORIES[0]!.key);
   const [county, setCounty] = useState<string>(IRELAND_COUNTIES[5]);
 
@@ -100,6 +101,7 @@ function ListBusinessPage() {
     }
 
     setSending(false);
+    setSubmittedEmail(String(form.get("email") ?? ""));
     setSent(true);
     toast.success("Request received — we'll be in touch about your listing.");
   };
@@ -166,6 +168,11 @@ function ListBusinessPage() {
               <p className="mt-2 text-sm text-accent-foreground">
                 We'll review your details and email you about setting up the profile.
               </p>
+              <Button asChild className="mt-5">
+                <Link to="/auth" search={{ mode: "signup", email: submittedEmail || undefined }}>
+                  Create business account
+                </Link>
+              </Button>
             </div>
           ) : (
             <form

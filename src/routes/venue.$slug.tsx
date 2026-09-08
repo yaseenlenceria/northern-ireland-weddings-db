@@ -371,6 +371,14 @@ function VenueProfile() {
                   </a>
                 </li>
               ) : null}
+              {venue.email ? (
+                <li className="flex items-center gap-2">
+                  <Mail className="size-4 text-primary" />
+                  <a href={`mailto:${venue.email}`} className="truncate hover:text-primary">
+                    {venue.email}
+                  </a>
+                </li>
+              ) : null}
               <li className="flex items-center gap-2">
                 <Mail className="size-4 text-primary" />
                 <a href="#enquire" className="hover:text-primary">

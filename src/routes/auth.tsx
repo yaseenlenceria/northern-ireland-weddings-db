@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { zodValidator } from "@tanstack/zod-adapter";
 import { toast } from "sonner";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +16,13 @@ const TITLE = "Sign In or Create a Free Account | WedHQ";
 const DESCRIPTION =
   "Create a free WedHQ account to shortlist suppliers, send enquiries and save your wedding checklist, budget and guest list.";
 
+const searchSchema = z.object({
+  mode: z.enum(["signin", "signup"]).optional().catch("signin"),
+  email: z.string().optional().catch(""),
+});
+
 export const Route = createFileRoute("/auth")({
+  validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: pageMeta({
       title: TITLE,
@@ -28,9 +36,11 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
+  const search = Route.useSearch();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
+  const initialTab = search.mode === "signup" ? "signup" : "signin";
 
   useEffect(() => {
     if (!loading && user) void navigate({ to: "/dashboard" });
@@ -118,7 +128,7 @@ function AuthPage() {
               <span className="h-px flex-1 bg-border" />
             </div>
 
-            <Tabs defaultValue="signin">
+            <Tabs defaultValue={initialTab}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin">Sign in</TabsTrigger>
                 <TabsTrigger value="signup">Create account</TabsTrigger>
@@ -128,7 +138,14 @@ function AuthPage() {
                 <form onSubmit={signIn} className="grid gap-4 pt-4">
                   <div className="grid gap-1.5">
                     <Label htmlFor="in-email">Email</Label>
-                    <Input id="in-email" name="email" type="email" required autoComplete="email" />
+                    <Input
+                      id="in-email"
+                      name="email"
+                      type="email"
+                      required
+                      autoComplete="email"
+                      defaultValue={search.email ?? ""}
+                    />
                   </div>
                   <div className="grid gap-1.5">
                     <Label htmlFor="in-password">Password</Label>
@@ -154,7 +171,14 @@ function AuthPage() {
                   </div>
                   <div className="grid gap-1.5">
                     <Label htmlFor="up-email">Email</Label>
-                    <Input id="up-email" name="email" type="email" required autoComplete="email" />
+                    <Input
+                      id="up-email"
+                      name="email"
+                      type="email"
+                      required
+                      autoComplete="email"
+                      defaultValue={search.email ?? ""}
+                    />
                   </div>
                   <div className="grid gap-1.5">
                     <Label htmlFor="up-password">Password</Label>
