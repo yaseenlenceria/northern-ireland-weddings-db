@@ -559,10 +559,20 @@ def useful_profile_text(value: Any) -> str | None:
     text = clean_mojibake(value)
     if not text:
         return None
+    text = strip_source_mentions(text)
+    if not text:
+        return None
     lowered = text.lower()
     if lowered.startswith("awards advertise about contact welcome!") or "use our venue finder > suppliers" in lowered:
         return None
     return text
+
+
+def strip_source_mentions(value: str) -> str:
+    text = re.sub(r"https?://(?:www\.)?hitched\.(?:co\.uk|ie)[^\s,;|)]*", "", value, flags=re.I)
+    text = re.sub(r"www\.hitched\.(?:co\.uk|ie)[^\s,;|)]*", "", text, flags=re.I)
+    text = re.sub(r"https?://twitter\.com/hitchedcouk[^\s,;|)]*", "", text, flags=re.I)
+    return re.sub(r"\s+", " ", text).strip(" ,;|")
 
 
 def boolish(value: Any) -> bool:

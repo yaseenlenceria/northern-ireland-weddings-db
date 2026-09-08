@@ -287,6 +287,28 @@ async function cleanupSourceSocialLinks(sql) {
         WHERE lower(COALESCE(${quoteIdentifier(column)}, '')) LIKE '%hitched.%'
       `);
     }
+
+    const textColumns =
+      table === "suppliers" ? ["overview", "description", "slogan"] : ["overview", "description"];
+    for (const column of textColumns) {
+      await sql.unsafe(`
+        UPDATE ${quoteIdentifier(table)}
+        SET ${quoteIdentifier(column)} = NULLIF(
+          btrim(
+            regexp_replace(
+              regexp_replace(
+                regexp_replace(${quoteIdentifier(column)}, 'https?://(www\\.)?hitched\\.(co\\.uk|ie)[^[:space:],;|)]*', '', 'gi'),
+                'www\\.hitched\\.(co\\.uk|ie)[^[:space:],;|)]*', '', 'gi'
+              ),
+              'https?://twitter\\.com/hitchedcouk[^[:space:],;|)]*', '', 'gi'
+            ),
+            ' ,;|'
+          ),
+          ''
+        )
+        WHERE ${quoteIdentifier(column)} ~* 'hitched\\.(co\\.uk|ie)|twitter\\.com/hitchedcouk'
+      `);
+    }
   }
 }
 
