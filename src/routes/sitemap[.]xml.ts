@@ -10,6 +10,14 @@ interface SitemapEntry {
   priority?: string;
 }
 
+const escapeXml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+
 /** Static, publicly indexable routes. Auth-only and noindex routes are excluded. */
 const STATIC_PATHS: SitemapEntry[] = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
@@ -121,7 +129,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           .map((e) =>
             [
               "  <url>",
-              `    <loc>${SITE_URL}${e.path === "/" ? "/" : e.path}</loc>`,
+              `    <loc>${escapeXml(`${SITE_URL}${e.path === "/" ? "/" : e.path}`)}</loc>`,
               e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
               e.priority ? `    <priority>${e.priority}</priority>` : null,
               "  </url>",

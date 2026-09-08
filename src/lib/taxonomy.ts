@@ -278,23 +278,56 @@ export const UK_REGIONS = [
   "Scotland",
   "Wales",
   "Northern Ireland",
+  "Aberdeenshire",
+  "Angus",
+  "Argyll and Bute",
+  "Ayrshire",
+  "Bedfordshire",
   "Berkshire",
+  "Bristol",
   "Buckinghamshire",
   "Cambridgeshire",
+  "Central London",
   "Cheshire",
   "Cornwall",
+  "Cumbria",
+  "Derbyshire",
+  "Devon",
+  "Dorset",
+  "East Riding of Yorkshire",
+  "East Sussex",
+  "Edinburgh",
   "Essex",
+  "Fife",
+  "Fife & Angus",
+  "Glasgow",
+  "Gloucestershire",
   "Greater Manchester",
   "Hampshire",
+  "Herefordshire",
   "Hertfordshire",
+  "Isle of Wight",
   "Kent",
   "Lancashire",
+  "Leicestershire",
+  "Lincolnshire",
+  "Merseyside",
   "Middlesex",
+  "Norfolk",
+  "Northamptonshire",
   "North Yorkshire",
   "Nottinghamshire",
+  "Oxfordshire",
+  "Shropshire",
+  "Somerset",
+  "Staffordshire",
+  "Suffolk",
   "Surrey",
+  "Warwickshire",
   "West Sussex",
   "West Yorkshire",
+  "Wiltshire",
+  "Worcestershire",
 ] as const;
 
 export const COUNTIES = IRELAND_COUNTIES;
@@ -325,7 +358,12 @@ export const FEATURED_LOCATIONS = [
   "Berkshire",
 ];
 
-export const locationSlug = (location: string) => location.toLowerCase().replace(/\s+/g, "-");
+export const locationSlug = (location: string) =>
+  location
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 export const countySlug = locationSlug;
 
 export const locationCountry = (location: string) =>
