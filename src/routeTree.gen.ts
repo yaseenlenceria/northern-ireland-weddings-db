@@ -14,6 +14,7 @@ import { Route as DirectorySlugRouteImport } from './routes/$directorySlug'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BudgetCalculatorRouteImport } from './routes/budget-calculator'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as InformationSlugRouteImport } from './routes/information.$slug'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as FindSuppliersRouteImport } from './routes/find-suppliers'
 import { Route as GuestListRouteImport } from './routes/guest-list'
@@ -55,6 +56,11 @@ const BudgetCalculatorRoute = BudgetCalculatorRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InformationSlugRoute = InformationSlugRouteImport.update({
+  id: '/information/$slug',
+  path: '/information/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/budget-calculator': typeof BudgetCalculatorRoute
   '/contact': typeof ContactRoute
+  '/information/$slug': typeof InformationSlugRoute
   '/dashboard': typeof DashboardRoute
   '/find-suppliers': typeof FindSuppliersRoute
   '/guest-list': typeof GuestListRoute
@@ -297,6 +304,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BudgetCalculatorRoute: typeof BudgetCalculatorRoute
   ContactRoute: typeof ContactRoute
+  InformationSlugRoute: typeof InformationSlugRoute
   DashboardRoute: typeof DashboardRoute
   FindSuppliersRoute: typeof FindSuppliersRoute
   GuestListRoute: typeof GuestListRoute
@@ -351,6 +359,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/information/$slug': {
+      id: '/information/$slug'
+      path: '/information/$slug'
+      fullPath: '/information/$slug'
+      preLoaderRoute: typeof InformationSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
