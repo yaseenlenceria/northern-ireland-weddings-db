@@ -32,6 +32,16 @@ const STATIC_PATHS: SitemapEntry[] = [
   { path: "/wedding-timeline", changefreq: "monthly", priority: "0.6" },
   { path: "/list-your-business", changefreq: "monthly", priority: "0.6" },
   { path: "/contact", changefreq: "yearly", priority: "0.4" },
+  { path: "/information/about", changefreq: "yearly", priority: "0.3" },
+  { path: "/information/editorial-team", changefreq: "yearly", priority: "0.3" },
+  { path: "/information/careers", changefreq: "yearly", priority: "0.2" },
+  { path: "/information/legal-hub", changefreq: "yearly", priority: "0.3" },
+  { path: "/information/transparency-hub", changefreq: "yearly", priority: "0.3" },
+  { path: "/information/terms-of-use", changefreq: "yearly", priority: "0.3" },
+  { path: "/information/terms-of-purchase", changefreq: "yearly", priority: "0.3" },
+  { path: "/information/privacy", changefreq: "yearly", priority: "0.3" },
+  { path: "/information/cookies", changefreq: "yearly", priority: "0.3" },
+  { path: "/information/your-privacy-choices", changefreq: "yearly", priority: "0.3" },
 ];
 
 export const Route = createFileRoute("/sitemap.xml")({
