@@ -284,7 +284,7 @@ async function cleanupSourceSocialLinks(sql) {
       await sql.unsafe(`
         UPDATE ${quoteIdentifier(table)}
         SET ${quoteIdentifier(column)} = NULL
-        WHERE lower(COALESCE(${quoteIdentifier(column)}, '')) LIKE '%hitched.%'
+        WHERE lower(COALESCE(${quoteIdentifier(column)}, '')) LIKE '%hitched%'
       `);
     }
 
@@ -297,16 +297,25 @@ async function cleanupSourceSocialLinks(sql) {
           btrim(
             regexp_replace(
               regexp_replace(
-                regexp_replace(${quoteIdentifier(column)}, 'https?://(www\\.)?hitched\\.(co\\.uk|ie)[^[:space:],;|)]*', '', 'gi'),
-                'www\\.hitched\\.(co\\.uk|ie)[^[:space:],;|)]*', '', 'gi'
+                regexp_replace(
+                  regexp_replace(${quoteIdentifier(column)}, 'https?://(www\\.)?hitched\\.(co\\.uk|ie)[^[:space:],;|)]*', '', 'gi'),
+                  'www\\.hitched\\.(co\\.uk|ie)[^[:space:],;|)]*',
+                  '',
+                  'gi'
+                ),
+                'https?://twitter\\.com/hitchedcouk[^[:space:],;|)]*',
+                '',
+                'gi'
               ),
-              'https?://twitter\\.com/hitchedcouk[^[:space:],;|)]*', '', 'gi'
+              '\\yHitched(\\.co\\.uk|\\.ie)?\\y',
+              'wedding industry',
+              'gi'
             ),
             ' ,;|'
           ),
           ''
         )
-        WHERE ${quoteIdentifier(column)} ~* 'hitched\\.(co\\.uk|ie)|twitter\\.com/hitchedcouk'
+        WHERE ${quoteIdentifier(column)} ~* 'hitched(\\.(co\\.uk|ie))?|twitter\\.com/hitchedcouk'
       `);
     }
   }

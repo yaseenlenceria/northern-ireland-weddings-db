@@ -572,6 +572,7 @@ def strip_source_mentions(value: str) -> str:
     text = re.sub(r"https?://(?:www\.)?hitched\.(?:co\.uk|ie)[^\s,;|)]*", "", value, flags=re.I)
     text = re.sub(r"www\.hitched\.(?:co\.uk|ie)[^\s,;|)]*", "", text, flags=re.I)
     text = re.sub(r"https?://twitter\.com/hitchedcouk[^\s,;|)]*", "", text, flags=re.I)
+    text = re.sub(r"\bHitched(?:\.co\.uk|\.ie)?\b", "wedding industry", text, flags=re.I)
     return re.sub(r"\s+", " ", text).strip(" ,;|")
 
 
