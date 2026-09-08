@@ -203,6 +203,7 @@ function SupplierProfile() {
             "@type": "PostalAddress",
             streetAddress: supplier.address ?? undefined,
             addressRegion: supplier.county ?? undefined,
+            postalCode: supplier.postcode ?? undefined,
             addressCountry: supplier.country === "United Kingdom" ? "GB" : "IE",
           },
           ...(supplier.latitude && supplier.longitude
@@ -330,6 +331,7 @@ function SupplierProfile() {
                 <p className="mt-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
                   <MapPin className="size-4" />
                   {supplier.address ? `${supplier.address}, ` : ""}
+                  {supplier.postcode ? `${supplier.postcode}, ` : ""}
                   {location}
                 </p>
               ) : null}

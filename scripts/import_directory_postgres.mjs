@@ -12,10 +12,11 @@ function loadEnv(text) {
     const line = rawLine.trim();
     if (!line || line.startsWith("#") || !line.includes("=")) continue;
     const [key, ...rest] = line.split("=");
-    env[key.trim()] = rest
+    const value = rest
       .join("=")
       .trim()
       .replace(/^['"]|['"]$/g, "");
+    if (value) env[key.trim()] = value;
   }
   return env;
 }
@@ -300,6 +301,14 @@ const env = {
     .catch(() => ({}))),
   ...(await fs
     .readFile(path.join(root, ".env.development.local"), "utf8")
+    .then(loadEnv)
+    .catch(() => ({}))),
+  ...(await fs
+    .readFile(path.join(root, ".env.vercel.local"), "utf8")
+    .then(loadEnv)
+    .catch(() => ({}))),
+  ...(await fs
+    .readFile(path.join(root, ".env.vercel.production.local"), "utf8")
     .then(loadEnv)
     .catch(() => ({}))),
   ...process.env,

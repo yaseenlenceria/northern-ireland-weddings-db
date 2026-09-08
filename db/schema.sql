@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS suppliers (
   service_areas text[],
   image_count integer,
   address text,
+  postcode text,
   latitude numeric,
   longitude numeric,
   google_maps_url text,
@@ -119,6 +120,7 @@ ALTER TABLE venues ADD COLUMN IF NOT EXISTS twitter_url text;
 ALTER TABLE venues ADD COLUMN IF NOT EXISTS rating_label text;
 ALTER TABLE venues ADD COLUMN IF NOT EXISTS recommended_percent text;
 ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS town_city text;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS postcode text;
 ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS google_maps_url text;
 ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS source_site text;
 ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS rating_label text;

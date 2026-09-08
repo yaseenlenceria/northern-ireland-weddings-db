@@ -361,6 +361,14 @@ def clean_phone(value: Any) -> str | None:
     return text
 
 
+def postcode_like(value: Any) -> str | None:
+    text = clean_mojibake(value)
+    if not text:
+        return None
+    match = re.search(r"\b[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\b", text, flags=re.I)
+    return match.group(0).upper() if match else None
+
+
 def clean_url(value: Any, host: str | None = None) -> str | None:
     text = clean_mojibake(value)
     if not text:
@@ -501,6 +509,7 @@ CANONICAL_CATEGORY_ALIASES = {
     "invitations-and-stationery": "wedding-invitations-stationery",
     "jewellers": "wedding-jewellers",
     "magicians": "wedding-entertainment-photobooths",
+    "marquee-and-tipi-hire": "marquee-hire",
     "mobile-bar-services": "catering-wine",
     "mobile-bars-and-food-trucks": "catering-wine",
     "mobile-bars-and-food-trucks-mobile-bars-and-food-trucks": "catering-wine",
@@ -925,26 +934,36 @@ def supplier_from_hitched_uk(row: dict[str, Any]) -> dict[str, Any] | None:
     name = clean_mojibake(row.get("Name"))
     if not name:
         return None
-    county = clean_mojibake(first(row.get("Category"), row.get("County/Region")))
+    county = clean_mojibake(row.get("Category"))
+    town_city = clean_mojibake(row.get("County/Region"))
     category = clean_mojibake(row.get("Description Word Count")) or "Wedding Suppliers"
     gallery = split_images(row.get("All FAQs"))
     logo = clean_image_url(row.get("Other Features"))
     source_url = clean_url(row.get("Breadcrumb"))
+    price_text = clean_mojibake(row.get("Max Guests"))
+    website = clean_url(row.get("Phone"))
+    facebook = clean_url(row.get("Website"), "www.facebook.com")
+    instagram = clean_url(row.get("Facebook"), "www.instagram.com")
+    twitter = clean_url(row.get("Instagram"), "twitter.com")
     return {
         "slug": slugify(f"{name}-{county or ''}-uk"),
         "name": name,
         "categories": [category_key(category)],
         "country": "United Kingdom",
         "county": county,
-        "town_city": clean_mojibake(row.get("Town/City")),
-        "avg_price": clean_mojibake(row.get("Max Guests")),
-        "avg_price_num": number(row.get("Max Guests")),
+        "town_city": town_city,
+        "avg_price": price_text,
+        "avg_price_num": number(price_text),
         "rating": number(row.get("Price From")),
         "review_count": integer(row.get("Rating Label")),
         "rating_label": clean_mojibake(row.get("Review Count")),
-        "recommended_percent": clean_mojibake(row.get("Recommended %")),
+        "recommended_percent": clean_mojibake(row.get("Review Count")),
         "overview": useful_profile_text(row.get("Twitter/X")),
-        "description": first(useful_profile_text(row.get("Twitter/X")), useful_profile_text(row.get("Services"))),
+        "description": first(
+            useful_profile_text(row.get("Twitter/X")),
+            useful_profile_text(row.get("Services")),
+            useful_profile_text(row.get("Leisure Facilities")),
+        ),
         "slogan": None,
         "logo_image": logo,
         "banner_image": logo,
@@ -953,9 +972,10 @@ def supplier_from_hitched_uk(row: dict[str, Any]) -> dict[str, Any] | None:
         "featured": boolish(row.get("On Platform Since")),
         "award_winner": False,
         "package_plan": "UK directory",
-        "service_areas": location_list(county, row.get("Category"), row.get("Town/City")),
+        "service_areas": location_list(row.get("Category"), row.get("County/Region"), row.get("Town/City")),
         "image_count": integer(row.get("Logo Image")) or (len(gallery) if gallery else None),
-        "address": clean_mojibake(first(row.get("Full Address"), row.get("Town/City"))),
+        "address": clean_mojibake(first(row.get("Town/City"), row.get("Full Address"))),
+        "postcode": postcode_like(first(row.get("Postcode"), row.get("Street"), row.get("Town/City"))),
         "latitude": number(row.get("Recommended %")),
         "longitude": number(row.get("Latitude")),
         "google_maps_url": clean_url(row.get("Longitude")),
@@ -965,12 +985,12 @@ def supplier_from_hitched_uk(row: dict[str, Any]) -> dict[str, Any] | None:
         "source_url": source_url,
         "source_site": "hitched.co.uk",
         "profile_url": source_url,
-        "website": clean_url(row.get("Phone")),
-        "facebook_url": clean_url(row.get("Website"), "www.facebook.com"),
-        "instagram_url": clean_url(row.get("Facebook"), "www.instagram.com"),
+        "website": website,
+        "facebook_url": facebook,
+        "instagram_url": instagram,
         "tiktok_url": None,
         "youtube_url": None,
-        "twitter_url": clean_url(row.get("Instagram"), "twitter.com"),
+        "twitter_url": twitter,
     }
 
 
@@ -1028,7 +1048,7 @@ def review_records(parent_kind: str, parent_id: str, row: dict[str, Any]) -> lis
         row.get("Top Reviews (verbatim)"),
         row.get("Review Highlights (3)"),
     )
-    for index, review in enumerate(parse_review_blob(review_blob)[:20], start=1):
+    for index, review in enumerate(parse_review_blob(review_blob), start=1):
         out.append({
             "id": stable_id("review", f"{parent_id}:parsed:{index}:{review.get('title') or ''}:{review['body'][:80]}"),
             "venue_id": parent_id if parent_kind == "venue" else None,
@@ -1041,7 +1061,7 @@ def review_records(parent_kind: str, parent_id: str, row: dict[str, Any]) -> lis
             "source_name": clean_text(row.get("Source Site")) or clean_text(row.get("Listed On (sites)")) or "Imported spreadsheet",
             "source_url": source_url,
         })
-    for index, review in enumerate(parse_review_titles_dates(row.get("Reviews (titles & dates)"))[:30], start=1):
+    for index, review in enumerate(parse_review_titles_dates(row.get("Reviews (titles & dates)")), start=1):
         out.append({
             "id": stable_id("review", f"{parent_id}:title-date:{index}:{review.get('title') or ''}:{review['body'][:80]}"),
             "venue_id": parent_id if parent_kind == "venue" else None,
