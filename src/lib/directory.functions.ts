@@ -62,6 +62,17 @@ type ReviewRow = {
   source_url?: string | null;
 };
 
+type DirectoryLocationStat = {
+  county: string | null;
+  country: string | null;
+  count: number;
+};
+
+type DirectoryTermStat = {
+  label: string;
+  count: number;
+};
+
 const emptyListResult = { rows: [], count: 0, page: 1, perPage: 24 };
 
 function logPublicDataError(scope: string, error: unknown) {
@@ -459,20 +470,59 @@ export const getDirectoryStats = createServerFn({ method: "GET" })
       const sql = await db();
 
       if (data.kind === "venues") {
-        const rows = await sql<
-          {
-            per_person_price_num: number | string | null;
-            capacity_max: number | null;
-            rating: number | string | null;
-            review_count: number | null;
-          }[]
-        >`
-          SELECT per_person_price_num, capacity_max, rating, review_count
-          FROM venues
-          WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
-            AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
-          LIMIT 1000
-        `;
+        const [rows, topLocations, venueTypes, styles, imageRows] = await Promise.all([
+          sql<
+            {
+              per_person_price_num: number | string | null;
+              capacity_max: number | null;
+              rating: number | string | null;
+              review_count: number | null;
+            }[]
+          >`
+            SELECT per_person_price_num, capacity_max, rating, review_count
+            FROM venues
+            WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
+              AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+            LIMIT 1000
+          `,
+          sql<DirectoryLocationStat[]>`
+            SELECT county, country, count(*)::int AS count
+            FROM venues
+            WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
+              AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+              AND county IS NOT NULL
+            GROUP BY county, country
+            ORDER BY count DESC, county ASC
+            LIMIT 8
+          `,
+          sql<DirectoryTermStat[]>`
+            SELECT term.label, count(*)::int AS count
+            FROM venues
+            CROSS JOIN LATERAL unnest(venue_types) AS term(label)
+            WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
+              AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+            GROUP BY term.label
+            ORDER BY count DESC, term.label ASC
+            LIMIT 6
+          `,
+          sql<DirectoryTermStat[]>`
+            SELECT term.label, count(*)::int AS count
+            FROM venues
+            CROSS JOIN LATERAL unnest(styles) AS term(label)
+            WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
+              AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+            GROUP BY term.label
+            ORDER BY count DESC, term.label ASC
+            LIMIT 6
+          `,
+          sql<{ count: number }[]>`
+            SELECT count(*)::int AS count
+            FROM venues
+            WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
+              AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+              AND COALESCE(logo_image, gallery_images[1]) IS NOT NULL
+          `,
+        ]);
         const prices = rows
           .map((r) => numericValue(r.per_person_price_num))
           .filter((n): n is number => n !== null && n > 0);
@@ -488,23 +538,69 @@ export const getDirectoryStats = createServerFn({ method: "GET" })
             .map((r) => r.capacity_max)
             .filter((n): n is number => typeof n === "number" && n > 0),
           rated,
+          topLocations,
+          popularTerms: [...venueTypes, ...styles].slice(0, 8),
+          imageCount: Number(imageRows[0]?.count ?? 0),
         };
       }
 
-      const rows = await sql<
-        {
-          avg_price_num: number | string | null;
-          rating: number | string | null;
-          review_count: number | null;
-        }[]
-      >`
-        SELECT avg_price_num, rating, review_count
-        FROM suppliers
-        WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
-          AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
-          AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
-        LIMIT 1000
-      `;
+      const [rows, topLocations, categories, serviceAreas, imageRows] = await Promise.all([
+        sql<
+          {
+            avg_price_num: number | string | null;
+            rating: number | string | null;
+            review_count: number | null;
+          }[]
+        >`
+          SELECT avg_price_num, rating, review_count
+          FROM suppliers
+          WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
+            AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
+            AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+          LIMIT 1000
+        `,
+        sql<DirectoryLocationStat[]>`
+          SELECT county, country, count(*)::int AS count
+          FROM suppliers
+          WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
+            AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
+            AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+            AND county IS NOT NULL
+          GROUP BY county, country
+          ORDER BY count DESC, county ASC
+          LIMIT 8
+        `,
+        sql<DirectoryTermStat[]>`
+          SELECT term.label, count(*)::int AS count
+          FROM suppliers
+          CROSS JOIN LATERAL unnest(categories) AS term(label)
+          WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
+            AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
+            AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+          GROUP BY term.label
+          ORDER BY count DESC, term.label ASC
+          LIMIT 6
+        `,
+        sql<DirectoryTermStat[]>`
+          SELECT term.label, count(*)::int AS count
+          FROM suppliers
+          CROSS JOIN LATERAL unnest(service_areas) AS term(label)
+          WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
+            AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
+            AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+          GROUP BY term.label
+          ORDER BY count DESC, term.label ASC
+          LIMIT 6
+        `,
+        sql<{ count: number }[]>`
+          SELECT count(*)::int AS count
+          FROM suppliers
+          WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
+            AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
+            AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+            AND COALESCE(banner_image, logo_image, gallery_images[1]) IS NOT NULL
+        `,
+      ]);
       const prices = rows
         .map((r) => numericValue(r.avg_price_num))
         .filter((n): n is number => n !== null && n > 0);
@@ -518,6 +614,9 @@ export const getDirectoryStats = createServerFn({ method: "GET" })
         prices,
         capacities: [] as number[],
         rated,
+        topLocations,
+        popularTerms: [...categories, ...serviceAreas].slice(0, 8),
+        imageCount: Number(imageRows[0]?.count ?? 0),
       };
     } catch (error) {
       logPublicDataError("getDirectoryStats", error);
@@ -525,6 +624,9 @@ export const getDirectoryStats = createServerFn({ method: "GET" })
         prices: [] as number[],
         capacities: [] as number[],
         rated: [] as { rating: number; count: number }[],
+        topLocations: [] as DirectoryLocationStat[],
+        popularTerms: [] as DirectoryTermStat[],
+        imageCount: 0,
       };
     }
   });

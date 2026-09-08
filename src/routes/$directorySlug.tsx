@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { Award, Euro, MapPin, Star, Users } from "lucide-react";
+import { Award, Camera, Euro, ListChecks, MapPin, Star, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
 import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
@@ -179,6 +179,16 @@ function locationGroupsFor(target: ReturnType<typeof parseDirectorySlug>) {
   ];
 }
 
+function joinList(items: string[]) {
+  if (items.length <= 1) return items[0] ?? "";
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+}
+
+function lowerFirst(value: string) {
+  return value ? `${value[0].toLowerCase()}${value.slice(1)}` : value;
+}
+
 /** Copy for the page title / H1 / meta, driven by the real listing count. */
 function buildCopy(opts: {
   plural: string;
@@ -343,8 +353,20 @@ function DirectoryPage() {
   const priced = priceGuide(stats.prices);
   const rating = weightedRating(stats.rated);
   const copy = buildCopy({ plural, place, count: total, page, priced });
-  const advice = seoAdvice(target.category?.key ?? (target.kind === "venues" ? VENUE_SLUG : undefined), plural, singular, place);
+  const advice = seoAdvice(
+    target.category?.key ?? (target.kind === "venues" ? VENUE_SLUG : undefined),
+    plural,
+    singular,
+    place,
+  );
   const locationGroups = locationGroupsFor(target);
+  const topLocations = stats.topLocations ?? [];
+  const popularTerms = stats.popularTerms ?? [];
+  const imageCount = stats.imageCount ?? 0;
+  const topLocationLabels = topLocations
+    .slice(0, 4)
+    .map((item) => listingLocationLabel(item.county, item.country));
+  const popularTermLabels = popularTerms.slice(0, 5).map((item) => lowerFirst(item.label));
 
   const rankedSuppliers = page === 1 ? supplierRows.slice(0, TOP_N) : [];
   const rankedVenues = page === 1 ? venueRows.slice(0, TOP_N) : [];
@@ -355,6 +377,19 @@ function DirectoryPage() {
     ...rankedVenues.map((v) => ({ name: v.name, path: `/venue/${v.slug}` })),
     ...rankedSuppliers.map((s) => ({ name: s.name, path: `/supplier/${s.slug}` })),
   ];
+  const exampleNames = rankedItems.slice(0, 3).map((item) => item.name);
+  const reviewCount = rating?.reviews ?? 0;
+  const pageIntro = [
+    copy.description,
+    topLocationLabels.length > 1
+      ? `Coverage is strongest around ${joinList(topLocationLabels)}.`
+      : null,
+    imageCount
+      ? `${imageCount.toLocaleString()} listings include real profile imagery for faster shortlisting.`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const faqs: { q: string; a: string }[] = [];
   if (priced) {
@@ -365,8 +400,20 @@ function DirectoryPage() {
   }
   faqs.push({
     q: `How many ${plural.toLowerCase()} are listed in ${place}?`,
-    a: `${total.toLocaleString()} ${plural.toLowerCase()} are listed in ${place} on WedHQ. Listings are ordered by portfolio depth, published reviews and how complete the listing is.`,
+    a: `${total.toLocaleString()} ${plural.toLowerCase()} are listed in ${place} on WedHQ. Listings are ordered by portfolio depth, published reviews, image coverage and how complete the listing is.`,
   });
+  if (topLocationLabels.length > 1) {
+    faqs.push({
+      q: `Which areas have the most ${plural.toLowerCase()}?`,
+      a: `The strongest coverage for this search includes ${joinList(topLocationLabels)}. Each listing still shows its own location, service area and enquiry route so couples can compare nearby options quickly.`,
+    });
+  }
+  if (popularTermLabels.length > 1) {
+    faqs.push({
+      q: `What types of ${plural.toLowerCase()} can we compare?`,
+      a: `Common terms in this set include ${joinList(popularTermLabels)}. Use those signals alongside photos, reviews and pricing notes rather than choosing on category name alone.`,
+    });
+  }
   faqs.push({
     q: `When should we book ${plural.toLowerCase()} in ${place}?`,
     a: `For a Saturday in peak season, ${plural.toLowerCase()} in ${place} are commonly booked twelve to eighteen months out. Off-season and midweek dates are far easier, so enquire with three or four options and compare what's actually available for your date.`,
@@ -393,6 +440,7 @@ function DirectoryPage() {
           name: copy.h1,
           description: copy.description,
           url: absoluteUrl(`/${directorySlug}`),
+          keywords: [plural, place, ...topLocationLabels, ...popularTermLabels, ...exampleNames],
           isPartOf: {
             "@type": "WebSite",
             name: "WedHQ",
@@ -451,7 +499,7 @@ function DirectoryPage() {
         />
       ) : null}
 
-      <PageHeader eyebrow="Directory" title={copy.h1} description={target.blurb}>
+      <PageHeader eyebrow="Directory" title={copy.h1} description={pageIntro || target.blurb}>
         <Breadcrumbs items={[{ label: copy.h1 }]} />
       </PageHeader>
 
@@ -490,6 +538,50 @@ function DirectoryPage() {
           />
         </div>
       </div>
+
+      <Section
+        title={`Why this ${plural.toLowerCase()} page is useful`}
+        description={pageIntro}
+      >
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <EvidenceCard
+            icon={<MapPin className="size-4" />}
+            title="Local coverage"
+            body={
+              topLocationLabels.length
+                ? `Strong coverage around ${joinList(topLocationLabels.slice(0, 3))}.`
+                : `Focused on ${place} with every matching listing pulled live.`
+            }
+          />
+          <EvidenceCard
+            icon={<Camera className="size-4" />}
+            title="Image-led shortlists"
+            body={
+              imageCount
+                ? `${imageCount.toLocaleString()} matching listings include images, so couples can judge style before enquiring.`
+                : "Image coverage is added as suppliers update their profiles."
+            }
+          />
+          <EvidenceCard
+            icon={<Star className="size-4" />}
+            title="Review signals"
+            body={
+              reviewCount
+                ? `${reviewCount.toLocaleString()} reviews help separate proven options from thin profiles.`
+                : "Reviews appear only when a listing has real review data."
+            }
+          />
+          <EvidenceCard
+            icon={<ListChecks className="size-4" />}
+            title="Useful filters"
+            body={
+              popularTermLabels.length
+                ? `Common signals include ${joinList(popularTermLabels.slice(0, 3))}.`
+                : "Compare price, location, portfolio depth and enquiry options in one place."
+            }
+          />
+        </div>
+      </Section>
 
       {listed === 0 ? (
         <Section>
@@ -707,6 +799,26 @@ function Stat({
       </p>
       <p className="mt-1 font-serif text-xl">{value}</p>
       <p className="text-xs text-muted-foreground">{detail}</p>
+    </div>
+  );
+}
+
+function EvidenceCard({
+  icon,
+  title,
+  body,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-card p-5 shadow-soft">
+      <div className="flex items-center gap-2 text-primary">
+        {icon}
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+      </div>
+      <p className="mt-3 text-sm leading-6 text-muted-foreground">{body}</p>
     </div>
   );
 }
