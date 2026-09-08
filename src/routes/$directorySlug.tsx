@@ -232,11 +232,9 @@ export const Route = createFileRoute("/$directorySlug")({
   validateSearch: zodValidator(searchSchema),
   loaderDeps: ({ search }) => ({ page: search.page }),
   loader: async ({ params, deps }) => {
-    let target = parseDirectorySlug(params.directorySlug);
-    if (!target && /-co-[a-z0-9-]+$/.test(params.directorySlug)) {
+    if (/-co-[a-z0-9-]+$/.test(params.directorySlug)) {
       const cleanSlug = params.directorySlug.replace(/-co-([a-z0-9-]+)$/, "-$1");
-      target = parseDirectorySlug(cleanSlug);
-      if (target) {
+      if (cleanSlug !== params.directorySlug && parseDirectorySlug(cleanSlug)) {
         throw redirect({
           to: "/$directorySlug",
           params: { directorySlug: cleanSlug },
@@ -244,6 +242,7 @@ export const Route = createFileRoute("/$directorySlug")({
         });
       }
     }
+    const target = parseDirectorySlug(params.directorySlug);
     if (!target) throw notFound();
     const page = Math.max(1, Math.min(deps.page ?? 1, 200));
     const place =
