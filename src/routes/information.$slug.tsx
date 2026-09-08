@@ -19,6 +19,7 @@ const PAGES: Record<string, InformationPage> = {
     eyebrow: "Information",
     description: "The terms that apply when you browse and use WedHQ.",
     intro: "WedHQ is a free wedding directory and planning resource for couples and wedding businesses across Ireland and the UK.",
+    source: { label: "Reference terms on Hitched", href: "https://www.hitched.co.uk/legal-terms.php" },
     sections: [
       { heading: "Using WedHQ", body: "You may browse listings, use planning tools and contact suppliers for personal wedding-planning purposes. Please use the site lawfully and do not attempt to disrupt, scrape or misuse its services." },
       { heading: "Directory information", body: "Listings are provided for information and discovery. Availability, pricing, services and business details can change, so confirm important details directly with the supplier before making a decision." },
@@ -31,6 +32,7 @@ const PAGES: Record<string, InformationPage> = {
     eyebrow: "Information",
     description: "Information about purchases and paid services on WedHQ.",
     intro: "WedHQ does not currently process purchases, bookings or payments through this website.",
+    source: { label: "Reference purchase terms on Hitched", href: "https://www.hitched.co.uk/corp/legal/terms-of-purchase-intl" },
     sections: [
       { heading: "No checkout on WedHQ", body: "When you contact a venue or supplier, any quote, contract, deposit or booking is arranged directly with that business. WedHQ is not a party to that supplier contract." },
       { heading: "Supplier responsibility", body: "Ask suppliers about their own terms, cancellation policies, insurance and payment arrangements before committing." },
@@ -42,6 +44,7 @@ const PAGES: Record<string, InformationPage> = {
     eyebrow: "Information",
     description: "How WedHQ handles personal information when you use the wedding directory.",
     intro: "We aim to collect only the information needed to run the directory, respond to enquiries and improve the planning experience.",
+    source: { label: "Reference privacy notice on Hitched", href: "https://www.hitched.co.uk/legal/privacy.php" },
     sections: [
       { heading: "Information you provide", body: "This may include your name, email address and message when you contact us or enquire about a listing. Supplier profile information is used to make the directory useful to couples." },
       { heading: "How we use it", body: "We use information to respond to requests, operate site features, protect the service and understand aggregate usage. We do not sell personal information." },
@@ -54,6 +57,7 @@ const PAGES: Record<string, InformationPage> = {
     eyebrow: "Information",
     description: "How WedHQ uses cookies and similar technologies.",
     intro: "WedHQ uses essential storage to keep the website working and may use limited analytics or security technologies where enabled.",
+    source: { label: "Reference cookie notice on Hitched", href: "https://www.hitched.co.uk/legal/cookies.php" },
     sections: [
       { heading: "Essential technologies", body: "Some storage is required for authentication, security, preferences and core application behaviour. These technologies cannot be switched off through the site because the service would not work reliably without them." },
       { heading: "Planning tools", body: "Some planning tools save your entries in your browser so you can return to them on the same device. This information is not a substitute for a backup." },
