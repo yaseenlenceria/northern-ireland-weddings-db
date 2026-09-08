@@ -54,6 +54,39 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/find-suppliers")({
   validateSearch: zodValidator(searchSchema),
+  loaderDeps: ({ search }) => ({
+    q: search.q,
+    category: search.category,
+    country: search.country,
+    county: search.county,
+    page: search.page,
+  }),
+  loader: async ({ deps }) => {
+    const term = deps.q ?? "";
+    const category = deps.category ?? "all";
+    const country = deps.country ?? "all";
+    const county = deps.county ?? "all";
+    const effectiveCountry = county !== "all" ? locationCountry(county) : country;
+    const page = Math.max(1, deps.page ?? 1);
+    const data = {
+      ...(effectiveCountry !== "all" ? { country: effectiveCountry } : {}),
+      ...(county !== "all" ? { county } : {}),
+    };
+    const [suppliers, categoryCounts] = await Promise.all([
+      listSuppliers({
+        data: {
+          ...(category !== "all" ? { category } : {}),
+          ...data,
+          ...(term ? { q: term } : {}),
+          page,
+          perPage: PER_PAGE,
+        },
+      }),
+      getSupplierCategoryCounts({ data }),
+    ]);
+
+    return { suppliers, categoryCounts, loadedAt: Date.now() };
+  },
   head: () => ({
     meta: pageMeta({ title: TITLE, description: DESCRIPTION, path: "/find-suppliers" }),
     // Filtered variants canonicalise back to the clean URL.
@@ -80,6 +113,7 @@ function cleanSearch(s: {
 }
 
 function FindSuppliersPage() {
+  const initial = Route.useLoaderData();
   const fetchSuppliers = useServerFn(listSuppliers);
   const fetchCategoryCounts = useServerFn(getSupplierCategoryCounts);
   const navigate = Route.useNavigate();
@@ -133,6 +167,8 @@ function FindSuppliersPage() {
           perPage: PER_PAGE,
         },
       }),
+    initialData: initial.suppliers,
+    initialDataUpdatedAt: initial.loadedAt,
   });
   const categoryCounts = useQuery({
     queryKey: ["supplier-category-counts", effectiveCountry, county],
@@ -143,6 +179,8 @@ function FindSuppliersPage() {
           ...(county !== "all" ? { county } : {}),
         },
       }),
+    initialData: initial.categoryCounts,
+    initialDataUpdatedAt: initial.loadedAt,
   });
   const countByCategory = new Map(
     (categoryCounts.data ?? []).map((row) => [row.category, row.count]),
@@ -176,13 +214,23 @@ function FindSuppliersPage() {
             "@type": "Thing",
             name: "Wedding suppliers in the UK and Ireland",
           },
+          mainEntity: {
+            "@type": "ItemList",
+            numberOfItems: total,
+            itemListElement: rows.slice(0, 24).map((supplier, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              name: supplier.name,
+              url: absoluteUrl(`/supplier/${supplier.slug}`),
+            })),
+          },
         }}
       />
 
       <PageHeader
         eyebrow="Directory"
         title="Find wedding suppliers"
-        description="Search by category, location and business name. Ireland is live now; UK regions are ready as new listings are added."
+        description="Search by category, location and business name across the UK and Ireland."
       >
         <Breadcrumbs items={[{ label: "Find Suppliers" }]} />
       </PageHeader>

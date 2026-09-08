@@ -8,7 +8,13 @@
 export const SITE_NAME = "WedHQ";
 
 /** Public origin used for canonical, og:url and sitemap entries. */
-export const SITE_URL = import.meta.env["VITE_SITE_URL"] ?? "https://wedhq.co.uk";
+export const SITE_URL = (import.meta.env["VITE_SITE_URL"] ?? "https://wedhq.co.uk").replace(
+  /\/+$/,
+  "",
+);
+
+/** Site-wide fallback for pages that do not have a listing image yet. */
+export const DEFAULT_OG_IMAGE = "/logo.png";
 
 /** Absolute URL for a site-relative path. */
 export const absoluteUrl = (path: string) =>
@@ -46,8 +52,9 @@ export function pageMeta({
     { property: "og:url", content: absoluteUrl(path) },
     { name: "twitter:card", content: "summary_large_image" },
   ];
-  if (image && (image.startsWith("https://") || image.startsWith("/"))) {
-    const imageUrl = image.startsWith("/") ? absoluteUrl(image) : image;
+  const resolvedImage = image || DEFAULT_OG_IMAGE;
+  const imageUrl = resolvedImage.startsWith("/") ? absoluteUrl(resolvedImage) : resolvedImage;
+  if (imageUrl.startsWith("https://")) {
     meta.push({ property: "og:image", content: imageUrl });
     meta.push({ name: "twitter:image", content: imageUrl });
   }

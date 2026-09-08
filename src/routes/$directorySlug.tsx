@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { Award, Camera, Euro, ListChecks, MapPin, Star, Users } from "lucide-react";
@@ -196,8 +196,9 @@ function buildCopy(opts: {
   count: number;
   page: number;
   priced: ReturnType<typeof priceGuide>;
+  kind: "suppliers" | "venues";
 }) {
-  const { plural, place, count, page, priced } = opts;
+  const { plural, place, count, page, priced, kind } = opts;
   const ranked = count > 0;
   const listingCount = count.toLocaleString();
   const label = countLabel(plural, count);
@@ -209,7 +210,11 @@ function buildCopy(opts: {
     ? `${listingCount} ${label} in ${place} ${SEO_YEAR} - Prices & Reviews`
     : `${plural} in ${place} — ${count} Listed | WedHQ`;
 
-  const priceBit = priced ? ` Typical spend around ${euro(priced.median)}.` : "";
+  const priceBit = priced
+    ? kind === "venues"
+      ? ` Published per-person venue guides are around ${euro(priced.median)} where shown.`
+      : ` Published guide prices are around ${euro(priced.median)} where shown.`
+    : "";
   const description = clamp(
     `Compare ${count.toLocaleString()} ${plural.toLowerCase()} in ${place}, ranked with live reviews, images, prices and enquiry links.${priceBit}`,
   );
@@ -227,7 +232,18 @@ export const Route = createFileRoute("/$directorySlug")({
   validateSearch: zodValidator(searchSchema),
   loaderDeps: ({ search }) => ({ page: search.page }),
   loader: async ({ params, deps }) => {
-    const target = parseDirectorySlug(params.directorySlug);
+    let target = parseDirectorySlug(params.directorySlug);
+    if (!target && /-co-[a-z0-9-]+$/.test(params.directorySlug)) {
+      const cleanSlug = params.directorySlug.replace(/-co-([a-z0-9-]+)$/, "-$1");
+      target = parseDirectorySlug(cleanSlug);
+      if (target) {
+        throw redirect({
+          to: "/$directorySlug",
+          params: { directorySlug: cleanSlug },
+          statusCode: 301,
+        });
+      }
+    }
     if (!target) throw notFound();
     const page = Math.max(1, Math.min(deps.page ?? 1, 200));
     const place =
@@ -288,6 +304,7 @@ export const Route = createFileRoute("/$directorySlug")({
       count,
       page: loaderData.page,
       priced: priceGuide(loaderData.stats.prices),
+      kind: target.kind,
     });
     const hero =
       loaderData.venues?.rows[0]?.logo_image ?? loaderData.suppliers?.rows[0]?.logo_image ?? null;
@@ -352,7 +369,7 @@ function DirectoryPage() {
 
   const priced = priceGuide(stats.prices);
   const rating = weightedRating(stats.rated);
-  const copy = buildCopy({ plural, place, count: total, page, priced });
+  const copy = buildCopy({ plural, place, count: total, page, priced, kind: target.kind });
   const advice = seoAdvice(
     target.category?.key ?? (target.kind === "venues" ? VENUE_SLUG : undefined),
     plural,

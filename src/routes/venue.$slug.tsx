@@ -20,7 +20,7 @@ import { ReviewList } from "@/components/site/Reviews";
 import { getVenue } from "@/lib/directory.functions";
 import { firstImage } from "@/lib/media";
 import { VENUE_SLUG, countySlug, listingLocationLabel } from "@/lib/taxonomy";
-import { canonical, clamp, pageMeta, reviewSchema, sourcedReviewSchema } from "@/lib/seo";
+import { canonical, clamp, pageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/venue/$slug")({
   loader: async ({ params }) => {
@@ -142,15 +142,6 @@ function VenueProfile() {
             postalCode: venue.postcode ?? undefined,
             addressCountry: venue.country === "United Kingdom" ? "GB" : "IE",
           },
-          ...(venue.rating && venue.review_count
-            ? {
-                aggregateRating: {
-                  "@type": "AggregateRating",
-                  ratingValue: venue.rating,
-                  reviewCount: venue.review_count,
-                },
-              }
-            : {}),
           ...(venue.latitude && venue.longitude
             ? {
                 geo: {
@@ -158,14 +149,6 @@ function VenueProfile() {
                   latitude: venue.latitude,
                   longitude: venue.longitude,
                 },
-              }
-            : {}),
-          ...(reviews.length || sourcedReviews.length
-            ? {
-                review: [...reviewSchema(reviews), ...sourcedReviewSchema(sourcedReviews)].slice(
-                  0,
-                  10,
-                ),
               }
             : {}),
         }}

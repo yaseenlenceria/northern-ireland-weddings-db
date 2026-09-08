@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import {
   Award,
   BadgeCheck,
+  ExternalLink,
   Globe,
   Instagram,
   Mail,
@@ -31,13 +32,10 @@ import { firstImage, videoEmbed } from "@/lib/media";
 import { CATEGORY_BY_KEY, countrySlug, countySlug, listingLocationLabel } from "@/lib/taxonomy";
 import {
   absoluteUrl,
-  aggregateRating,
   averageRating,
   canonical,
   clamp,
   pageMeta,
-  reviewSchema,
-  sourcedReviewSchema,
 } from "@/lib/seo";
 
 export const Route = createFileRoute("/supplier/$slug")({
@@ -155,7 +153,6 @@ function SupplierProfile() {
     ? allScored.reduce((s, r) => s + r, 0) / allScored.length
     : (supplierRating ?? averageRating(reviews));
   const displayReviewCount = supplierReviewCount ?? allScored.length;
-  const ratingNode = aggregateRating(avg, displayReviewCount);
   const profileReviews = [...reviews, ...sourcedReviews];
   const socialLinks = [
     supplier.facebook_url ? { label: "Facebook", href: supplier.facebook_url, icon: Globe } : null,
@@ -213,15 +210,6 @@ function SupplierProfile() {
                   latitude: supplier.latitude,
                   longitude: supplier.longitude,
                 },
-              }
-            : {}),
-          ...(ratingNode ? { aggregateRating: ratingNode } : {}),
-          ...(reviews.length || sourcedReviews.length
-            ? {
-                review: [...reviewSchema(reviews), ...sourcedReviewSchema(sourcedReviews)].slice(
-                  0,
-                  10,
-                ),
               }
             : {}),
         }}

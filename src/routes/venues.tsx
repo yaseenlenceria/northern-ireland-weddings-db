@@ -55,6 +55,34 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/venues")({
   validateSearch: zodValidator(searchSchema),
+  loaderDeps: ({ search }) => ({
+    q: search.q,
+    country: search.country,
+    county: search.county,
+    capacity: search.capacity,
+    page: search.page,
+  }),
+  loader: async ({ deps }) => {
+    const term = deps.q ?? "";
+    const country = deps.country ?? "all";
+    const county = deps.county ?? "all";
+    const effectiveCountry = county !== "all" ? locationCountry(county) : country;
+    const capacity = deps.capacity ?? "all";
+    const page = Math.max(1, deps.page ?? 1);
+
+    const venues = await listVenues({
+      data: {
+        ...(effectiveCountry !== "all" ? { country: effectiveCountry } : {}),
+        ...(county !== "all" ? { county } : {}),
+        ...(capacity !== "all" ? { minCapacity: Number(capacity.replace("min", "")) } : {}),
+        ...(term ? { q: term } : {}),
+        page,
+        perPage: PER_PAGE,
+      },
+    });
+
+    return { venues, loadedAt: Date.now() };
+  },
   head: () => ({
     meta: pageMeta({ title: TITLE, description: DESCRIPTION, path: "/venues" }),
     links: canonical("/venues"),
@@ -80,6 +108,7 @@ function cleanSearch(s: {
 }
 
 function VenuesPage() {
+  const initial = Route.useLoaderData();
   const fetchVenues = useServerFn(listVenues);
   const navigate = Route.useNavigate();
   const search = Route.useSearch();
@@ -132,6 +161,8 @@ function VenuesPage() {
           perPage: PER_PAGE,
         },
       }),
+    initialData: initial.venues,
+    initialDataUpdatedAt: initial.loadedAt,
   });
 
   const total = query.data?.count ?? 0;
@@ -161,6 +192,16 @@ function VenuesPage() {
           about: {
             "@type": "Place",
             name: "Wedding venues in the UK and Ireland",
+          },
+          mainEntity: {
+            "@type": "ItemList",
+            numberOfItems: total,
+            itemListElement: rows.slice(0, 24).map((venue, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              name: venue.name,
+              url: absoluteUrl(`/venue/${venue.slug}`),
+            })),
           },
         }}
       />

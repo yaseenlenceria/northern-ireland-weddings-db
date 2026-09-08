@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
-import { SITE_NAME, SITE_URL } from "@/lib/seo";
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/seo";
 
 function NotFoundComponent() {
   return (
@@ -88,12 +88,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:site_name", content: SITE_NAME },
       { property: "og:url", content: SITE_URL },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: absoluteUrl(DEFAULT_OG_IMAGE) },
       { property: "og:locale", content: "en_GB" },
       {
         name: "google-site-verification",
         content: "xiJoR2UKPN0J8mz-vSJeI5JxEPMfnZMh-XO_XXvpP1s",
       },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: absoluteUrl(DEFAULT_OG_IMAGE) },
       { name: "theme-color", content: "#6b7f68" },
     ],
     links: [

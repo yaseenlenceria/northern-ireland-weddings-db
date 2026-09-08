@@ -12,29 +12,55 @@ export const GUIDES: Guide[] = [
   {
     slug: "how-much-does-an-irish-wedding-cost",
     topic: "Budget",
-    title: "What an Irish wedding actually costs in 2026",
+    title: "What a wedding costs in Ireland and the UK in 2026",
     excerpt:
-      "A category-by-category breakdown of where the money goes, from venue and catering down to favours, with realistic ranges rather than averages.",
-    readMinutes: 8,
+      "A practical 2026 budget breakdown for Ireland and the UK, with realistic ranges for venue, food, photography, flowers, music, styling and the hidden extras.",
+    readMinutes: 12,
     sections: [
       {
-        heading: "Start with the guest number, not the total",
+        heading: "The realistic headline number",
         body: [
-          "Almost every large cost on an Irish wedding scales with headcount. Catering is quoted per person, drinks reception is per person, and the venue you can consider is decided by whether you need to seat 90 or 220.",
-          "Before you set a budget figure, write the guest list. Then multiply your realistic per-head food cost by that number. That single line is usually between 45 and 65 per cent of the whole day.",
+          "For a full hotel, country-house or barn-style wedding in 2026, many Irish couples should plan around EUR30,000 to EUR40,000 before honeymoon. In the UK, a typical full wedding often sits around GBP18,000 to GBP30,000, with London, the South East and premium country venues pushing higher.",
+          "Those numbers are not targets. A weekday restaurant wedding for 40 people can cost far less, while a Saturday wedding for 160 guests with exclusive use, a band, premium photography, styling and accommodation can move well beyond them. The useful question is not 'what is average?' but 'which parts of our day scale with every extra guest?'",
         ],
       },
       {
-        heading: "The five costs that move the needle",
+        heading: "Start with guests before choosing suppliers",
         body: [
-          "Venue and catering, photography, music, flowers and styling, and attire. Everything else is meaningful but rarely changes the total by more than a few hundred euro.",
-          "If the budget is tight, adjust the big five first. Moving from a Saturday in July to a Friday in April changes venue pricing more than cutting favours ever will.",
+          "Almost every large wedding cost follows the guest count. Food is per person, drinks packages are per person, evening food is per person, stationery is per household, favours are per guest and the room you need is decided by whether you are seating 80, 120 or 200.",
+          "Before you fall in love with a venue, write three guest lists: essential, likely and everyone. Then multiply the likely list by your expected food and drink cost. For Ireland, EUR90 to EUR150 per guest is a sensible planning range for many hotel and country-house packages. For the UK, GBP70 to GBP140 per guest is a useful early range, with high-end venues above that.",
+          "If that one line already uses more than half the budget, the fix is guest count, date, venue type or package level. Cutting favours will not solve a venue and catering budget that is already too large.",
         ],
       },
       {
-        heading: "Build in a contingency you never touch",
+        heading: "Core budget ranges by category",
         body: [
-          "Set aside 8 to 10 per cent and do not allocate it. Late additions to the guest list, an extra hour of the band, transport for a second location and last-minute stationery all appear in the final six weeks.",
+          "Venue and catering: Ireland EUR12,000 to EUR25,000 for many 100 to 150 guest hotel or country-house weddings; UK GBP8,000 to GBP22,000 depending on region, exclusivity and menu. Exclusive-use hire can add several thousand before food is counted.",
+          "Photography: Ireland EUR2,000 to EUR4,000; UK GBP1,500 to GBP3,500. Two photographers, albums, travel and fast delivery increase the quote. Videography often adds a similar second line: Ireland EUR1,800 to EUR4,000, UK GBP1,200 to GBP3,000.",
+          "Music and entertainment: ceremony music can be EUR400 to EUR1,000 or GBP300 to GBP900. A strong evening band plus DJ can sit around EUR2,000 to EUR4,000 in Ireland or GBP1,200 to GBP3,500 in the UK. A DJ-only evening is usually lower.",
+          "Flowers, decor and styling: simple personal flowers may start under EUR800 or GBP700, while ceremony arches, staircase florals, table installations and room styling can reach EUR3,000 to EUR8,000 or GBP2,000 to GBP7,000.",
+          "Cake, stationery, transport, celebrant or registrar fees, beauty, attire and rings often look small one by one but can easily add EUR5,000 to EUR12,000 or GBP4,000 to GBP10,000 together.",
+        ],
+      },
+      {
+        heading: "Where couples overspend without noticing",
+        body: [
+          "The common budget leak is not one dramatic purchase. It is upgrade stacking: premium canapes, a second entree choice, late bar, extra hour of photography, larger bridal party, additional transport, menu tasting extras, ceremony decor that cannot be reused and last-minute stationery reprints.",
+          "Ask every supplier for a quote with three columns: included, optional and not included. Anything that is optional should stay outside the working budget until the core wedding is affordable.",
+        ],
+      },
+      {
+        heading: "A simple 100 guest planning model",
+        body: [
+          "For a 100 guest wedding, a balanced mid-range plan might reserve 50 to 60 per cent for venue, food and drink; 8 to 12 per cent for photography; 5 to 10 per cent for video; 6 to 10 per cent for music; 5 to 10 per cent for flowers and styling; and the rest for attire, beauty, cake, stationery, transport, ceremony costs and contingency.",
+          "If the venue package is already 65 per cent of the budget, choose a lower-cost date or a smaller guest list before trimming the suppliers you care about. If photos matter most, protect that line and simplify decor. If food and party atmosphere matter most, put money into menu, bar and music before extras.",
+        ],
+      },
+      {
+        heading: "Build in a contingency you do not spend",
+        body: [
+          "Keep 8 to 10 per cent unassigned until the final six weeks. Late guest changes, supplier meals, taxis, umbrellas, extra printing, dress alterations, child meals and bar extensions tend to appear after couples think the budget is finished.",
+          "The healthiest wedding budget is not the cheapest one. It is the one where every confirmed supplier is affordable, every deposit is written down, and there is still room for one or two late practical costs without using credit.",
         ],
       },
     ],

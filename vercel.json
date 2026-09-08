@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.wedhq.co.uk"
+        }
+      ],
+      "destination": "https://wedhq.co.uk/$1",
+      "permanent": true
+    }
+  ]
+}
