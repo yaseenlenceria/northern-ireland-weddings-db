@@ -358,8 +358,11 @@ export const FEATURED_LOCATIONS = [
   "Berkshire",
 ];
 
+export const normalizeLocationName = (location: string) =>
+  location.replace(/^Co\.?\s+/i, "").trim();
+
 export const locationSlug = (location: string) =>
-  location
+  normalizeLocationName(location)
     .toLowerCase()
     .replace(/&/g, "and")
     .replace(/[^a-z0-9]+/g, "-")
@@ -367,7 +370,7 @@ export const locationSlug = (location: string) =>
 export const countySlug = locationSlug;
 
 export const locationCountry = (location: string) =>
-  UK_REGIONS.some((c) => c === location) ? "United Kingdom" : "Ireland";
+  UK_REGIONS.some((c) => c === normalizeLocationName(location)) ? "United Kingdom" : "Ireland";
 
 export const countrySlug = (country: string) =>
   country === "United Kingdom" ? "uk" : country.toLowerCase().replace(/\s+/g, "-");
@@ -376,15 +379,18 @@ export const countryDisplayName = (country?: string | null) =>
   country === "United Kingdom" ? "UK" : country || "Ireland";
 
 export const listingLocationLabel = (location?: string | null, country?: string | null) => {
-  const resolvedCountry = country ?? (location ? locationCountry(location) : null);
-  if (location) {
-    return resolvedCountry === "United Kingdom" ? `${location}, UK` : `Co. ${location}`;
+  const normalized = location ? normalizeLocationName(location) : null;
+  const resolvedCountry = country ?? (normalized ? locationCountry(normalized) : null);
+  if (normalized) {
+    return resolvedCountry === "United Kingdom" ? `${normalized}, UK` : `Co. ${normalized}`;
   }
   return countryDisplayName(resolvedCountry);
 };
 
-export const locationFromSlug = (slug: string) =>
-  LOCATIONS.find((c) => locationSlug(c) === slug.toLowerCase());
+export const locationFromSlug = (slug: string) => {
+  const normalizedSlug = slug.toLowerCase().replace(/^co-/, "");
+  return LOCATIONS.find((c) => locationSlug(c) === normalizedSlug);
+};
 
 export const countyFromSlug = locationFromSlug;
 

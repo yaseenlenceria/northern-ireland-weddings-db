@@ -185,7 +185,7 @@ export const listSuppliers = createServerFn({ method: "GET" })
         FROM suppliers
         WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
           AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
-          AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+          AND (${data.county ?? null}::text IS NULL OR regexp_replace(county, '^Co\\.?\\s+', '', 'i') = ${data.county ?? ""})
           AND (${data.q ?? null}::text IS NULL OR name ILIKE ${`%${data.q ?? ""}%`})
         ORDER BY (COALESCE(banner_image, logo_image, gallery_images[1]) IS NOT NULL) DESC,
                  featured DESC, award_winner DESC, rating DESC NULLS LAST, image_count DESC NULLS LAST, name ASC
@@ -197,7 +197,7 @@ export const listSuppliers = createServerFn({ method: "GET" })
         FROM suppliers
         WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
           AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
-          AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+          AND (${data.county ?? null}::text IS NULL OR regexp_replace(county, '^Co\\.?\\s+', '', 'i') = ${data.county ?? ""})
           AND (${data.q ?? null}::text IS NULL OR name ILIKE ${`%${data.q ?? ""}%`})
       `,
       );
@@ -233,7 +233,7 @@ export const listVenues = createServerFn({ method: "GET" })
                logo_image, gallery_images, venue_types, styles, featured
         FROM venues
         WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
-          AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+          AND (${data.county ?? null}::text IS NULL OR regexp_replace(county, '^Co\\.?\\s+', '', 'i') = ${data.county ?? ""})
           AND (${data.q ?? null}::text IS NULL OR name ILIKE ${`%${data.q ?? ""}%`})
           AND (${data.minCapacity ?? null}::integer IS NULL OR capacity_max >= ${data.minCapacity ?? 0})
           AND (${data.venueType ?? null}::text IS NULL OR venue_types @> ARRAY[${data.venueType ?? ""}]::text[])
@@ -246,7 +246,7 @@ export const listVenues = createServerFn({ method: "GET" })
         SELECT count(*)::text AS count
         FROM venues
         WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
-          AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+          AND (${data.county ?? null}::text IS NULL OR regexp_replace(county, '^Co\\.?\\s+', '', 'i') = ${data.county ?? ""})
           AND (${data.q ?? null}::text IS NULL OR name ILIKE ${`%${data.q ?? ""}%`})
           AND (${data.minCapacity ?? null}::integer IS NULL OR capacity_max >= ${data.minCapacity ?? 0})
           AND (${data.venueType ?? null}::text IS NULL OR venue_types @> ARRAY[${data.venueType ?? ""}]::text[])
@@ -482,14 +482,14 @@ export const getDirectoryStats = createServerFn({ method: "GET" })
             SELECT per_person_price_num, capacity_max, rating, review_count
             FROM venues
             WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
-              AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+              AND (${data.county ?? null}::text IS NULL OR regexp_replace(county, '^Co\\.?\\s+', '', 'i') = ${data.county ?? ""})
             LIMIT 1000
           `,
           sql<DirectoryLocationStat[]>`
             SELECT county, country, count(*)::int AS count
             FROM venues
             WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
-              AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+              AND (${data.county ?? null}::text IS NULL OR regexp_replace(county, '^Co\\.?\\s+', '', 'i') = ${data.county ?? ""})
               AND county IS NOT NULL
             GROUP BY county, country
             ORDER BY count DESC, county ASC
@@ -500,7 +500,7 @@ export const getDirectoryStats = createServerFn({ method: "GET" })
             FROM venues
             CROSS JOIN LATERAL unnest(venue_types) AS term(label)
             WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
-              AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+              AND (${data.county ?? null}::text IS NULL OR regexp_replace(county, '^Co\\.?\\s+', '', 'i') = ${data.county ?? ""})
             GROUP BY term.label
             ORDER BY count DESC, term.label ASC
             LIMIT 6
@@ -510,7 +510,7 @@ export const getDirectoryStats = createServerFn({ method: "GET" })
             FROM venues
             CROSS JOIN LATERAL unnest(styles) AS term(label)
             WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
-              AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+              AND (${data.county ?? null}::text IS NULL OR regexp_replace(county, '^Co\\.?\\s+', '', 'i') = ${data.county ?? ""})
             GROUP BY term.label
             ORDER BY count DESC, term.label ASC
             LIMIT 6
@@ -519,7 +519,7 @@ export const getDirectoryStats = createServerFn({ method: "GET" })
             SELECT count(*)::int AS count
             FROM venues
             WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
-              AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+              AND (${data.county ?? null}::text IS NULL OR regexp_replace(county, '^Co\\.?\\s+', '', 'i') = ${data.county ?? ""})
               AND COALESCE(logo_image, gallery_images[1]) IS NOT NULL
           `,
         ]);
@@ -556,7 +556,7 @@ export const getDirectoryStats = createServerFn({ method: "GET" })
           FROM suppliers
           WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
             AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
-            AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+            AND (${data.county ?? null}::text IS NULL OR regexp_replace(county, '^Co\\.?\\s+', '', 'i') = ${data.county ?? ""})
           LIMIT 1000
         `,
         sql<DirectoryLocationStat[]>`
@@ -564,7 +564,7 @@ export const getDirectoryStats = createServerFn({ method: "GET" })
           FROM suppliers
           WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
             AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
-            AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+            AND (${data.county ?? null}::text IS NULL OR regexp_replace(county, '^Co\\.?\\s+', '', 'i') = ${data.county ?? ""})
             AND county IS NOT NULL
           GROUP BY county, country
           ORDER BY count DESC, county ASC
@@ -576,7 +576,7 @@ export const getDirectoryStats = createServerFn({ method: "GET" })
           CROSS JOIN LATERAL unnest(categories) AS term(label)
           WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
             AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
-            AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+            AND (${data.county ?? null}::text IS NULL OR regexp_replace(county, '^Co\\.?\\s+', '', 'i') = ${data.county ?? ""})
           GROUP BY term.label
           ORDER BY count DESC, term.label ASC
           LIMIT 6
@@ -587,7 +587,7 @@ export const getDirectoryStats = createServerFn({ method: "GET" })
           CROSS JOIN LATERAL unnest(service_areas) AS term(label)
           WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
             AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
-            AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+            AND (${data.county ?? null}::text IS NULL OR regexp_replace(county, '^Co\\.?\\s+', '', 'i') = ${data.county ?? ""})
           GROUP BY term.label
           ORDER BY count DESC, term.label ASC
           LIMIT 6
@@ -597,7 +597,7 @@ export const getDirectoryStats = createServerFn({ method: "GET" })
           FROM suppliers
           WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
             AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
-            AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+            AND (${data.county ?? null}::text IS NULL OR regexp_replace(county, '^Co\\.?\\s+', '', 'i') = ${data.county ?? ""})
             AND COALESCE(banner_image, logo_image, gallery_images[1]) IS NOT NULL
         `,
       ]);
@@ -639,10 +639,10 @@ export const getCountyStats = createServerFn({ method: "GET" })
       const [suppliers, venues] = await Promise.all([
         sql<
           { count: string }[]
-        >`SELECT count(*)::text AS count FROM suppliers WHERE county = ${data.county} AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})`,
+        >`SELECT count(*)::text AS count FROM suppliers WHERE regexp_replace(county, '^Co\\.?\\s+', '', 'i') = ${data.county} AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})`,
         sql<
           { count: string }[]
-        >`SELECT count(*)::text AS count FROM venues WHERE county = ${data.county} AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})`,
+        >`SELECT count(*)::text AS count FROM venues WHERE regexp_replace(county, '^Co\\.?\\s+', '', 'i') = ${data.county} AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})`,
       ]);
       return { suppliers: countValue(suppliers), venues: countValue(venues) };
     } catch (error) {
@@ -666,7 +666,7 @@ export const getSupplierCategoryCounts = createServerFn({ method: "GET" })
         FROM suppliers
         CROSS JOIN LATERAL unnest(categories) AS category
         WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
-          AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+          AND (${data.county ?? null}::text IS NULL OR regexp_replace(county, '^Co\\.?\\s+', '', 'i') = ${data.county ?? ""})
         GROUP BY category
         ORDER BY count DESC, category ASC
       `;

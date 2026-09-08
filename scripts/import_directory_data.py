@@ -258,7 +258,7 @@ def venue_from_weddingdates(row: dict[str, Any]) -> dict[str, Any] | None:
     name = clean_text(row.get("Venue Name"))
     if not name:
         return None
-    county = clean_text(row.get("County"))
+    county = normalize_county(row.get("County"))
     gallery = split_images(row.get("Gallery Images (all)"))
     return {
         "slug": slugify(f"{name}-{county or ''}"),
@@ -300,7 +300,7 @@ def venue_from_hitched(row: dict[str, Any]) -> dict[str, Any] | None:
     name = clean_text(row.get("Name"))
     if not name:
         return None
-    county = clean_text(row.get("County"))
+    county = normalize_county(row.get("County"))
     gallery = split_images(first(row.get("Gallery Images (all)"), row.get("All Images"), row.get("Top Image")))
     capacity_text = first(row.get("Capacity (range)"), row.get("Capacity"))
     return {
@@ -542,17 +542,24 @@ def category_key(value: str) -> str:
     return CANONICAL_CATEGORY_ALIASES.get(key, key)
 
 
+def normalize_county(value: Any) -> str | None:
+    county = clean_mojibake(value)
+    if not county:
+        return None
+    return re.sub(r"^Co\.?\s+", "", county, flags=re.I).strip() or None
+
+
 def county_from_row(row: dict[str, Any]) -> str | None:
-    county = clean_mojibake(row.get("County"))
+    county = normalize_county(row.get("County"))
     if county:
-        return county.removeprefix("Co. ").strip()
+        return county
     location = clean_mojibake(row.get("Location Text"))
     if not location:
         return None
     match = re.search(r"\bCo\.\s+([A-Za-z ]+)", location)
     if match:
         return match.group(1).strip()
-    return location.removeprefix("Co. ").strip()
+    return normalize_county(location)
 
 
 def useful_profile_text(value: Any) -> str | None:
@@ -673,7 +680,7 @@ def venue_from_master(row: dict[str, Any]) -> dict[str, Any] | None:
     name = clean_mojibake(row.get("Business Name"))
     if not name:
         return None
-    county = clean_mojibake(row.get("County"))
+    county = normalize_county(row.get("County"))
     gallery = split_images(first(row.get("All Images"), row.get("Top Image"), row.get("Logo Image")))
     capacity_text = first(row.get("Capacity"))
     return {
@@ -716,7 +723,7 @@ def supplier_from_master(row: dict[str, Any]) -> dict[str, Any] | None:
     name = clean_mojibake(row.get("Business Name"))
     if not name:
         return None
-    county = clean_mojibake(row.get("County"))
+    county = normalize_county(row.get("County"))
     category = clean_mojibake(row.get("Category")) or "Wedding Suppliers"
     gallery = split_images(first(row.get("All Images"), row.get("Top Image"), row.get("Logo Image")))
     return {
@@ -799,7 +806,7 @@ def supplier_from_planner(row: dict[str, Any]) -> dict[str, Any] | None:
     name = clean_text(row.get("Name"))
     if not name:
         return None
-    county = clean_text(row.get("County"))
+    county = normalize_county(row.get("County"))
     gallery = split_images(row.get("Gallery Images"))
     return {
         "slug": slugify(f"{name}-{county or ''}"),
@@ -884,7 +891,7 @@ def venue_from_hitched_uk(row: dict[str, Any]) -> dict[str, Any] | None:
     name = clean_mojibake(row.get("Name"))
     if not name:
         return None
-    county = clean_mojibake(row.get("County/Region"))
+    county = normalize_county(row.get("County/Region"))
     gallery = split_images(row.get("Gallery Images (all)"))
     capacity_text = clean_mojibake(row.get("Capacity (range)"))
     source_url = profile_url_from_row(row)
@@ -945,7 +952,7 @@ def supplier_from_hitched_uk(row: dict[str, Any]) -> dict[str, Any] | None:
     name = clean_mojibake(row.get("Name"))
     if not name:
         return None
-    county = clean_mojibake(row.get("Category"))
+    county = normalize_county(row.get("Category"))
     town_city = clean_mojibake(row.get("County/Region"))
     category = clean_mojibake(row.get("Description Word Count")) or "Wedding Suppliers"
     gallery = split_images(row.get("All FAQs"))

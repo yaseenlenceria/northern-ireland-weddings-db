@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { SITE_URL } from "@/lib/seo";
-import { CATEGORIES, LOCATIONS, VENUE_SLUG, countySlug } from "@/lib/taxonomy";
+import { CATEGORIES, LOCATIONS, VENUE_SLUG, countySlug, normalizeLocationName } from "@/lib/taxonomy";
 import { GUIDES } from "@/lib/guides";
 
 interface SitemapEntry {
@@ -80,8 +80,9 @@ export const Route = createFileRoute("/sitemap.xml")({
             }
             for (const cat of row.categories ?? []) {
               if (!row.county) continue;
+              const county = normalizeLocationName(row.county);
               const set = supplierCounties.get(cat) ?? new Set<string>();
-              set.add(row.county);
+              set.add(county);
               supplierCounties.set(cat, set);
             }
           }
@@ -94,7 +95,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           `;
           for (const row of venues) {
             entries.push({ path: `/venue/${row.slug}`, changefreq: "monthly", priority: "0.7" });
-            if (row.county) venueCounties.add(row.county);
+            if (row.county) venueCounties.add(normalizeLocationName(row.county));
             if (row.country) venueCountries.add(row.country);
           }
         } catch (error) {
