@@ -38,7 +38,6 @@ const PAGES: Record<string, InformationPage> = {
     eyebrow: "Information",
     description: "Information about purchases and paid services on WedHQ.",
     intro: "WedHQ does not currently process purchases, bookings or payments through this website.",
-    source: { label: "Reference purchase terms on Hitched", href: "https://www.hitched.co.uk/corp/legal/terms-of-purchase-intl" },
     sections: [
       { heading: "No checkout on WedHQ", body: "When you contact a venue or supplier, any quote, contract, deposit or booking is arranged directly with that business. WedHQ is not a party to that supplier contract." },
       { heading: "Supplier responsibility", body: "Ask suppliers about their own terms, cancellation policies, insurance and payment arrangements before committing." },
