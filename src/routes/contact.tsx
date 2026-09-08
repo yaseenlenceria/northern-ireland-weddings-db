@@ -13,9 +13,9 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { submitEnquiry } from "@/lib/enquiries.functions";
 import { pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Contact WedHQ";
+const TITLE = "Contact WedHQ | Wedding Directory Help & Listing Support";
 const DESCRIPTION =
-  "Get in touch with WedHQ — listing questions, profile claims, corrections to a supplier entry, or help using the planning tools.";
+  "Contact the WedHQ team for help with the UK and Ireland wedding directory — listing claims, profile corrections, supplier enquiries or the free wedding planning tools.";
 
 const FAQS = [
   {
@@ -33,6 +33,14 @@ const FAQS = [
   {
     q: "Can I remove my business?",
     a: "Yes. Ask through the form and we'll remove the listing.",
+  },
+  {
+    q: "Where does WedHQ cover?",
+    a: "The directory covers the whole of Ireland and the United Kingdom — venues and suppliers across all counties, regions and postcodes.",
+  },
+  {
+    q: "How do I ask about my personal data?",
+    a: "Send a message with the subject \"Privacy request\" and we'll handle access, correction or deletion under our privacy notice, usually within one month.",
   },
 ];
 
@@ -91,7 +99,7 @@ function ContactPage() {
       <PageHeader
         eyebrow="Contact"
         title="Talk to WedHQ"
-        description="Listing questions, corrections, profile claims or help with the planning tools — this reaches us directly."
+        description="Listing questions, corrections, profile claims, privacy requests or help with the planning tools — this reaches the team directly. For supplier availability and pricing, use the enquiry form on the supplier's profile."
       >
         <Breadcrumbs items={[{ label: "Contact" }]} />
       </PageHeader>

@@ -192,6 +192,41 @@ export function Footer() {
       </div>
 
       <div className="border-t border-border/70">
+        <nav
+          aria-label="Legal"
+          className="mx-auto flex w-full max-w-7xl flex-wrap gap-x-6 gap-y-2 px-4 pt-6 text-xs text-muted-foreground sm:px-6"
+        >
+          <Link to="/information/about" className="hover:text-primary">
+            About WedHQ
+          </Link>
+          <Link to="/information/editorial-team" className="hover:text-primary">
+            Editorial team &amp; policies
+          </Link>
+          <Link to="/information/careers" className="hover:text-primary">
+            Careers
+          </Link>
+          <Link to="/information/legal-hub" className="hover:text-primary">
+            Legal hub
+          </Link>
+          <Link to="/information/transparency-hub" className="hover:text-primary">
+            Transparency hub
+          </Link>
+          <Link to="/information/terms-of-use" className="hover:text-primary">
+            Terms of use
+          </Link>
+          <Link to="/information/terms-of-purchase" className="hover:text-primary">
+            Terms of purchase
+          </Link>
+          <Link to="/information/privacy" className="hover:text-primary">
+            Privacy notice
+          </Link>
+          <Link to="/information/cookies" className="hover:text-primary">
+            Cookie notice
+          </Link>
+          <Link to="/information/your-privacy-choices" className="hover:text-primary">
+            Your Privacy Choices
+          </Link>
+        </nav>
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>{`© ${new Date().getFullYear()} ${SITE_NAME}. All rights reserved.`}</p>
           <p>Built for couples planning weddings across Ireland and the UK.</p>

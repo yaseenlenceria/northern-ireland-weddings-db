@@ -11,23 +11,42 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DirectorySlugRouteImport } from './routes/$directorySlug'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BudgetCalculatorRouteImport } from './routes/budget-calculator'
+import { Route as CareersRouteImport } from './routes/careers'
 import { Route as ContactRouteImport } from './routes/contact'
-import { Route as InformationSlugRouteImport } from './routes/information.$slug'
+import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as EditorialRouteImport } from './routes/editorial'
 import { Route as FindSuppliersRouteImport } from './routes/find-suppliers'
 import { Route as GuestListRouteImport } from './routes/guest-list'
+import { Route as LegalRouteImport } from './routes/legal'
 import { Route as ListYourBusinessRouteImport } from './routes/list-your-business'
 import { Route as PlanningToolsRouteImport } from './routes/planning-tools'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PrivacyChoicesRouteImport } from './routes/privacy-choices'
 import { Route as RealWeddingsRouteImport } from './routes/real-weddings'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TermsOfPurchaseRouteImport } from './routes/terms-of-purchase'
+import { Route as TransparencyRouteImport } from './routes/transparency'
 import { Route as VenuesRouteImport } from './routes/venues'
 import { Route as WeddingChecklistRouteImport } from './routes/wedding-checklist'
 import { Route as WeddingFairsRouteImport } from './routes/wedding-fairs'
 import { Route as WeddingTimelineRouteImport } from './routes/wedding-timeline'
 import { Route as CountyCountyRouteImport } from './routes/county.$county'
 import { Route as ImageEncodedRouteImport } from './routes/image.$encoded'
+import { Route as InformationAboutRouteImport } from './routes/information.about'
+import { Route as InformationCareersRouteImport } from './routes/information.careers'
+import { Route as InformationCookiesRouteImport } from './routes/information.cookies'
+import { Route as InformationEditorialTeamRouteImport } from './routes/information.editorial-team'
+import { Route as InformationLegalHubRouteImport } from './routes/information.legal-hub'
+import { Route as InformationPrivacyRouteImport } from './routes/information.privacy'
+import { Route as InformationTermsOfPurchaseRouteImport } from './routes/information.terms-of-purchase'
+import { Route as InformationTermsOfUseRouteImport } from './routes/information.terms-of-use'
+import { Route as InformationTransparencyHubRouteImport } from './routes/information.transparency-hub'
+import { Route as InformationYourPrivacyChoicesRouteImport } from './routes/information.your-privacy-choices'
 import { Route as SupplierSlugRouteImport } from './routes/supplier.$slug'
 import { Route as VenueSlugRouteImport } from './routes/venue.$slug'
 import { Route as WeddingGuidesIndexRouteImport } from './routes/wedding-guides.index'
@@ -43,6 +62,11 @@ const DirectorySlugRoute = DirectorySlugRouteImport.update({
   path: '/$directorySlug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -53,19 +77,29 @@ const BudgetCalculatorRoute = BudgetCalculatorRouteImport.update({
   path: '/budget-calculator',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CareersRoute = CareersRouteImport.update({
+  id: '/careers',
+  path: '/careers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const InformationSlugRoute = InformationSlugRouteImport.update({
-  id: '/information/$slug',
-  path: '/information/$slug',
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EditorialRoute = EditorialRouteImport.update({
+  id: '/editorial',
+  path: '/editorial',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FindSuppliersRoute = FindSuppliersRouteImport.update({
@@ -78,6 +112,11 @@ const GuestListRoute = GuestListRouteImport.update({
   path: '/guest-list',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LegalRoute = LegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ListYourBusinessRoute = ListYourBusinessRouteImport.update({
   id: '/list-your-business',
   path: '/list-your-business',
@@ -88,6 +127,16 @@ const PlanningToolsRoute = PlanningToolsRouteImport.update({
   path: '/planning-tools',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyChoicesRoute = PrivacyChoicesRouteImport.update({
+  id: '/privacy-choices',
+  path: '/privacy-choices',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RealWeddingsRoute = RealWeddingsRouteImport.update({
   id: '/real-weddings',
   path: '/real-weddings',
@@ -96,6 +145,21 @@ const RealWeddingsRoute = RealWeddingsRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsOfPurchaseRoute = TermsOfPurchaseRouteImport.update({
+  id: '/terms-of-purchase',
+  path: '/terms-of-purchase',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransparencyRoute = TransparencyRouteImport.update({
+  id: '/transparency',
+  path: '/transparency',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VenuesRoute = VenuesRouteImport.update({
@@ -128,6 +192,60 @@ const ImageEncodedRoute = ImageEncodedRouteImport.update({
   path: '/image/$encoded',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InformationAboutRoute = InformationAboutRouteImport.update({
+  id: '/information/about',
+  path: '/information/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InformationCareersRoute = InformationCareersRouteImport.update({
+  id: '/information/careers',
+  path: '/information/careers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InformationCookiesRoute = InformationCookiesRouteImport.update({
+  id: '/information/cookies',
+  path: '/information/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InformationEditorialTeamRoute =
+  InformationEditorialTeamRouteImport.update({
+    id: '/information/editorial-team',
+    path: '/information/editorial-team',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const InformationLegalHubRoute = InformationLegalHubRouteImport.update({
+  id: '/information/legal-hub',
+  path: '/information/legal-hub',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InformationPrivacyRoute = InformationPrivacyRouteImport.update({
+  id: '/information/privacy',
+  path: '/information/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InformationTermsOfPurchaseRoute =
+  InformationTermsOfPurchaseRouteImport.update({
+    id: '/information/terms-of-purchase',
+    path: '/information/terms-of-purchase',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const InformationTermsOfUseRoute = InformationTermsOfUseRouteImport.update({
+  id: '/information/terms-of-use',
+  path: '/information/terms-of-use',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InformationTransparencyHubRoute =
+  InformationTransparencyHubRouteImport.update({
+    id: '/information/transparency-hub',
+    path: '/information/transparency-hub',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const InformationYourPrivacyChoicesRoute =
+  InformationYourPrivacyChoicesRouteImport.update({
+    id: '/information/your-privacy-choices',
+    path: '/information/your-privacy-choices',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const SupplierSlugRoute = SupplierSlugRouteImport.update({
   id: '/supplier/$slug',
   path: '/supplier/$slug',
@@ -152,23 +270,42 @@ const WeddingGuidesSlugRoute = WeddingGuidesSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$directorySlug': typeof DirectorySlugRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/budget-calculator': typeof BudgetCalculatorRoute
+  '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
-  '/information/$slug': typeof InformationSlugRoute
+  '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
+  '/editorial': typeof EditorialRoute
   '/find-suppliers': typeof FindSuppliersRoute
   '/guest-list': typeof GuestListRoute
+  '/legal': typeof LegalRoute
   '/list-your-business': typeof ListYourBusinessRoute
   '/planning-tools': typeof PlanningToolsRoute
+  '/privacy': typeof PrivacyRoute
+  '/privacy-choices': typeof PrivacyChoicesRoute
   '/real-weddings': typeof RealWeddingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
+  '/terms-of-purchase': typeof TermsOfPurchaseRoute
+  '/transparency': typeof TransparencyRoute
   '/venues': typeof VenuesRoute
   '/wedding-checklist': typeof WeddingChecklistRoute
   '/wedding-fairs': typeof WeddingFairsRoute
   '/wedding-timeline': typeof WeddingTimelineRoute
   '/county/$county': typeof CountyCountyRoute
   '/image/$encoded': typeof ImageEncodedRoute
+  '/information/about': typeof InformationAboutRoute
+  '/information/careers': typeof InformationCareersRoute
+  '/information/cookies': typeof InformationCookiesRoute
+  '/information/editorial-team': typeof InformationEditorialTeamRoute
+  '/information/legal-hub': typeof InformationLegalHubRoute
+  '/information/privacy': typeof InformationPrivacyRoute
+  '/information/terms-of-purchase': typeof InformationTermsOfPurchaseRoute
+  '/information/terms-of-use': typeof InformationTermsOfUseRoute
+  '/information/transparency-hub': typeof InformationTransparencyHubRoute
+  '/information/your-privacy-choices': typeof InformationYourPrivacyChoicesRoute
   '/supplier/$slug': typeof SupplierSlugRoute
   '/venue/$slug': typeof VenueSlugRoute
   '/wedding-guides/$slug': typeof WeddingGuidesSlugRoute
@@ -177,23 +314,42 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$directorySlug': typeof DirectorySlugRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/budget-calculator': typeof BudgetCalculatorRoute
+  '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
-  '/information/$slug': typeof InformationSlugRoute
+  '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
+  '/editorial': typeof EditorialRoute
   '/find-suppliers': typeof FindSuppliersRoute
   '/guest-list': typeof GuestListRoute
+  '/legal': typeof LegalRoute
   '/list-your-business': typeof ListYourBusinessRoute
   '/planning-tools': typeof PlanningToolsRoute
+  '/privacy': typeof PrivacyRoute
+  '/privacy-choices': typeof PrivacyChoicesRoute
   '/real-weddings': typeof RealWeddingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
+  '/terms-of-purchase': typeof TermsOfPurchaseRoute
+  '/transparency': typeof TransparencyRoute
   '/venues': typeof VenuesRoute
   '/wedding-checklist': typeof WeddingChecklistRoute
   '/wedding-fairs': typeof WeddingFairsRoute
   '/wedding-timeline': typeof WeddingTimelineRoute
   '/county/$county': typeof CountyCountyRoute
   '/image/$encoded': typeof ImageEncodedRoute
+  '/information/about': typeof InformationAboutRoute
+  '/information/careers': typeof InformationCareersRoute
+  '/information/cookies': typeof InformationCookiesRoute
+  '/information/editorial-team': typeof InformationEditorialTeamRoute
+  '/information/legal-hub': typeof InformationLegalHubRoute
+  '/information/privacy': typeof InformationPrivacyRoute
+  '/information/terms-of-purchase': typeof InformationTermsOfPurchaseRoute
+  '/information/terms-of-use': typeof InformationTermsOfUseRoute
+  '/information/transparency-hub': typeof InformationTransparencyHubRoute
+  '/information/your-privacy-choices': typeof InformationYourPrivacyChoicesRoute
   '/supplier/$slug': typeof SupplierSlugRoute
   '/venue/$slug': typeof VenueSlugRoute
   '/wedding-guides/$slug': typeof WeddingGuidesSlugRoute
@@ -203,23 +359,42 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$directorySlug': typeof DirectorySlugRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/budget-calculator': typeof BudgetCalculatorRoute
+  '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
-  '/information/$slug': typeof InformationSlugRoute
+  '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
+  '/editorial': typeof EditorialRoute
   '/find-suppliers': typeof FindSuppliersRoute
   '/guest-list': typeof GuestListRoute
+  '/legal': typeof LegalRoute
   '/list-your-business': typeof ListYourBusinessRoute
   '/planning-tools': typeof PlanningToolsRoute
+  '/privacy': typeof PrivacyRoute
+  '/privacy-choices': typeof PrivacyChoicesRoute
   '/real-weddings': typeof RealWeddingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
+  '/terms-of-purchase': typeof TermsOfPurchaseRoute
+  '/transparency': typeof TransparencyRoute
   '/venues': typeof VenuesRoute
   '/wedding-checklist': typeof WeddingChecklistRoute
   '/wedding-fairs': typeof WeddingFairsRoute
   '/wedding-timeline': typeof WeddingTimelineRoute
   '/county/$county': typeof CountyCountyRoute
   '/image/$encoded': typeof ImageEncodedRoute
+  '/information/about': typeof InformationAboutRoute
+  '/information/careers': typeof InformationCareersRoute
+  '/information/cookies': typeof InformationCookiesRoute
+  '/information/editorial-team': typeof InformationEditorialTeamRoute
+  '/information/legal-hub': typeof InformationLegalHubRoute
+  '/information/privacy': typeof InformationPrivacyRoute
+  '/information/terms-of-purchase': typeof InformationTermsOfPurchaseRoute
+  '/information/terms-of-use': typeof InformationTermsOfUseRoute
+  '/information/transparency-hub': typeof InformationTransparencyHubRoute
+  '/information/your-privacy-choices': typeof InformationYourPrivacyChoicesRoute
   '/supplier/$slug': typeof SupplierSlugRoute
   '/venue/$slug': typeof VenueSlugRoute
   '/wedding-guides/$slug': typeof WeddingGuidesSlugRoute
@@ -230,23 +405,42 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$directorySlug'
+    | '/about'
     | '/auth'
     | '/budget-calculator'
+    | '/careers'
     | '/contact'
-    | '/information/$slug'
+    | '/cookies'
     | '/dashboard'
+    | '/editorial'
     | '/find-suppliers'
     | '/guest-list'
+    | '/legal'
     | '/list-your-business'
     | '/planning-tools'
+    | '/privacy'
+    | '/privacy-choices'
     | '/real-weddings'
     | '/sitemap.xml'
+    | '/terms'
+    | '/terms-of-purchase'
+    | '/transparency'
     | '/venues'
     | '/wedding-checklist'
     | '/wedding-fairs'
     | '/wedding-timeline'
     | '/county/$county'
     | '/image/$encoded'
+    | '/information/about'
+    | '/information/careers'
+    | '/information/cookies'
+    | '/information/editorial-team'
+    | '/information/legal-hub'
+    | '/information/privacy'
+    | '/information/terms-of-purchase'
+    | '/information/terms-of-use'
+    | '/information/transparency-hub'
+    | '/information/your-privacy-choices'
     | '/supplier/$slug'
     | '/venue/$slug'
     | '/wedding-guides/$slug'
@@ -255,23 +449,42 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$directorySlug'
+    | '/about'
     | '/auth'
     | '/budget-calculator'
+    | '/careers'
     | '/contact'
-    | '/information/$slug'
+    | '/cookies'
     | '/dashboard'
+    | '/editorial'
     | '/find-suppliers'
     | '/guest-list'
+    | '/legal'
     | '/list-your-business'
     | '/planning-tools'
+    | '/privacy'
+    | '/privacy-choices'
     | '/real-weddings'
     | '/sitemap.xml'
+    | '/terms'
+    | '/terms-of-purchase'
+    | '/transparency'
     | '/venues'
     | '/wedding-checklist'
     | '/wedding-fairs'
     | '/wedding-timeline'
     | '/county/$county'
     | '/image/$encoded'
+    | '/information/about'
+    | '/information/careers'
+    | '/information/cookies'
+    | '/information/editorial-team'
+    | '/information/legal-hub'
+    | '/information/privacy'
+    | '/information/terms-of-purchase'
+    | '/information/terms-of-use'
+    | '/information/transparency-hub'
+    | '/information/your-privacy-choices'
     | '/supplier/$slug'
     | '/venue/$slug'
     | '/wedding-guides/$slug'
@@ -280,23 +493,42 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$directorySlug'
+    | '/about'
     | '/auth'
     | '/budget-calculator'
+    | '/careers'
     | '/contact'
-    | '/information/$slug'
+    | '/cookies'
     | '/dashboard'
+    | '/editorial'
     | '/find-suppliers'
     | '/guest-list'
+    | '/legal'
     | '/list-your-business'
     | '/planning-tools'
+    | '/privacy'
+    | '/privacy-choices'
     | '/real-weddings'
     | '/sitemap.xml'
+    | '/terms'
+    | '/terms-of-purchase'
+    | '/transparency'
     | '/venues'
     | '/wedding-checklist'
     | '/wedding-fairs'
     | '/wedding-timeline'
     | '/county/$county'
     | '/image/$encoded'
+    | '/information/about'
+    | '/information/careers'
+    | '/information/cookies'
+    | '/information/editorial-team'
+    | '/information/legal-hub'
+    | '/information/privacy'
+    | '/information/terms-of-purchase'
+    | '/information/terms-of-use'
+    | '/information/transparency-hub'
+    | '/information/your-privacy-choices'
     | '/supplier/$slug'
     | '/venue/$slug'
     | '/wedding-guides/$slug'
@@ -306,23 +538,42 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DirectorySlugRoute: typeof DirectorySlugRoute
+  AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   BudgetCalculatorRoute: typeof BudgetCalculatorRoute
+  CareersRoute: typeof CareersRoute
   ContactRoute: typeof ContactRoute
-  InformationSlugRoute: typeof InformationSlugRoute
+  CookiesRoute: typeof CookiesRoute
   DashboardRoute: typeof DashboardRoute
+  EditorialRoute: typeof EditorialRoute
   FindSuppliersRoute: typeof FindSuppliersRoute
   GuestListRoute: typeof GuestListRoute
+  LegalRoute: typeof LegalRoute
   ListYourBusinessRoute: typeof ListYourBusinessRoute
   PlanningToolsRoute: typeof PlanningToolsRoute
+  PrivacyRoute: typeof PrivacyRoute
+  PrivacyChoicesRoute: typeof PrivacyChoicesRoute
   RealWeddingsRoute: typeof RealWeddingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TermsRoute: typeof TermsRoute
+  TermsOfPurchaseRoute: typeof TermsOfPurchaseRoute
+  TransparencyRoute: typeof TransparencyRoute
   VenuesRoute: typeof VenuesRoute
   WeddingChecklistRoute: typeof WeddingChecklistRoute
   WeddingFairsRoute: typeof WeddingFairsRoute
   WeddingTimelineRoute: typeof WeddingTimelineRoute
   CountyCountyRoute: typeof CountyCountyRoute
   ImageEncodedRoute: typeof ImageEncodedRoute
+  InformationAboutRoute: typeof InformationAboutRoute
+  InformationCareersRoute: typeof InformationCareersRoute
+  InformationCookiesRoute: typeof InformationCookiesRoute
+  InformationEditorialTeamRoute: typeof InformationEditorialTeamRoute
+  InformationLegalHubRoute: typeof InformationLegalHubRoute
+  InformationPrivacyRoute: typeof InformationPrivacyRoute
+  InformationTermsOfPurchaseRoute: typeof InformationTermsOfPurchaseRoute
+  InformationTermsOfUseRoute: typeof InformationTermsOfUseRoute
+  InformationTransparencyHubRoute: typeof InformationTransparencyHubRoute
+  InformationYourPrivacyChoicesRoute: typeof InformationYourPrivacyChoicesRoute
   SupplierSlugRoute: typeof SupplierSlugRoute
   VenueSlugRoute: typeof VenueSlugRoute
   WeddingGuidesSlugRoute: typeof WeddingGuidesSlugRoute
@@ -345,6 +596,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DirectorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -359,6 +617,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BudgetCalculatorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/careers': {
+      id: '/careers'
+      path: '/careers'
+      fullPath: '/careers'
+      preLoaderRoute: typeof CareersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
@@ -366,11 +631,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/information/$slug': {
-      id: '/information/$slug'
-      path: '/information/$slug'
-      fullPath: '/information/$slug'
-      preLoaderRoute: typeof InformationSlugRouteImport
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -378,6 +643,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/editorial': {
+      id: '/editorial'
+      path: '/editorial'
+      fullPath: '/editorial'
+      preLoaderRoute: typeof EditorialRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/find-suppliers': {
@@ -394,6 +666,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuestListRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/legal': {
+      id: '/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof LegalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/list-your-business': {
       id: '/list-your-business'
       path: '/list-your-business'
@@ -408,6 +687,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlanningToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-choices': {
+      id: '/privacy-choices'
+      path: '/privacy-choices'
+      fullPath: '/privacy-choices'
+      preLoaderRoute: typeof PrivacyChoicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/real-weddings': {
       id: '/real-weddings'
       path: '/real-weddings'
@@ -420,6 +713,27 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms-of-purchase': {
+      id: '/terms-of-purchase'
+      path: '/terms-of-purchase'
+      fullPath: '/terms-of-purchase'
+      preLoaderRoute: typeof TermsOfPurchaseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transparency': {
+      id: '/transparency'
+      path: '/transparency'
+      fullPath: '/transparency'
+      preLoaderRoute: typeof TransparencyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/venues': {
@@ -464,6 +778,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImageEncodedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/information/about': {
+      id: '/information/about'
+      path: '/information/about'
+      fullPath: '/information/about'
+      preLoaderRoute: typeof InformationAboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/information/careers': {
+      id: '/information/careers'
+      path: '/information/careers'
+      fullPath: '/information/careers'
+      preLoaderRoute: typeof InformationCareersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/information/cookies': {
+      id: '/information/cookies'
+      path: '/information/cookies'
+      fullPath: '/information/cookies'
+      preLoaderRoute: typeof InformationCookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/information/editorial-team': {
+      id: '/information/editorial-team'
+      path: '/information/editorial-team'
+      fullPath: '/information/editorial-team'
+      preLoaderRoute: typeof InformationEditorialTeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/information/legal-hub': {
+      id: '/information/legal-hub'
+      path: '/information/legal-hub'
+      fullPath: '/information/legal-hub'
+      preLoaderRoute: typeof InformationLegalHubRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/information/privacy': {
+      id: '/information/privacy'
+      path: '/information/privacy'
+      fullPath: '/information/privacy'
+      preLoaderRoute: typeof InformationPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/information/terms-of-purchase': {
+      id: '/information/terms-of-purchase'
+      path: '/information/terms-of-purchase'
+      fullPath: '/information/terms-of-purchase'
+      preLoaderRoute: typeof InformationTermsOfPurchaseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/information/terms-of-use': {
+      id: '/information/terms-of-use'
+      path: '/information/terms-of-use'
+      fullPath: '/information/terms-of-use'
+      preLoaderRoute: typeof InformationTermsOfUseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/information/transparency-hub': {
+      id: '/information/transparency-hub'
+      path: '/information/transparency-hub'
+      fullPath: '/information/transparency-hub'
+      preLoaderRoute: typeof InformationTransparencyHubRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/information/your-privacy-choices': {
+      id: '/information/your-privacy-choices'
+      path: '/information/your-privacy-choices'
+      fullPath: '/information/your-privacy-choices'
+      preLoaderRoute: typeof InformationYourPrivacyChoicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/supplier/$slug': {
       id: '/supplier/$slug'
       path: '/supplier/$slug'
@@ -498,23 +882,42 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DirectorySlugRoute: DirectorySlugRoute,
+  AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   BudgetCalculatorRoute: BudgetCalculatorRoute,
+  CareersRoute: CareersRoute,
   ContactRoute: ContactRoute,
-  InformationSlugRoute: InformationSlugRoute,
+  CookiesRoute: CookiesRoute,
   DashboardRoute: DashboardRoute,
+  EditorialRoute: EditorialRoute,
   FindSuppliersRoute: FindSuppliersRoute,
   GuestListRoute: GuestListRoute,
+  LegalRoute: LegalRoute,
   ListYourBusinessRoute: ListYourBusinessRoute,
   PlanningToolsRoute: PlanningToolsRoute,
+  PrivacyRoute: PrivacyRoute,
+  PrivacyChoicesRoute: PrivacyChoicesRoute,
   RealWeddingsRoute: RealWeddingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TermsRoute: TermsRoute,
+  TermsOfPurchaseRoute: TermsOfPurchaseRoute,
+  TransparencyRoute: TransparencyRoute,
   VenuesRoute: VenuesRoute,
   WeddingChecklistRoute: WeddingChecklistRoute,
   WeddingFairsRoute: WeddingFairsRoute,
   WeddingTimelineRoute: WeddingTimelineRoute,
   CountyCountyRoute: CountyCountyRoute,
   ImageEncodedRoute: ImageEncodedRoute,
+  InformationAboutRoute: InformationAboutRoute,
+  InformationCareersRoute: InformationCareersRoute,
+  InformationCookiesRoute: InformationCookiesRoute,
+  InformationEditorialTeamRoute: InformationEditorialTeamRoute,
+  InformationLegalHubRoute: InformationLegalHubRoute,
+  InformationPrivacyRoute: InformationPrivacyRoute,
+  InformationTermsOfPurchaseRoute: InformationTermsOfPurchaseRoute,
+  InformationTermsOfUseRoute: InformationTermsOfUseRoute,
+  InformationTransparencyHubRoute: InformationTransparencyHubRoute,
+  InformationYourPrivacyChoicesRoute: InformationYourPrivacyChoicesRoute,
   SupplierSlugRoute: SupplierSlugRoute,
   VenueSlugRoute: VenueSlugRoute,
   WeddingGuidesSlugRoute: WeddingGuidesSlugRoute,
