@@ -156,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/budget-calculator': typeof BudgetCalculatorRoute
   '/contact': typeof ContactRoute
   '/information/$slug': typeof InformationSlugRoute
+  '/information/$slug': typeof InformationSlugRoute
   '/dashboard': typeof DashboardRoute
   '/find-suppliers': typeof FindSuppliersRoute
   '/guest-list': typeof GuestListRoute
@@ -180,6 +181,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/budget-calculator': typeof BudgetCalculatorRoute
   '/contact': typeof ContactRoute
+  '/information/$slug': typeof InformationSlugRoute
   '/dashboard': typeof DashboardRoute
   '/find-suppliers': typeof FindSuppliersRoute
   '/guest-list': typeof GuestListRoute
@@ -205,6 +207,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/budget-calculator': typeof BudgetCalculatorRoute
   '/contact': typeof ContactRoute
+  '/information/$slug': typeof InformationSlugRoute
   '/dashboard': typeof DashboardRoute
   '/find-suppliers': typeof FindSuppliersRoute
   '/guest-list': typeof GuestListRoute
@@ -231,6 +234,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/budget-calculator'
     | '/contact'
+    | '/information/$slug'
     | '/dashboard'
     | '/find-suppliers'
     | '/guest-list'
@@ -255,6 +259,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/budget-calculator'
     | '/contact'
+    | '/information/$slug'
     | '/dashboard'
     | '/find-suppliers'
     | '/guest-list'
@@ -279,6 +284,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/budget-calculator'
     | '/contact'
+    | '/information/$slug'
     | '/dashboard'
     | '/find-suppliers'
     | '/guest-list'
@@ -496,6 +502,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BudgetCalculatorRoute: BudgetCalculatorRoute,
   ContactRoute: ContactRoute,
+  InformationSlugRoute: InformationSlugRoute,
   DashboardRoute: DashboardRoute,
   FindSuppliersRoute: FindSuppliersRoute,
   GuestListRoute: GuestListRoute,
