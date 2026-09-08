@@ -1,5 +1,5 @@
 import type React from "react";
-import { ExternalLink, Star } from "lucide-react";
+import { Star } from "lucide-react";
 
 type Review = {
   id: string;
@@ -55,7 +55,6 @@ export function ReviewList({
                   <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                     <span>{review.author_name || "Verified couple"}</span>
                     {date ? <span>{date}</span> : null}
-                    {review.source_name ? <span>via {review.source_name}</span> : null}
                   </p>
                 </div>
                 {review.rating ? (
@@ -68,16 +67,6 @@ export function ReviewList({
               <p className="line-clamp-6 mt-3 whitespace-pre-line text-sm leading-6 text-muted-foreground">
                 {review.body}
               </p>
-              {review.source_url ? (
-                <a
-                  href={review.source_url}
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
-                  className="mt-3 inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                >
-                  Source <ExternalLink className="size-3" aria-hidden="true" />
-                </a>
-              ) : null}
             </article>
           );
         })}

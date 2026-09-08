@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ImageOff } from "lucide-react";
-import { imageCandidates } from "@/lib/media";
+import { imageCandidates, publicImageUrl } from "@/lib/media";
 
 /** Listing image with graceful fallback when the source URL fails. */
 export function ListingImage({
@@ -34,7 +34,7 @@ export function ListingImage({
 
   return (
     <img
-      src={image}
+      src={publicImageUrl(image)}
       alt={alt}
       loading="lazy"
       decoding="async"

@@ -2,7 +2,6 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import {
   Award,
   BadgeCheck,
-  ExternalLink,
   Globe,
   Instagram,
   Mail,
@@ -29,7 +28,7 @@ import { Stars } from "@/components/site/Stars";
 import { ReviewList } from "@/components/site/Reviews";
 import { getSupplier } from "@/lib/directory.functions";
 import { firstImage, videoEmbed } from "@/lib/media";
-import { CATEGORY_BY_KEY, countySlug } from "@/lib/taxonomy";
+import { CATEGORY_BY_KEY, countrySlug, countySlug, listingLocationLabel } from "@/lib/taxonomy";
 import {
   absoluteUrl,
   aggregateRating,
@@ -53,9 +52,10 @@ export const Route = createFileRoute("/supplier/$slug")({
     }
     const s = loaderData.supplier;
     const category = CATEGORY_BY_KEY.get(s.categories?.[0] ?? "")?.label ?? "Wedding supplier";
-    const place = s.county ? `Co. ${s.county}` : "Ireland";
+    const place = listingLocationLabel(s.county, s.country);
     const avg = averageRating(loaderData.reviews);
     const title = `${s.name} — ${category}, ${place} | WedHQ`;
+    const isDemo = s.source_url === "wedhq-demo";
     const ratingBit = avg
       ? `Rated ${avg.toFixed(1)}/5 from ${loaderData.reviews.length} reviews. `
       : "";
@@ -70,6 +70,7 @@ export const Route = createFileRoute("/supplier/$slug")({
         path,
         type: "profile",
         image: firstImage(s.banner_image, s.logo_image, s.gallery_images),
+        noindex: isDemo,
       }),
       links: canonical(path),
     };
@@ -102,7 +103,7 @@ const FAQS = (name: string) => [
   },
   {
     q: "How far in advance should I book?",
-    a: "Most Irish couples book their key suppliers 9 to 18 months before the wedding, and sooner for peak Saturdays between May and September. If your date is inside six months it is still worth asking.",
+    a: "Most couples book their key suppliers 9 to 18 months before the wedding, and sooner for peak Saturdays between May and September. If your date is inside six months it is still worth asking.",
   },
   {
     q: "Is pricing on this page final?",
@@ -148,6 +149,8 @@ function SupplierProfile() {
   const supplierRating = toNumber(supplier.rating);
   const supplierReviewCount = toNumber(supplier.review_count);
   const supplierPrice = priceLabel(supplier.avg_price, supplier.avg_price_num);
+  const location = listingLocationLabel(supplier.county, supplier.country);
+  const scopeSlug = supplier.country ? countrySlug(supplier.country) : "uk-and-ireland";
   const avg = allScored.length
     ? allScored.reduce((s, r) => s + r, 0) / allScored.length
     : (supplierRating ?? averageRating(reviews));
@@ -181,7 +184,7 @@ function SupplierProfile() {
         data={breadcrumbSchema("", [
           { name: "Home", path: "/" },
           { name: "Find Suppliers", path: "/find-suppliers" },
-          ...(category ? [{ name: category.plural, path: `/${category.slug}-ireland` }] : []),
+          ...(category ? [{ name: category.plural, path: `/${category.slug}-${scopeSlug}` }] : []),
           { name: supplier.name, path: `/supplier/${supplier.slug}` },
         ])}
       />
@@ -200,7 +203,7 @@ function SupplierProfile() {
             "@type": "PostalAddress",
             streetAddress: supplier.address ?? undefined,
             addressRegion: supplier.county ?? undefined,
-            addressCountry: "IE",
+            addressCountry: supplier.country === "United Kingdom" ? "GB" : "IE",
           },
           ...(supplier.latitude && supplier.longitude
             ? {
@@ -268,7 +271,7 @@ function SupplierProfile() {
                     {
                       label: category.plural,
                       to: "/$directorySlug",
-                      params: { directorySlug: `${category.slug}-ireland` },
+                      params: { directorySlug: `${category.slug}-${scopeSlug}` },
                     },
                   ]
                 : []),
@@ -280,9 +283,7 @@ function SupplierProfile() {
             <div className="overflow-hidden rounded-2xl border border-border bg-card">
               <ListingImage
                 src={[supplier.banner_image, supplier.logo_image, ...gallery]}
-                alt={`${supplier.name}${category ? ` — ${category.label.toLowerCase()}` : ""}${
-                  supplier.county ? ` in Co. ${supplier.county}` : ""
-                }`}
+                alt={`${supplier.name}${category ? ` — ${category.label.toLowerCase()}` : ""} in ${location}`}
                 className="aspect-16/10 w-full object-cover"
               />
             </div>
@@ -328,7 +329,8 @@ function SupplierProfile() {
               {supplier.county ? (
                 <p className="mt-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
                   <MapPin className="size-4" />
-                  {supplier.address ? `${supplier.address}, ` : ""}Co. {supplier.county}
+                  {supplier.address ? `${supplier.address}, ` : ""}
+                  {location}
                 </p>
               ) : null}
 
@@ -553,14 +555,20 @@ function SupplierProfile() {
             </ul>
             {supplier.county ? (
               <Button asChild variant="outline" className="mt-5 w-full">
-                <Link to="/county/$county" params={{ county: countySlug(supplier.county) }}>
-                  More in Co. {supplier.county}
-                </Link>
+                {supplier.country === "United Kingdom" ? (
+                  <Link to="/find-suppliers" search={{ country: "United Kingdom" }}>
+                    More in the UK
+                  </Link>
+                ) : (
+                  <Link to="/county/$county" params={{ county: countySlug(supplier.county) }}>
+                    More in {location}
+                  </Link>
+                )}
               </Button>
             ) : null}
           </div>
 
-          {socialLinks.length || supplier.profile_url ? (
+          {socialLinks.length ? (
             <div className="rounded-xl border border-border bg-card p-6">
               <h3 className="font-serif text-xl">Online profiles</h3>
               <div className="mt-4 grid gap-2">
@@ -571,17 +579,6 @@ function SupplierProfile() {
                     </a>
                   </Button>
                 ))}
-                {supplier.profile_url ? (
-                  <Button asChild variant="outline" className="justify-start">
-                    <a
-                      href={supplier.profile_url}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                    >
-                      <ExternalLink className="size-4" /> Source profile
-                    </a>
-                  </Button>
-                ) : null}
               </div>
             </div>
           ) : null}

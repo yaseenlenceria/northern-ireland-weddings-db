@@ -11,7 +11,9 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -21,12 +23,12 @@ import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { SupplierCard } from "@/components/site/Cards";
 import { JsonLd } from "@/components/site/JsonLd";
 import { getSupplierCategoryCounts, listSuppliers } from "@/lib/directory.functions";
-import { CATEGORIES, COUNTIES } from "@/lib/taxonomy";
+import { CATEGORIES, LOCATION_GROUPS, locationCountry } from "@/lib/taxonomy";
 import { SITE_NAME, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 
-const TITLE = "Find Wedding Suppliers in Ireland | WedHQ";
+const TITLE = "Find Wedding Suppliers in the UK & Ireland | WedHQ";
 const DESCRIPTION =
-  "Search every wedding supplier on WedHQ by category, county and name — photographers, bands, florists, planners, celebrants and more.";
+  "Search wedding suppliers on WedHQ by category, location and name — photographers, bands, florists, planners, celebrants and more.";
 
 const PER_PAGE = 24;
 
@@ -45,6 +47,7 @@ const QUICK_CATEGORY_KEYS = [
 const searchSchema = z.object({
   q: fallback(z.coerce.string(), "").optional(),
   category: fallback(z.coerce.string(), "all").optional(),
+  country: fallback(z.coerce.string(), "all").optional(),
   county: fallback(z.coerce.string(), "all").optional(),
   page: fallback(z.coerce.number().int(), 1).optional(),
 });
@@ -63,12 +66,14 @@ export const Route = createFileRoute("/find-suppliers")({
 function cleanSearch(s: {
   q?: string | undefined;
   category?: string | undefined;
+  country?: string | undefined;
   county?: string | undefined;
   page?: number | undefined;
 }) {
   return {
     ...(s.q ? { q: s.q } : {}),
     ...(s.category && s.category !== "all" ? { category: s.category } : {}),
+    ...(s.country && s.country !== "all" ? { country: s.country } : {}),
     ...(s.county && s.county !== "all" ? { county: s.county } : {}),
     ...(s.page && s.page > 1 ? { page: s.page } : {}),
   };
@@ -82,13 +87,25 @@ function FindSuppliersPage() {
 
   const term = search.q ?? "";
   const category = search.category ?? "all";
+  const country = search.country ?? "all";
   const county = search.county ?? "all";
+  const effectiveCountry = county !== "all" ? locationCountry(county) : country;
+  const locationValue =
+    county !== "all"
+      ? county
+      : country === "Ireland"
+        ? "country:ireland"
+        : country === "United Kingdom"
+          ? "country:uk"
+          : "all";
   const page = Math.max(1, search.page ?? 1);
 
   const [draft, setDraft] = useState(term);
   useEffect(() => setDraft(term), [term]);
 
-  const update = (next: Partial<{ q: string; category: string; county: string; page: number }>) =>
+  const update = (
+    next: Partial<{ q: string; category: string; country: string; county: string; page: number }>,
+  ) =>
     navigate({
       to: ".",
       // Defaults are stripped so shared URLs stay clean.
@@ -96,12 +113,20 @@ function FindSuppliersPage() {
       resetScroll: false,
     });
 
+  const updateLocation = (value: string) => {
+    if (value === "all") return update({ country: "all", county: "all" });
+    if (value === "country:ireland") return update({ country: "Ireland", county: "all" });
+    if (value === "country:uk") return update({ country: "United Kingdom", county: "all" });
+    return update({ country: locationCountry(value), county: value });
+  };
+
   const query = useQuery({
-    queryKey: ["suppliers", category, county, term, page],
+    queryKey: ["suppliers", category, effectiveCountry, county, term, page],
     queryFn: () =>
       fetchSuppliers({
         data: {
           ...(category !== "all" ? { category } : {}),
+          ...(effectiveCountry !== "all" ? { country: effectiveCountry } : {}),
           ...(county !== "all" ? { county } : {}),
           ...(term ? { q: term } : {}),
           page,
@@ -110,8 +135,14 @@ function FindSuppliersPage() {
       }),
   });
   const categoryCounts = useQuery({
-    queryKey: ["supplier-category-counts"],
-    queryFn: () => fetchCategoryCounts(),
+    queryKey: ["supplier-category-counts", effectiveCountry, county],
+    queryFn: () =>
+      fetchCategoryCounts({
+        data: {
+          ...(effectiveCountry !== "all" ? { country: effectiveCountry } : {}),
+          ...(county !== "all" ? { county } : {}),
+        },
+      }),
   });
   const countByCategory = new Map(
     (categoryCounts.data ?? []).map((row) => [row.category, row.count]),
@@ -133,7 +164,7 @@ function FindSuppliersPage() {
         data={{
           "@context": "https://schema.org",
           "@type": "CollectionPage",
-          name: "Find wedding suppliers in Ireland",
+          name: "Find wedding suppliers in the UK and Ireland",
           description: DESCRIPTION,
           url: absoluteUrl("/find-suppliers"),
           isPartOf: {
@@ -143,15 +174,15 @@ function FindSuppliersPage() {
           },
           about: {
             "@type": "Thing",
-            name: "Wedding suppliers in Ireland",
+            name: "Wedding suppliers in the UK and Ireland",
           },
         }}
       />
 
       <PageHeader
         eyebrow="Directory"
-        title="Find wedding suppliers in Ireland"
-        description="Filter the full directory by what you need and where your wedding is happening."
+        title="Find wedding suppliers"
+        description="Search by category, location and business name. Ireland is live now; UK regions are ready as new listings are added."
       >
         <Breadcrumbs items={[{ label: "Find Suppliers" }]} />
       </PageHeader>
@@ -183,17 +214,24 @@ function FindSuppliersPage() {
           </div>
 
           <div className="grid gap-1.5">
-            <Label htmlFor="supplier-county">County</Label>
-            <Select value={county} onValueChange={(v) => update({ county: v })}>
-              <SelectTrigger id="supplier-county" className="h-11">
+            <Label htmlFor="supplier-location">Location</Label>
+            <Select value={locationValue} onValueChange={updateLocation}>
+              <SelectTrigger id="supplier-location" className="h-11">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="max-h-80">
-                <SelectItem value="all">All counties</SelectItem>
-                {COUNTIES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    Co. {c}
-                  </SelectItem>
+                <SelectItem value="all">All UK &amp; Ireland</SelectItem>
+                <SelectItem value="country:ireland">Ireland</SelectItem>
+                <SelectItem value="country:uk">United Kingdom</SelectItem>
+                {LOCATION_GROUPS.map((group) => (
+                  <SelectGroup key={group.label}>
+                    <SelectLabel>{group.label}</SelectLabel>
+                    {group.locations.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {group.country === "Ireland" ? `Co. ${c}` : c}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 ))}
               </SelectContent>
             </Select>
@@ -286,12 +324,12 @@ function FindSuppliersPage() {
               <div className="mt-10 rounded-xl border border-dashed border-border p-10 text-center">
                 <h2 className="text-xl">No suppliers match those filters</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Try widening the county or category, or clear the name search.
+                  Try widening the location or category, or clear the name search.
                 </p>
                 <Button
                   variant="outline"
                   className="mt-5"
-                  onClick={() => update({ q: "", category: "all", county: "all" })}
+                  onClick={() => update({ q: "", category: "all", country: "all", county: "all" })}
                 >
                   Clear filters
                 </Button>

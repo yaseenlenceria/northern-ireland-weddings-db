@@ -18,7 +18,7 @@ import { SITE_NAME, absoluteUrl, pageMeta, canonical } from "@/lib/seo";
 
 const TITLE = "Wedding Guest List Planner | WedHQ";
 const DESCRIPTION =
-  "Free guest list planner for Irish weddings. Track names, sides, seats and RSVPs with a live headcount in your browser.";
+  "Free guest list planner for weddings. Track names, sides, seats and RSVPs with a live headcount in your browser.";
 const STORAGE_KEY = "wedhq-guest-list";
 const LEGACY_STORAGE_KEYS = ["shortlist-ie-guest-list", "niamh-weddings-guest-list"];
 const SIDES = ["Bride", "Groom", "Both", "Other"];

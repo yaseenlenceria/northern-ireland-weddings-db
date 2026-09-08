@@ -17,9 +17,9 @@ import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { JsonLd } from "@/components/site/JsonLd";
 import { SITE_NAME, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 
-const TITLE = "Wedding Checklist for Irish Weddings | WedHQ";
+const TITLE = "Wedding Checklist | WedHQ";
 const DESCRIPTION =
-  "A free wedding checklist for Irish couples. Tick off booking, legal, guest, styling and final-week tasks in your browser.";
+  "A free wedding checklist for couples. Tick off booking, legal, guest, styling and final-week tasks in your browser.";
 const STORAGE_KEY = "wedhq-checklist-items";
 const LEGACY_STORAGE_KEYS = ["shortlist-ie-checklist-items", "niamh-weddings-checklist-items"];
 const PHASES = [
@@ -121,7 +121,7 @@ function ChecklistPage() {
       <PageHeader
         eyebrow="Planning tool"
         title="Wedding checklist"
-        description="A practical Irish wedding checklist that works straight away and saves in this browser."
+        description="A practical wedding checklist that works straight away and saves in this browser."
       >
         <Breadcrumbs
           items={[{ label: "Planning Tools", to: "/planning-tools" }, { label: "Checklist" }]}

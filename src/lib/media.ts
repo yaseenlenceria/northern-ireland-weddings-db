@@ -8,14 +8,20 @@ const PLACEHOLDER_MARKERS = [
   "undefined",
 ];
 
+const PROXIED_IMAGE_HOSTS = new Set(["cdn0.hitched.ie", "cdn0.hitched.co.uk"]);
+
 function isKnownUnavailableImage(url: string) {
   const lowered = url.toLowerCase();
   return (
-    lowered.includes("://cdn0.hitched.ie/") ||
-    lowered.includes("://cdn0.hitched.co.uk/") ||
     lowered.includes("://www.weddingsuppliers.ie/uploads/") ||
     lowered.includes("://www.weddingsuppliers.ie/public/uploads/")
   );
+}
+
+function hexEncode(value: string) {
+  return Array.from(value)
+    .map((char) => char.charCodeAt(0).toString(16).padStart(2, "0"))
+    .join("");
 }
 
 export function cleanImageUrl(value?: string | null) {
@@ -41,6 +47,19 @@ export function imageCandidates(...values: Array<string | string[] | null | unde
     if (image) candidates.push(image);
   }
   return [...new Set(candidates)];
+}
+
+export function publicImageUrl(value: string) {
+  if (value.startsWith("/")) return value;
+  try {
+    const url = new URL(value);
+    if (PROXIED_IMAGE_HOSTS.has(url.hostname.toLowerCase())) {
+      return `/image/${hexEncode(value)}`;
+    }
+  } catch {
+    return value;
+  }
+  return value;
 }
 
 export function firstImage(...values: Array<string | string[] | null | undefined>) {

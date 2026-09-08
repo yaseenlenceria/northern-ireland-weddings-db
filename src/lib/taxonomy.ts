@@ -3,7 +3,7 @@
  *
  * Maps the raw category slugs stored on supplier rows (imported from the
  * directory spreadsheet) to public-facing URL slugs and display labels, and
- * lists the counties present in the data.
+ * lists the locations present in the data.
  */
 
 export type CategoryDef = {
@@ -228,8 +228,8 @@ export const VENUE_SLUG = "wedding-venues";
 export const CATEGORY_BY_SLUG = new Map(CATEGORIES.map((c) => [c.slug, c]));
 export const CATEGORY_BY_KEY = new Map(CATEGORIES.map((c) => [c.key, c]));
 
-/** Counties present in the imported listings. */
-export const COUNTIES = [
+/** Irish counties present in the imported listings. */
+export const IRELAND_COUNTIES = [
   "Carlow",
   "Cavan",
   "Clare",
@@ -259,8 +259,54 @@ export const COUNTIES = [
   "Wicklow",
 ] as const;
 
-/** Counties surfaced in the homepage "browse by county" grid. */
-export const FEATURED_COUNTIES = [
+/** UK regions are ready for the next import; they can also back UK SEO pages. */
+export const UK_REGIONS = [
+  "London",
+  "West London",
+  "North London",
+  "South East London",
+  "South West London",
+  "North West London",
+  "South East England",
+  "South West England",
+  "East of England",
+  "West Midlands",
+  "East Midlands",
+  "North West England",
+  "North East England",
+  "Yorkshire",
+  "Scotland",
+  "Wales",
+  "Northern Ireland",
+  "Berkshire",
+  "Buckinghamshire",
+  "Cambridgeshire",
+  "Cheshire",
+  "Cornwall",
+  "Essex",
+  "Greater Manchester",
+  "Hampshire",
+  "Hertfordshire",
+  "Kent",
+  "Lancashire",
+  "Middlesex",
+  "North Yorkshire",
+  "Nottinghamshire",
+  "Surrey",
+  "West Sussex",
+  "West Yorkshire",
+] as const;
+
+export const COUNTIES = IRELAND_COUNTIES;
+export const LOCATIONS = [...IRELAND_COUNTIES, ...UK_REGIONS] as const;
+
+export const LOCATION_GROUPS = [
+  { label: "Ireland", country: "Ireland", locations: IRELAND_COUNTIES },
+  { label: "United Kingdom", country: "United Kingdom", locations: UK_REGIONS },
+] as const;
+
+/** Locations surfaced in the homepage "browse by location" grid. */
+export const FEATURED_LOCATIONS = [
   "Dublin",
   "Cork",
   "Galway",
@@ -273,17 +319,43 @@ export const FEATURED_COUNTIES = [
   "Kilkenny",
   "Wicklow",
   "Meath",
+  "Essex",
+  "Surrey",
+  "Kent",
+  "Berkshire",
 ];
 
-export const countySlug = (county: string) => county.toLowerCase().replace(/\s+/g, "-");
+export const locationSlug = (location: string) => location.toLowerCase().replace(/\s+/g, "-");
+export const countySlug = locationSlug;
 
-export const countyFromSlug = (slug: string) =>
-  COUNTIES.find((c) => countySlug(c) === slug.toLowerCase());
+export const locationCountry = (location: string) =>
+  UK_REGIONS.some((c) => c === location) ? "United Kingdom" : "Ireland";
+
+export const countrySlug = (country: string) =>
+  country === "United Kingdom" ? "uk" : country.toLowerCase().replace(/\s+/g, "-");
+
+export const countryDisplayName = (country?: string | null) =>
+  country === "United Kingdom" ? "UK" : country || "Ireland";
+
+export const listingLocationLabel = (location?: string | null, country?: string | null) => {
+  const resolvedCountry = country ?? (location ? locationCountry(location) : null);
+  if (location) {
+    return resolvedCountry === "United Kingdom" ? `${location}, UK` : `Co. ${location}`;
+  }
+  return countryDisplayName(resolvedCountry);
+};
+
+export const locationFromSlug = (slug: string) =>
+  LOCATIONS.find((c) => locationSlug(c) === slug.toLowerCase());
+
+export const countyFromSlug = locationFromSlug;
 
 export type DirectoryTarget = {
   kind: "venues" | "suppliers";
   category?: CategoryDef | undefined;
   county?: string | undefined;
+  country?: "Ireland" | "United Kingdom" | undefined;
+  scope: "all" | "country" | "location";
 
   /** "Wedding Photographers in Dublin" */
   heading: string;
@@ -304,25 +376,53 @@ export function parseDirectorySlug(raw: string): DirectoryTarget | null {
     category?: CategoryDef,
   ): DirectoryTarget | null => {
     const plural = category ? category.plural : "Wedding Venues";
+    if (slug === `${base}-uk-and-ireland`) {
+      return {
+        kind,
+        category,
+        scope: "all",
+        heading: `${plural} across the UK and Ireland`,
+        blurb: category
+          ? category.blurb
+          : "Ceremony and reception venues across Ireland and the United Kingdom.",
+      };
+    }
     if (slug === `${base}-ireland`) {
       return {
         kind,
         category,
+        country: "Ireland",
+        scope: "country",
         heading: `${plural} in Ireland`,
         blurb: category
           ? category.blurb
           : "Ceremony and reception venues the length of the country.",
       };
     }
+    if (slug === `${base}-uk` || slug === `${base}-united-kingdom`) {
+      return {
+        kind,
+        category,
+        country: "United Kingdom",
+        scope: "country",
+        heading: `${plural} in the UK`,
+        blurb: category
+          ? category.blurb
+          : "Ceremony and reception venues across the United Kingdom.",
+      };
+    }
     if (slug.startsWith(`${base}-`)) {
-      const county = countyFromSlug(slug.slice(base.length + 1));
+      const county = locationFromSlug(slug.slice(base.length + 1));
       if (county) {
+        const country = locationCountry(county);
         return {
           kind,
           category,
           county,
+          country,
+          scope: "location",
           heading: `${plural} in ${county}`,
-          blurb: category ? category.blurb : "Ceremony and reception venues across the county.",
+          blurb: category ? category.blurb : "Ceremony and reception venues across the area.",
         };
       }
     }

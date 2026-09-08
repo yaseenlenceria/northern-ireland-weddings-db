@@ -11,7 +11,9 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -21,12 +23,12 @@ import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { VenueCard } from "@/components/site/Cards";
 import { JsonLd } from "@/components/site/JsonLd";
 import { listVenues } from "@/lib/directory.functions";
-import { COUNTIES } from "@/lib/taxonomy";
+import { LOCATION_GROUPS, locationCountry } from "@/lib/taxonomy";
 import { SITE_NAME, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 
-const TITLE = "Wedding Venues Ireland — Search Every County | WedHQ";
+const TITLE = "Wedding Venues in the UK & Ireland | WedHQ";
 const DESCRIPTION =
-  "Browse Irish wedding venues by county, guest capacity and style. Compare per-person pricing, read details and enquire directly with the venue.";
+  "Browse wedding venues by location, guest capacity and style. Compare pricing, read details and enquire directly with the venue.";
 
 const PER_PAGE = 24;
 
@@ -45,6 +47,7 @@ const CAPACITIES = [
  */
 const searchSchema = z.object({
   q: fallback(z.coerce.string(), "").optional(),
+  country: fallback(z.coerce.string(), "all").optional(),
   county: fallback(z.coerce.string(), "all").optional(),
   capacity: fallback(z.coerce.string(), "all").optional(),
   page: fallback(z.coerce.number().int(), 1).optional(),
@@ -62,12 +65,14 @@ export const Route = createFileRoute("/venues")({
 /** Drops default-valued params so /venues stays /venues. */
 function cleanSearch(s: {
   q?: string | undefined;
+  country?: string | undefined;
   county?: string | undefined;
   capacity?: string | undefined;
   page?: number | undefined;
 }) {
   return {
     ...(s.q ? { q: s.q } : {}),
+    ...(s.country && s.country !== "all" ? { country: s.country } : {}),
     ...(s.county && s.county !== "all" ? { county: s.county } : {}),
     ...(s.capacity && s.capacity !== "all" ? { capacity: s.capacity } : {}),
     ...(s.page && s.page > 1 ? { page: s.page } : {}),
@@ -80,14 +85,26 @@ function VenuesPage() {
   const search = Route.useSearch();
 
   const term = search.q ?? "";
+  const country = search.country ?? "all";
   const county = search.county ?? "all";
+  const effectiveCountry = county !== "all" ? locationCountry(county) : country;
+  const locationValue =
+    county !== "all"
+      ? county
+      : country === "Ireland"
+        ? "country:ireland"
+        : country === "United Kingdom"
+          ? "country:uk"
+          : "all";
   const capacity = search.capacity ?? "all";
   const page = Math.max(1, search.page ?? 1);
 
   const [draft, setDraft] = useState(term);
   useEffect(() => setDraft(term), [term]);
 
-  const update = (next: Partial<{ q: string; county: string; capacity: string; page: number }>) =>
+  const update = (
+    next: Partial<{ q: string; country: string; county: string; capacity: string; page: number }>,
+  ) =>
     navigate({
       to: ".",
       // Defaults are stripped so shared URLs stay clean.
@@ -95,11 +112,19 @@ function VenuesPage() {
       resetScroll: false,
     });
 
+  const updateLocation = (value: string) => {
+    if (value === "all") return update({ country: "all", county: "all" });
+    if (value === "country:ireland") return update({ country: "Ireland", county: "all" });
+    if (value === "country:uk") return update({ country: "United Kingdom", county: "all" });
+    return update({ country: locationCountry(value), county: value });
+  };
+
   const query = useQuery({
-    queryKey: ["venues", county, capacity, term, page],
+    queryKey: ["venues", effectiveCountry, county, capacity, term, page],
     queryFn: () =>
       fetchVenues({
         data: {
+          ...(effectiveCountry !== "all" ? { country: effectiveCountry } : {}),
           ...(county !== "all" ? { county } : {}),
           ...(capacity !== "all" ? { minCapacity: Number(capacity.replace("min", "")) } : {}),
           ...(term ? { q: term } : {}),
@@ -125,7 +150,7 @@ function VenuesPage() {
         data={{
           "@context": "https://schema.org",
           "@type": "CollectionPage",
-          name: "Wedding venues in Ireland",
+          name: "Wedding venues in the UK and Ireland",
           description: DESCRIPTION,
           url: absoluteUrl("/venues"),
           isPartOf: {
@@ -135,15 +160,15 @@ function VenuesPage() {
           },
           about: {
             "@type": "Place",
-            name: "Wedding venues in Ireland",
+            name: "Wedding venues in the UK and Ireland",
           },
         }}
       />
 
       <PageHeader
         eyebrow="Venues"
-        title="Wedding venues in Ireland"
-        description="Hotels, country estates, barns, castles and city rooms — filtered by county and the number of guests you need to seat."
+        title="Wedding venues"
+        description="Hotels, country estates, barns, castles and city rooms, filtered by location and guest capacity."
       >
         <Breadcrumbs items={[{ label: "Venues" }]} />
       </PageHeader>
@@ -158,17 +183,24 @@ function VenuesPage() {
           aria-label="Venue filters"
         >
           <div className="grid gap-1.5">
-            <Label htmlFor="venue-county">County</Label>
-            <Select value={county} onValueChange={(v) => update({ county: v })}>
-              <SelectTrigger id="venue-county" className="h-11">
+            <Label htmlFor="venue-location">Location</Label>
+            <Select value={locationValue} onValueChange={updateLocation}>
+              <SelectTrigger id="venue-location" className="h-11">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="max-h-80">
-                <SelectItem value="all">All counties</SelectItem>
-                {COUNTIES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    Co. {c}
-                  </SelectItem>
+                <SelectItem value="all">All UK &amp; Ireland</SelectItem>
+                <SelectItem value="country:ireland">Ireland</SelectItem>
+                <SelectItem value="country:uk">United Kingdom</SelectItem>
+                {LOCATION_GROUPS.map((group) => (
+                  <SelectGroup key={group.label}>
+                    <SelectLabel>{group.label}</SelectLabel>
+                    {group.locations.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {group.country === "Ireland" ? `Co. ${c}` : c}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 ))}
               </SelectContent>
             </Select>
@@ -238,12 +270,12 @@ function VenuesPage() {
               <div className="mt-10 rounded-xl border border-dashed border-border p-10 text-center">
                 <h2 className="text-xl">No venues match those filters</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Try a lower capacity, a nearby county, or clear the name search.
+                  Try a lower capacity, a nearby location, or clear the name search.
                 </p>
                 <Button
                   variant="outline"
                   className="mt-5"
-                  onClick={() => update({ q: "", county: "all", capacity: "all" })}
+                  onClick={() => update({ q: "", country: "all", county: "all", capacity: "all" })}
                 >
                   Clear filters
                 </Button>

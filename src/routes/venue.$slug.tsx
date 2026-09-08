@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Globe, Mail, MapPin, Phone, Users } from "lucide-react";
+import { Globe, Instagram, Mail, MapPin, Phone, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +19,7 @@ import { SaveButton } from "@/components/site/SaveButton";
 import { ReviewList } from "@/components/site/Reviews";
 import { getVenue } from "@/lib/directory.functions";
 import { firstImage } from "@/lib/media";
-import { VENUE_SLUG, countySlug } from "@/lib/taxonomy";
+import { VENUE_SLUG, countySlug, listingLocationLabel } from "@/lib/taxonomy";
 import { canonical, clamp, pageMeta, reviewSchema, sourcedReviewSchema } from "@/lib/seo";
 
 export const Route = createFileRoute("/venue/$slug")({
@@ -33,8 +33,9 @@ export const Route = createFileRoute("/venue/$slug")({
       return { meta: [{ title: "Venue not found" }, { name: "robots", content: "noindex" }] };
     }
     const v = loaderData.venue;
-    const place = v.county ? `Co. ${v.county}` : "Ireland";
+    const place = listingLocationLabel(v.county, v.country);
     const title = `${v.name} — Wedding Venue in ${place} | Prices & Capacity`;
+    const isDemo = v.source_url === "wedhq-demo";
     const bits = [
       v.rating && v.review_count ? `Rated ${v.rating}/5 from ${v.review_count} reviews.` : "",
       v.guest_capacity ? `Capacity ${v.guest_capacity}.` : "",
@@ -48,6 +49,7 @@ export const Route = createFileRoute("/venue/$slug")({
         description: clamp(bits.join(" ")),
         path,
         image: firstImage(v.logo_image, v.gallery_images),
+        noindex: isDemo,
       }),
       links: canonical(path),
     };
@@ -85,11 +87,11 @@ const FAQS = (name: string, capacity: string | null) => [
   },
   {
     q: "Is there a minimum number or minimum spend?",
-    a: "Many Irish venues apply minimum numbers or a minimum spend on peak Saturdays. Always ask for this in writing before you pay a deposit.",
+    a: "Many venues apply minimum numbers or a minimum spend on peak Saturdays. Always ask for this in writing before you pay a deposit.",
   },
   {
     q: "What is the wet-weather plan?",
-    a: "Ask to see the indoor space used for drinks reception and photographs if the weather turns. It is the single most useful question on any Irish venue viewing.",
+    a: "Ask to see the indoor space used for drinks reception and photographs if the weather turns. It is one of the most useful questions on any venue viewing.",
   },
 ];
 
@@ -99,6 +101,12 @@ function VenueProfile() {
   const hero = firstImage(venue.logo_image, gallery);
   const faqs = FAQS(venue.name, venue.guest_capacity);
   const profileReviews = [...reviews, ...sourcedReviews];
+  const location = listingLocationLabel(venue.county, venue.country);
+  const socialLinks = [
+    venue.facebook_url ? { label: "Facebook", href: venue.facebook_url, icon: Globe } : null,
+    venue.instagram_url ? { label: "Instagram", href: venue.instagram_url, icon: Instagram } : null,
+    venue.twitter_url ? { label: "X", href: venue.twitter_url, icon: Globe } : null,
+  ].filter(Boolean) as { label: string; href: string; icon: typeof Globe }[];
 
   return (
     <SiteLayout>
@@ -109,7 +117,7 @@ function VenueProfile() {
           ...(venue.county
             ? [
                 {
-                  name: `Co. ${venue.county}`,
+                  name: location,
                   path: `/${VENUE_SLUG}-${countySlug(venue.county)}`,
                 },
               ]
@@ -132,7 +140,7 @@ function VenueProfile() {
             streetAddress: venue.address ?? undefined,
             addressRegion: venue.county ?? undefined,
             postalCode: venue.postcode ?? undefined,
-            addressCountry: "IE",
+            addressCountry: venue.country === "United Kingdom" ? "GB" : "IE",
           },
           ...(venue.rating && venue.review_count
             ? {
@@ -182,7 +190,7 @@ function VenueProfile() {
               ...(venue.county
                 ? [
                     {
-                      label: `Co. ${venue.county}`,
+                      label: location,
                       to: "/$directorySlug",
                       params: { directorySlug: `${VENUE_SLUG}-${countySlug(venue.county)}` },
                     },
@@ -196,7 +204,7 @@ function VenueProfile() {
             <div className="overflow-hidden rounded-2xl border border-border bg-card">
               <ListingImage
                 src={[venue.logo_image, ...gallery]}
-                alt={`${venue.name}, wedding venue${venue.county ? ` in Co. ${venue.county}` : " in Ireland"}`}
+                alt={`${venue.name}, wedding venue in ${location}`}
                 className="aspect-16/10 w-full object-cover"
               />
             </div>
@@ -213,7 +221,8 @@ function VenueProfile() {
               {venue.county ? (
                 <p className="mt-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
                   <MapPin className="size-4" />
-                  {venue.address ? `${venue.address}, ` : ""}Co. {venue.county}
+                  {venue.address ? `${venue.address}, ` : ""}
+                  {location}
                 </p>
               ) : null}
 
@@ -388,12 +397,44 @@ function VenueProfile() {
             </ul>
             {venue.county ? (
               <Button asChild variant="outline" className="mt-5 w-full">
-                <Link to="/county/$county" params={{ county: countySlug(venue.county) }}>
-                  More in Co. {venue.county}
-                </Link>
+                {venue.country === "United Kingdom" ? (
+                  <Link to="/venues" search={{ country: "United Kingdom" }}>
+                    More venues in the UK
+                  </Link>
+                ) : (
+                  <Link to="/county/$county" params={{ county: countySlug(venue.county) }}>
+                    More in {location}
+                  </Link>
+                )}
               </Button>
             ) : null}
           </div>
+
+          {socialLinks.length || venue.google_maps_url ? (
+            <div className="rounded-xl border border-border bg-card p-6">
+              <h3 className="font-serif text-xl">Online profiles</h3>
+              <div className="mt-4 grid gap-2">
+                {socialLinks.map(({ label, href, icon: Icon }) => (
+                  <Button key={href} asChild variant="outline" className="justify-start">
+                    <a href={href} target="_blank" rel="noopener noreferrer nofollow">
+                      <Icon className="size-4" /> {label}
+                    </a>
+                  </Button>
+                ))}
+                {venue.google_maps_url ? (
+                  <Button asChild variant="outline" className="justify-start">
+                    <a
+                      href={venue.google_maps_url}
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                    >
+                      <MapPin className="size-4" /> Map
+                    </a>
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
         </aside>
       </div>
 

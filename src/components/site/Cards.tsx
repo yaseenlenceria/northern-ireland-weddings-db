@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ListingImage } from "./ListingImage";
 import { Stars } from "./Stars";
-import { CATEGORY_BY_KEY } from "@/lib/taxonomy";
+import { CATEGORY_BY_KEY, listingLocationLabel } from "@/lib/taxonomy";
 import type { SupplierCardRow, VenueCardRow } from "@/lib/directory.functions";
 
 function shortOverview(value: string | null | undefined, max = 180) {
@@ -59,6 +59,7 @@ export function SupplierCard({
   const overview = shortOverview(supplier.overview);
   const rating = toNumber(supplier.rating);
   const reviewCount = toNumber(supplier.review_count);
+  const location = listingLocationLabel(supplier.county, supplier.country);
   return (
     <article className="card-lift group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
       {rank ? <RankBadge rank={rank} /> : null}
@@ -69,9 +70,7 @@ export function SupplierCard({
       >
         <ListingImage
           src={[supplier.banner_image, supplier.logo_image, ...(supplier.gallery_images ?? [])]}
-          alt={`${supplier.name}${primary ? ` — ${primary.label.toLowerCase()}` : ""}${
-            supplier.county ? ` in Co. ${supplier.county}` : ""
-          }`}
+          alt={`${supplier.name}${primary ? ` — ${primary.label.toLowerCase()}` : ""} in ${location}`}
           className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </Link>
@@ -103,9 +102,9 @@ export function SupplierCard({
           </Link>
         </h3>
 
-        {supplier.county ? (
+        {location ? (
           <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
-            <MapPin className="size-3" /> Co. {supplier.county}
+            <MapPin className="size-3" /> {location}
           </p>
         ) : null}
 
@@ -145,6 +144,7 @@ export function SupplierCard({
 
 export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number }) {
   const overview = shortOverview(venue.overview);
+  const location = listingLocationLabel(venue.county, venue.country);
   return (
     <article className="card-lift group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
       {rank ? <RankBadge rank={rank} /> : null}
@@ -155,7 +155,7 @@ export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number 
       >
         <ListingImage
           src={[venue.logo_image, ...(venue.gallery_images ?? [])]}
-          alt={`${venue.name}, wedding venue${venue.county ? ` in Co. ${venue.county}` : " in Ireland"}`}
+          alt={`${venue.name}, wedding venue in ${location}`}
           className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </Link>
@@ -177,9 +177,9 @@ export function VenueCard({ venue, rank }: { venue: VenueCardRow; rank?: number 
           <Stars rating={venue.rating} count={venue.review_count} />
         </div>
 
-        {venue.county ? (
+        {location ? (
           <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
-            <MapPin className="size-3" /> Co. {venue.county}
+            <MapPin className="size-3" /> {location}
           </p>
         ) : null}
 

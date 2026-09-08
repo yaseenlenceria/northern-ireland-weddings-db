@@ -1,5 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { CATEGORIES, FEATURED_COUNTIES, VENUE_SLUG, countySlug } from "@/lib/taxonomy";
+import {
+  CATEGORIES,
+  FEATURED_LOCATIONS,
+  VENUE_SLUG,
+  countySlug,
+  listingLocationLabel,
+} from "@/lib/taxonomy";
 import { BrandLogo } from "@/components/site/BrandMark";
 import { SITE_NAME } from "@/lib/seo";
 
@@ -12,7 +18,7 @@ export function Footer() {
         <div>
           <BrandLogo className="h-14 w-auto" />
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">
-            An Ireland-focused wedding directory: real venues, real suppliers, and free planning
+            A UK and Ireland wedding directory: real venues, real suppliers, and free planning
             tools in one place.
           </p>
         </div>
@@ -26,7 +32,7 @@ export function Footer() {
               <li key={c.slug}>
                 <Link
                   to="/$directorySlug"
-                  params={{ directorySlug: `${c.slug}-ireland` }}
+                  params={{ directorySlug: `${c.slug}-uk-and-ireland` }}
                   className="text-foreground/80 hover:text-primary"
                 >
                   {c.plural}
@@ -38,17 +44,17 @@ export function Footer() {
 
         <nav aria-labelledby="footer-counties">
           <h3 id="footer-counties" className="eyebrow text-muted-foreground">
-            Venues by county
+            Venues by location
           </h3>
           <ul className="mt-4 grid grid-cols-2 gap-2 text-sm">
-            {FEATURED_COUNTIES.slice(0, 10).map((county) => (
+            {FEATURED_LOCATIONS.slice(0, 10).map((county) => (
               <li key={county}>
                 <Link
                   to="/$directorySlug"
                   params={{ directorySlug: `${VENUE_SLUG}-${countySlug(county)}` }}
                   className="text-foreground/80 hover:text-primary"
                 >
-                  {county}
+                  {listingLocationLabel(county)}
                 </Link>
               </li>
             ))}
@@ -112,7 +118,7 @@ export function Footer() {
       <div className="border-t border-border/70">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>{`© ${new Date().getFullYear()} ${SITE_NAME}. All rights reserved.`}</p>
-          <p>Made in Ireland for couples getting married here.</p>
+          <p>Built for couples planning weddings across Ireland and the UK.</p>
         </div>
       </div>
     </footer>

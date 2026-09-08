@@ -10,7 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -18,18 +20,18 @@ import { SiteLayout, PageHeader, Section } from "@/components/site/Layout";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { JsonLd } from "@/components/site/JsonLd";
 import { submitEnquiry } from "@/lib/enquiries.functions";
-import { CATEGORIES, COUNTIES } from "@/lib/taxonomy";
+import { CATEGORIES, IRELAND_COUNTIES, LOCATION_GROUPS, locationCountry } from "@/lib/taxonomy";
 import { pageMeta, canonical } from "@/lib/seo";
 
 const TITLE = "List Your Wedding Business on WedHQ";
 const DESCRIPTION =
-  "Get your wedding business in front of Irish couples. Free listing, your own profile page, county and category pages that rank, and enquiries straight to your inbox.";
+  "Get your wedding business in front of couples across Ireland and the UK. Free listing, your own profile page, location and category pages, and enquiries straight to your inbox.";
 
 const BENEFITS = [
   {
     icon: Search,
     title: "Found where couples search",
-    copy: "Your listing appears on category and county pages built for the searches couples actually type, such as “wedding singers Galway”.",
+    copy: "Your listing appears on category and location pages built for the searches couples actually type, such as “wedding singers Galway” or “wedding venues London”.",
   },
   {
     icon: MessageSquare,
@@ -45,7 +47,7 @@ const BENEFITS = [
 
 const INCLUDED = [
   "Profile page with gallery and full description",
-  "Category listing in every county you cover",
+  "Category listing in every location you cover",
   "Enquiry form with your date and budget questions",
   "Verified couple reviews on your profile",
   "Structured data so your details show in search",
@@ -65,7 +67,7 @@ function ListBusinessPage() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [category, setCategory] = useState(CATEGORIES[0]!.key);
-  const [county, setCounty] = useState<string>(COUNTIES[5]);
+  const [county, setCounty] = useState<string>(IRELAND_COUNTIES[5]);
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -85,6 +87,7 @@ function ListBusinessPage() {
           metadata: {
             business: String(form.get("business") ?? ""),
             category: categoryLabel,
+            country: locationCountry(county),
             county,
             website: String(form.get("website") ?? ""),
           },
@@ -115,7 +118,7 @@ function ListBusinessPage() {
       <PageHeader
         eyebrow="For suppliers"
         title="List your wedding business on WedHQ"
-        description="Couples plan their wedding by county and by category. Get listed where they're already looking, and let them enquire in two minutes."
+        description="Couples plan by location and by category. Get listed where they're already looking, and let them enquire in two minutes."
       >
         <Breadcrumbs items={[{ label: "List Your Business" }]} />
       </PageHeader>
@@ -172,7 +175,7 @@ function ListBusinessPage() {
               <div>
                 <h2 className="font-serif text-xl">Request a listing</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  No fee, no contract. We only list suppliers who actually work in Ireland.
+                  No fee, no contract. We list suppliers who work in Ireland or the UK.
                 </p>
               </div>
 
@@ -209,16 +212,21 @@ function ListBusinessPage() {
                   </Select>
                 </div>
                 <div className="grid gap-1.5">
-                  <Label>Base county</Label>
+                  <Label>Base location</Label>
                   <Select value={county} onValueChange={setCounty}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="max-h-72">
-                      {COUNTIES.map((c) => (
-                        <SelectItem key={c} value={c}>
-                          Co. {c}
-                        </SelectItem>
+                      {LOCATION_GROUPS.map((group) => (
+                        <SelectGroup key={group.label}>
+                          <SelectLabel>{group.label}</SelectLabel>
+                          {group.locations.map((c) => (
+                            <SelectItem key={c} value={c}>
+                              {group.country === "Ireland" ? `Co. ${c}` : c}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
                       ))}
                     </SelectContent>
                   </Select>

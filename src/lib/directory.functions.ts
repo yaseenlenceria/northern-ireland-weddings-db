@@ -1,17 +1,19 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { publicImageUrl } from "@/lib/media";
 
 export const SUPPLIER_CARD_FIELDS =
-  "id, slug, name, categories, county, avg_price, avg_price_num, rating, review_count, overview, logo_image, banner_image, gallery_images, featured, award_winner, service_areas";
+  "id, slug, name, categories, country, county, avg_price, avg_price_num, rating, review_count, overview, logo_image, banner_image, gallery_images, featured, award_winner, service_areas";
 
 export const VENUE_CARD_FIELDS =
-  "id, slug, name, county, badge, guest_capacity, capacity_min, capacity_max, per_person_price, per_person_price_num, rating, review_count, overview, logo_image, gallery_images, venue_types, styles, featured";
+  "id, slug, name, country, county, badge, guest_capacity, capacity_min, capacity_max, per_person_price, per_person_price_num, rating, review_count, overview, logo_image, gallery_images, venue_types, styles, featured";
 
 export type SupplierCardRow = {
   id: string;
   slug: string;
   name: string;
   categories: string[];
+  country: string | null;
   county: string | null;
   avg_price: string | null;
   avg_price_num: number | string | null;
@@ -30,6 +32,7 @@ export type VenueCardRow = {
   id: string;
   slug: string;
   name: string;
+  country: string | null;
   county: string | null;
   badge: string | null;
   guest_capacity: string | null;
@@ -83,8 +86,72 @@ function numericValue(value: number | string | null | undefined) {
   return null;
 }
 
+type ImageBearing = {
+  logo_image?: string | null;
+  banner_image?: string | null;
+  gallery_images?: string[] | null;
+  image?: string | null;
+  source_url?: string | null;
+  source_site?: string | null;
+  profile_url?: string | null;
+  facebook_url?: string | null;
+  instagram_url?: string | null;
+  tiktok_url?: string | null;
+  youtube_url?: string | null;
+  twitter_url?: string | null;
+};
+
+function proxyImage(value?: string | null) {
+  return value ? publicImageUrl(value) : value;
+}
+
+function sanitizeImages<T extends ImageBearing>(row: T): T {
+  return {
+    ...row,
+    logo_image: proxyImage(row.logo_image),
+    banner_image: proxyImage(row.banner_image),
+    image: proxyImage(row.image),
+    gallery_images: row.gallery_images?.map(publicImageUrl) ?? row.gallery_images,
+  };
+}
+
+function sanitizeDetail<T extends ImageBearing>(row: T): T {
+  const demoSource = row.source_url === "wedhq-demo" ? "wedhq-demo" : null;
+  return {
+    ...sanitizeImages(row),
+    source_url: demoSource,
+    source_site: null,
+    profile_url: null,
+    facebook_url: publicExternalUrl(row.facebook_url),
+    instagram_url: publicExternalUrl(row.instagram_url),
+    tiktok_url: publicExternalUrl(row.tiktok_url),
+    youtube_url: publicExternalUrl(row.youtube_url),
+    twitter_url: publicExternalUrl(row.twitter_url),
+  };
+}
+
+function sanitizeReview(row: ReviewRow): ReviewRow {
+  return {
+    ...row,
+    source_name: null,
+    source_url: null,
+  };
+}
+
+function publicExternalUrl(value?: string | null) {
+  if (!value) return value ?? null;
+  try {
+    const url = new URL(value);
+    if (url.hostname.toLowerCase().includes("hitched.")) return null;
+  } catch {
+    return null;
+  }
+  return value;
+}
+
 const listSuppliersSchema = z.object({
   category: z.string().optional(),
+  country: z.string().optional(),
   county: z.string().optional(),
   q: z.string().optional(),
   page: z.number().int().optional(),
@@ -101,11 +168,12 @@ export const listSuppliers = createServerFn({ method: "GET" })
     try {
       const sql = await db();
       const rows = (await sql<SupplierCardRow[]>`
-        SELECT id, slug, name, categories, county, avg_price, avg_price_num, overview,
+        SELECT id, slug, name, categories, country, county, avg_price, avg_price_num, overview,
                rating, review_count, logo_image, banner_image, gallery_images,
                featured, award_winner, service_areas
         FROM suppliers
         WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
+          AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
           AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
           AND (${data.q ?? null}::text IS NULL OR name ILIKE ${`%${data.q ?? ""}%`})
         ORDER BY (COALESCE(banner_image, logo_image, gallery_images[1]) IS NOT NULL) DESC,
@@ -117,11 +185,12 @@ export const listSuppliers = createServerFn({ method: "GET" })
         SELECT count(*)::text AS count
         FROM suppliers
         WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
+          AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
           AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
           AND (${data.q ?? null}::text IS NULL OR name ILIKE ${`%${data.q ?? ""}%`})
       `,
       );
-      return { rows, count, page, perPage };
+      return { rows: rows.map(sanitizeImages), count, page, perPage };
     } catch (error) {
       logPublicDataError("listSuppliers", error);
       return { ...emptyListResult, page, perPage };
@@ -129,6 +198,7 @@ export const listSuppliers = createServerFn({ method: "GET" })
   });
 
 const listVenuesSchema = z.object({
+  country: z.string().optional(),
   county: z.string().optional(),
   q: z.string().optional(),
   minCapacity: z.number().optional(),
@@ -147,11 +217,12 @@ export const listVenues = createServerFn({ method: "GET" })
     try {
       const sql = await db();
       const rows = (await sql<VenueCardRow[]>`
-        SELECT id, slug, name, county, badge, guest_capacity, capacity_min, capacity_max,
+        SELECT id, slug, name, country, county, badge, guest_capacity, capacity_min, capacity_max,
                per_person_price, per_person_price_num, rating, review_count, overview,
                logo_image, gallery_images, venue_types, styles, featured
         FROM venues
-        WHERE (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+        WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
+          AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
           AND (${data.q ?? null}::text IS NULL OR name ILIKE ${`%${data.q ?? ""}%`})
           AND (${data.minCapacity ?? null}::integer IS NULL OR capacity_max >= ${data.minCapacity ?? 0})
           AND (${data.venueType ?? null}::text IS NULL OR venue_types @> ARRAY[${data.venueType ?? ""}]::text[])
@@ -163,13 +234,14 @@ export const listVenues = createServerFn({ method: "GET" })
         await sql<{ count: string }[]>`
         SELECT count(*)::text AS count
         FROM venues
-        WHERE (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+        WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
+          AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
           AND (${data.q ?? null}::text IS NULL OR name ILIKE ${`%${data.q ?? ""}%`})
           AND (${data.minCapacity ?? null}::integer IS NULL OR capacity_max >= ${data.minCapacity ?? 0})
           AND (${data.venueType ?? null}::text IS NULL OR venue_types @> ARRAY[${data.venueType ?? ""}]::text[])
       `,
       );
-      return { rows, count, page, perPage };
+      return { rows: rows.map(sanitizeImages), count, page, perPage };
     } catch (error) {
       logPublicDataError("listVenues", error);
       return { ...emptyListResult, page, perPage };
@@ -199,12 +271,13 @@ export const getSupplier = createServerFn({ method: "GET" })
           LIMIT 20
         `,
         sql<SupplierCardRow[]>`
-          SELECT id, slug, name, categories, county, avg_price, avg_price_num, overview,
+          SELECT id, slug, name, categories, country, county, avg_price, avg_price_num, overview,
                  rating, review_count, logo_image, banner_image, gallery_images,
                  featured, award_winner, service_areas
           FROM suppliers
           WHERE id <> ${supplier.id}
             AND county IS NOT DISTINCT FROM ${supplier.county}
+            AND country IS NOT DISTINCT FROM ${supplier.country}
             AND categories && ${supplier.categories ?? []}::text[]
           ORDER BY (COALESCE(banner_image, logo_image, gallery_images[1]) IS NOT NULL) DESC,
                    featured DESC, award_winner DESC, rating DESC NULLS LAST, image_count DESC NULLS LAST, name ASC
@@ -212,7 +285,12 @@ export const getSupplier = createServerFn({ method: "GET" })
         `,
       ]);
 
-      return { supplier, reviews: [] as ReviewRow[], sourcedReviews: sourced, similar };
+      return {
+        supplier: sanitizeDetail(supplier),
+        reviews: [] as ReviewRow[],
+        sourcedReviews: sourced.map(sanitizeReview),
+        similar: similar.map(sanitizeImages),
+      };
     } catch (error) {
       logPublicDataError("getSupplier", error);
       return null;
@@ -242,19 +320,25 @@ export const getVenue = createServerFn({ method: "GET" })
           LIMIT 20
         `,
         sql<VenueCardRow[]>`
-          SELECT id, slug, name, county, badge, guest_capacity, capacity_min, capacity_max,
+          SELECT id, slug, name, country, county, badge, guest_capacity, capacity_min, capacity_max,
                  per_person_price, per_person_price_num, rating, review_count, overview,
                  logo_image, gallery_images, venue_types, styles, featured
           FROM venues
           WHERE id <> ${venue.id}
             AND county IS NOT DISTINCT FROM ${venue.county}
+            AND country IS NOT DISTINCT FROM ${venue.country}
           ORDER BY (COALESCE(logo_image, gallery_images[1]) IS NOT NULL) DESC,
                    featured DESC, rating DESC NULLS LAST, image_count DESC NULLS LAST, name ASC
           LIMIT 4
         `,
       ]);
 
-      return { venue, reviews: [] as ReviewRow[], sourcedReviews: sourced, similar };
+      return {
+        venue: sanitizeDetail(venue),
+        reviews: [] as ReviewRow[],
+        sourcedReviews: sourced.map(sanitizeReview),
+        similar: similar.map(sanitizeImages),
+      };
     } catch (error) {
       logPublicDataError("getVenue", error);
       return null;
@@ -281,7 +365,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
         ),
         picked AS (
           SELECT DISTINCT ON (pc.category)
-            s.id, s.slug, s.name, s.categories, s.county, s.avg_price, s.avg_price_num,
+            s.id, s.slug, s.name, s.categories, s.country, s.county, s.avg_price, s.avg_price_num,
             s.rating, s.review_count, s.overview, s.logo_image, s.banner_image,
             s.gallery_images, s.featured, s.award_winner, s.service_areas,
             pc.category
@@ -290,7 +374,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
           WHERE COALESCE(s.banner_image, s.logo_image, s.gallery_images[1]) IS NOT NULL
           ORDER BY pc.category, s.featured DESC, s.award_winner DESC, s.rating DESC NULLS LAST, s.image_count DESC NULLS LAST, s.name ASC
         )
-        SELECT id, slug, name, categories, county, avg_price, avg_price_num, overview,
+        SELECT id, slug, name, categories, country, county, avg_price, avg_price_num, overview,
                rating, review_count, logo_image, banner_image, gallery_images,
                featured, award_winner, service_areas
         FROM picked
@@ -307,7 +391,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
         LIMIT 8
       `,
         sql<VenueCardRow[]>`
-        SELECT id, slug, name, county, badge, guest_capacity, capacity_min, capacity_max,
+        SELECT id, slug, name, country, county, badge, guest_capacity, capacity_min, capacity_max,
                per_person_price, per_person_price_num, rating, review_count, overview,
                logo_image, gallery_images, venue_types, styles, featured
         FROM venues
@@ -327,8 +411,8 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
       ]);
 
     return {
-      suppliers,
-      venues,
+      suppliers: suppliers.map(sanitizeImages),
+      venues: venues.map(sanitizeImages),
       counts: {
         suppliers: countValue(supplierCount),
         venues: countValue(venueCount),
@@ -364,6 +448,7 @@ export const listFairs = createServerFn({ method: "GET" }).handler(async () => {
 const directoryStatsSchema = z.object({
   kind: z.enum(["suppliers", "venues"]),
   category: z.string().optional(),
+  country: z.string().optional(),
   county: z.string().optional(),
 });
 
@@ -384,7 +469,8 @@ export const getDirectoryStats = createServerFn({ method: "GET" })
         >`
           SELECT per_person_price_num, capacity_max, rating, review_count
           FROM venues
-          WHERE (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+          WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
+            AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
           LIMIT 1000
         `;
         const prices = rows
@@ -415,6 +501,7 @@ export const getDirectoryStats = createServerFn({ method: "GET" })
         SELECT avg_price_num, rating, review_count
         FROM suppliers
         WHERE (${data.category ?? null}::text IS NULL OR categories @> ARRAY[${data.category ?? ""}]::text[])
+          AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
           AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
         LIMIT 1000
       `;
@@ -443,17 +530,17 @@ export const getDirectoryStats = createServerFn({ method: "GET" })
   });
 
 export const getCountyStats = createServerFn({ method: "GET" })
-  .validator((d: unknown) => z.object({ county: z.string() }).parse(d))
+  .validator((d: unknown) => z.object({ county: z.string(), country: z.string().optional() }).parse(d))
   .handler(async ({ data }) => {
     try {
       const sql = await db();
       const [suppliers, venues] = await Promise.all([
         sql<
           { count: string }[]
-        >`SELECT count(*)::text AS count FROM suppliers WHERE county = ${data.county}`,
+        >`SELECT count(*)::text AS count FROM suppliers WHERE county = ${data.county} AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})`,
         sql<
           { count: string }[]
-        >`SELECT count(*)::text AS count FROM venues WHERE county = ${data.county}`,
+        >`SELECT count(*)::text AS count FROM venues WHERE county = ${data.county} AND (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})`,
       ]);
       return { suppliers: countValue(suppliers), venues: countValue(venues) };
     } catch (error) {
@@ -462,28 +549,37 @@ export const getCountyStats = createServerFn({ method: "GET" })
     }
   });
 
-export const getSupplierCategoryCounts = createServerFn({ method: "GET" }).handler(async () => {
-  try {
-    const sql = await db();
-    return await sql<{ category: string; count: number }[]>`
-      SELECT category, count(*)::int AS count
-      FROM suppliers
-      CROSS JOIN LATERAL unnest(categories) AS category
-      GROUP BY category
-      ORDER BY count DESC, category ASC
-    `;
-  } catch (error) {
-    logPublicDataError("getSupplierCategoryCounts", error);
-    return [] as { category: string; count: number }[];
-  }
+const categoryCountsSchema = z.object({
+  country: z.string().optional(),
+  county: z.string().optional(),
 });
+
+export const getSupplierCategoryCounts = createServerFn({ method: "GET" })
+  .validator((d: unknown) => categoryCountsSchema.parse(d ?? {}))
+  .handler(async ({ data }) => {
+    try {
+      const sql = await db();
+      return await sql<{ category: string; count: number }[]>`
+        SELECT category, count(*)::int AS count
+        FROM suppliers
+        CROSS JOIN LATERAL unnest(categories) AS category
+        WHERE (${data.country ?? null}::text IS NULL OR country = ${data.country ?? ""})
+          AND (${data.county ?? null}::text IS NULL OR county = ${data.county ?? ""})
+        GROUP BY category
+        ORDER BY count DESC, category ASC
+      `;
+    } catch (error) {
+      logPublicDataError("getSupplierCategoryCounts", error);
+      return [] as { category: string; count: number }[];
+    }
+  });
 
 export const getHeaderHighlights = createServerFn({ method: "GET" }).handler(async () => {
   try {
     const sql = await db();
     const [venues, suppliers] = await Promise.all([
-      sql<{ slug: string; name: string; county: string | null; image: string | null }[]>`
-        SELECT slug, name, county, COALESCE(logo_image, gallery_images[1]) AS image
+      sql<{ slug: string; name: string; country: string | null; county: string | null; image: string | null }[]>`
+        SELECT slug, name, country, county, COALESCE(logo_image, gallery_images[1]) AS image
         FROM venues
         WHERE COALESCE(logo_image, gallery_images[1]) IS NOT NULL
         ORDER BY featured DESC, rating DESC NULLS LAST, image_count DESC NULLS LAST, name ASC
@@ -493,12 +589,13 @@ export const getHeaderHighlights = createServerFn({ method: "GET" }).handler(asy
         {
           slug: string;
           name: string;
+          country: string | null;
           county: string | null;
           image: string | null;
           category: string | null;
         }[]
       >`
-        SELECT slug, name, county, COALESCE(banner_image, logo_image, gallery_images[1]) AS image, categories[1] AS category
+        SELECT slug, name, country, county, COALESCE(banner_image, logo_image, gallery_images[1]) AS image, categories[1] AS category
         FROM suppliers
         WHERE COALESCE(banner_image, logo_image, gallery_images[1]) IS NOT NULL
           AND NOT categories @> ARRAY['hens-stags']::text[]
@@ -506,14 +603,15 @@ export const getHeaderHighlights = createServerFn({ method: "GET" }).handler(asy
         LIMIT 2
       `,
     ]);
-    return { venues, suppliers };
+    return { venues: venues.map(sanitizeImages), suppliers: suppliers.map(sanitizeImages) };
   } catch (error) {
     logPublicDataError("getHeaderHighlights", error);
     return {
-      venues: [] as { slug: string; name: string; county: string | null; image: string | null }[],
+      venues: [] as { slug: string; name: string; country: string | null; county: string | null; image: string | null }[],
       suppliers: [] as {
         slug: string;
         name: string;
+        country: string | null;
         county: string | null;
         image: string | null;
         category: string | null;
@@ -526,29 +624,30 @@ export const getGuideHighlights = createServerFn({ method: "GET" }).handler(asyn
   try {
     const sql = await db();
     const [venues, suppliers] = await Promise.all([
-      sql<{ slug: string; name: string; county: string | null; image: string | null }[]>`
-        SELECT slug, name, county, COALESCE(logo_image, gallery_images[1]) AS image
+      sql<{ slug: string; name: string; country: string | null; county: string | null; image: string | null }[]>`
+        SELECT slug, name, country, county, COALESCE(logo_image, gallery_images[1]) AS image
         FROM venues
         WHERE COALESCE(logo_image, gallery_images[1]) IS NOT NULL
         ORDER BY rating DESC NULLS LAST, image_count DESC NULLS LAST, name ASC
         LIMIT 3
       `,
-      sql<{ slug: string; name: string; county: string | null; image: string | null }[]>`
-        SELECT slug, name, county, COALESCE(banner_image, logo_image, gallery_images[1]) AS image
+      sql<{ slug: string; name: string; country: string | null; county: string | null; image: string | null }[]>`
+        SELECT slug, name, country, county, COALESCE(banner_image, logo_image, gallery_images[1]) AS image
         FROM suppliers
         WHERE COALESCE(banner_image, logo_image, gallery_images[1]) IS NOT NULL
         ORDER BY rating DESC NULLS LAST, image_count DESC NULLS LAST, name ASC
         LIMIT 3
       `,
     ]);
-    return { venues, suppliers };
+    return { venues: venues.map(sanitizeImages), suppliers: suppliers.map(sanitizeImages) };
   } catch (error) {
     logPublicDataError("getGuideHighlights", error);
     return {
-      venues: [] as { slug: string; name: string; county: string | null; image: string | null }[],
+      venues: [] as { slug: string; name: string; country: string | null; county: string | null; image: string | null }[],
       suppliers: [] as {
         slug: string;
         name: string;
+        country: string | null;
         county: string | null;
         image: string | null;
       }[],

@@ -5,19 +5,27 @@ import { SupplierCard, VenueCard } from "@/components/site/Cards";
 import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { JsonLd } from "@/components/site/JsonLd";
 import { getCountyStats, listSuppliers, listVenues } from "@/lib/directory.functions";
-import { CATEGORIES, VENUE_SLUG, countyFromSlug, countySlug } from "@/lib/taxonomy";
+import {
+  CATEGORIES,
+  VENUE_SLUG,
+  countyFromSlug,
+  countySlug,
+  listingLocationLabel,
+  locationCountry,
+} from "@/lib/taxonomy";
 import { SEO_YEAR, canonical, clamp, pageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/county/$county")({
   loader: async ({ params }) => {
     const county = countyFromSlug(params.county);
     if (!county) throw notFound();
+    const country = locationCountry(county);
     const [stats, venues, suppliers] = await Promise.all([
-      getCountyStats({ data: { county } }),
-      listVenues({ data: { county, perPage: 6 } }),
-      listSuppliers({ data: { county, perPage: 6 } }),
+      getCountyStats({ data: { county, country } }),
+      listVenues({ data: { county, country, perPage: 6 } }),
+      listSuppliers({ data: { county, country, perPage: 6 } }),
     ]);
-    return { county, stats, venues: venues.rows, suppliers: suppliers.rows };
+    return { county, country, stats, venues: venues.rows, suppliers: suppliers.rows };
   },
   head: ({ params, loaderData }) => {
     const county = loaderData?.county ?? countyFromSlug(params.county);
@@ -25,9 +33,10 @@ export const Route = createFileRoute("/county/$county")({
       return { meta: [{ title: "County not found" }, { name: "robots", content: "noindex" }] };
     }
     const { stats } = loaderData;
-    const title = `Wedding Venues & Suppliers in Co. ${county} (${SEO_YEAR}) | WedHQ`;
+    const location = listingLocationLabel(county, loaderData.country);
+    const title = `Wedding Venues & Suppliers in ${location} (${SEO_YEAR}) | WedHQ`;
     const description = clamp(
-      `${stats.venues} wedding venues and ${stats.suppliers} suppliers listed in Co. ${county}. Compare capacity, per-person prices and reviews, then enquire free.`,
+      `${stats.venues} wedding venues and ${stats.suppliers} suppliers listed in ${location}. Compare capacity, prices and reviews, then enquire free.`,
     );
     const path = `/county/${params.county}`;
     return {
@@ -54,8 +63,9 @@ export const Route = createFileRoute("/county/$county")({
 });
 
 function CountyPage() {
-  const { county, stats, venues, suppliers } = Route.useLoaderData();
+  const { county, country, stats, venues, suppliers } = Route.useLoaderData();
   const slug = countySlug(county);
+  const location = listingLocationLabel(county, country);
 
   const topVenue = venues[0];
 
@@ -64,25 +74,25 @@ function CountyPage() {
       <JsonLd
         data={breadcrumbSchema("", [
           { name: "Home", path: "/" },
-          { name: `Co. ${county}`, path: `/county/${slug}` },
+          { name: location, path: `/county/${slug}` },
         ])}
       />
       <JsonLd
         data={{
           "@context": "https://schema.org",
           "@type": "CollectionPage",
-          name: `Weddings in Co. ${county}`,
-          about: { "@type": "AdministrativeArea", name: `County ${county}, Ireland` },
-          description: `Wedding venues and suppliers listed in Co. ${county}, Ireland.`,
+          name: `Weddings in ${location}`,
+          about: { "@type": "AdministrativeArea", name: location },
+          description: `Wedding venues and suppliers listed in ${location}.`,
         }}
       />
 
       <PageHeader
         eyebrow="County guide"
-        title={`Getting married in Co. ${county}`}
-        description={`${stats.venues.toLocaleString()} venues and ${stats.suppliers.toLocaleString()} suppliers listed in Co. ${county}, from ceremony music to the morning-after brunch.`}
+        title={`Getting married in ${location}`}
+        description={`${stats.venues.toLocaleString()} venues and ${stats.suppliers.toLocaleString()} suppliers listed in ${location}, from ceremony music to the morning-after brunch.`}
       >
-        <Breadcrumbs items={[{ label: `Co. ${county}` }]} />
+        <Breadcrumbs items={[{ label: location }]} />
       </PageHeader>
 
       <div className="border-b border-border bg-card">
@@ -105,11 +115,11 @@ function CountyPage() {
       </div>
 
       <Section
-        title={`Wedding venues in Co. ${county}`}
+        title={`Wedding venues in ${location}`}
         action={
           <Button asChild variant="outline">
             <Link to="/$directorySlug" params={{ directorySlug: `${VENUE_SLUG}-${slug}` }}>
-              All {county} venues
+              All {location} venues
             </Link>
           </Button>
         }
@@ -121,13 +131,13 @@ function CountyPage() {
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground">No venues listed in this county yet.</p>
+          <p className="text-muted-foreground">No venues listed in this location yet.</p>
         )}
       </Section>
 
       <Section
         tone="ivory"
-        title={`Suppliers in Co. ${county}`}
+        title={`Suppliers in ${location}`}
         action={
           <Button asChild variant="outline">
             <Link to="/find-suppliers">All suppliers</Link>
@@ -141,13 +151,13 @@ function CountyPage() {
             ))}
           </div>
         ) : (
-          <p className="text-muted-foreground">No suppliers listed in this county yet.</p>
+          <p className="text-muted-foreground">No suppliers listed in this location yet.</p>
         )}
       </Section>
 
       <Section
-        title={`Browse ${county} by category`}
-        description="Each category page lists only businesses working in this county."
+        title={`Browse ${location} by category`}
+        description="Each category page lists only businesses working in this location."
       >
         <div className="flex flex-wrap gap-2">
           <Link
@@ -155,7 +165,7 @@ function CountyPage() {
             params={{ directorySlug: `${VENUE_SLUG}-${slug}` }}
             className="rounded-full border border-border px-4 py-2 text-sm hover:border-primary/50 hover:text-primary"
           >
-            Wedding Venues in {county}
+            Wedding Venues in {location}
           </Link>
           {CATEGORIES.map((c) => (
             <Link
@@ -164,7 +174,7 @@ function CountyPage() {
               params={{ directorySlug: `${c.slug}-${slug}` }}
               className="rounded-full border border-border px-4 py-2 text-sm hover:border-primary/50 hover:text-primary"
             >
-              {c.plural} in {county}
+              {c.plural} in {location}
             </Link>
           ))}
         </div>

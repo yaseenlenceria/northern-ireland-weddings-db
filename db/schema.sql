@@ -4,7 +4,9 @@ CREATE TABLE IF NOT EXISTS venues (
   id uuid PRIMARY KEY,
   slug text NOT NULL UNIQUE,
   name text NOT NULL,
+  country text NOT NULL DEFAULT 'Ireland',
   county text,
+  town_city text,
   badge text,
   guest_capacity text,
   capacity_min integer,
@@ -29,9 +31,16 @@ CREATE TABLE IF NOT EXISTS venues (
   contact_role text,
   latitude numeric,
   longitude numeric,
+  google_maps_url text,
   phone text,
   source_url text,
+  source_site text,
   website text,
+  facebook_url text,
+  instagram_url text,
+  twitter_url text,
+  rating_label text,
+  recommended_percent text,
   venue_hire_price text,
   image_count integer,
   created_at timestamptz NOT NULL DEFAULT now(),
@@ -43,7 +52,9 @@ CREATE TABLE IF NOT EXISTS suppliers (
   slug text NOT NULL UNIQUE,
   name text NOT NULL,
   categories text[] NOT NULL DEFAULT '{}',
+  country text NOT NULL DEFAULT 'Ireland',
   county text,
+  town_city text,
   avg_price text,
   avg_price_num numeric,
   rating numeric,
@@ -63,10 +74,12 @@ CREATE TABLE IF NOT EXISTS suppliers (
   address text,
   latitude numeric,
   longitude numeric,
+  google_maps_url text,
   phone text,
   email text,
   contact_person text,
   source_url text,
+  source_site text,
   profile_url text,
   website text,
   facebook_url text,
@@ -74,6 +87,8 @@ CREATE TABLE IF NOT EXISTS suppliers (
   tiktok_url text,
   youtube_url text,
   twitter_url text,
+  rating_label text,
+  recommended_percent text,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
@@ -93,11 +108,27 @@ ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS instagram_url text;
 ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS tiktok_url text;
 ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS youtube_url text;
 ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS twitter_url text;
+ALTER TABLE venues ADD COLUMN IF NOT EXISTS country text NOT NULL DEFAULT 'Ireland';
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS country text NOT NULL DEFAULT 'Ireland';
+ALTER TABLE venues ADD COLUMN IF NOT EXISTS town_city text;
+ALTER TABLE venues ADD COLUMN IF NOT EXISTS google_maps_url text;
+ALTER TABLE venues ADD COLUMN IF NOT EXISTS source_site text;
+ALTER TABLE venues ADD COLUMN IF NOT EXISTS facebook_url text;
+ALTER TABLE venues ADD COLUMN IF NOT EXISTS instagram_url text;
+ALTER TABLE venues ADD COLUMN IF NOT EXISTS twitter_url text;
+ALTER TABLE venues ADD COLUMN IF NOT EXISTS rating_label text;
+ALTER TABLE venues ADD COLUMN IF NOT EXISTS recommended_percent text;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS town_city text;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS google_maps_url text;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS source_site text;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS rating_label text;
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS recommended_percent text;
 
 CREATE TABLE IF NOT EXISTS wedding_fairs (
   id uuid PRIMARY KEY,
   slug text NOT NULL UNIQUE,
   name text NOT NULL,
+  country text NOT NULL DEFAULT 'Ireland',
   date_text text,
   time_text text,
   venue_name text,
@@ -140,7 +171,9 @@ CREATE TABLE IF NOT EXISTS enquiries (
   metadata jsonb NOT NULL DEFAULT '{}',
   created_at timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE wedding_fairs ADD COLUMN IF NOT EXISTS country text NOT NULL DEFAULT 'Ireland';
 
+CREATE INDEX IF NOT EXISTS venues_country_idx ON venues(country);
 CREATE INDEX IF NOT EXISTS venues_county_idx ON venues(county);
 CREATE INDEX IF NOT EXISTS venues_featured_idx ON venues(featured);
 CREATE INDEX IF NOT EXISTS venues_rating_idx ON venues(rating DESC NULLS LAST);
@@ -148,12 +181,14 @@ CREATE INDEX IF NOT EXISTS venues_capacity_max_idx ON venues(capacity_max);
 CREATE INDEX IF NOT EXISTS venues_name_trgm_idx ON venues USING gin (name gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS venues_types_idx ON venues USING gin (venue_types);
 
+CREATE INDEX IF NOT EXISTS suppliers_country_idx ON suppliers(country);
 CREATE INDEX IF NOT EXISTS suppliers_county_idx ON suppliers(county);
 CREATE INDEX IF NOT EXISTS suppliers_featured_idx ON suppliers(featured);
 CREATE INDEX IF NOT EXISTS suppliers_award_winner_idx ON suppliers(award_winner);
 CREATE INDEX IF NOT EXISTS suppliers_rating_idx ON suppliers(rating DESC NULLS LAST);
 CREATE INDEX IF NOT EXISTS suppliers_categories_idx ON suppliers USING gin (categories);
 CREATE INDEX IF NOT EXISTS suppliers_name_trgm_idx ON suppliers USING gin (name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS wedding_fairs_country_idx ON wedding_fairs(country);
 
 CREATE INDEX IF NOT EXISTS imported_reviews_venue_idx ON imported_reviews(venue_id);
 CREATE INDEX IF NOT EXISTS imported_reviews_supplier_idx ON imported_reviews(supplier_id);

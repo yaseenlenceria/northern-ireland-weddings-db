@@ -1,7 +1,7 @@
 {
   "name": "WedHQ",
   "short_name": "WedHQ",
-  "description": "Ireland wedding venue and supplier directory with reviews, prices and free planning tools.",
+  "description": "UK and Ireland wedding venue and supplier directory with reviews, prices and free planning tools.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fffaf0",

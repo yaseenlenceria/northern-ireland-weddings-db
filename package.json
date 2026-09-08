@@ -8,7 +8,10 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
+    "db:schema": "node scripts/apply_schema.mjs",
     "db:import": "node scripts/import_directory_postgres.mjs",
+    "db:import:uk": "node scripts/import_directory_postgres.mjs --uk-only",
+    "db:seed:uk-demo": "node scripts/seed_uk_demo.mjs",
     "lint": "eslint .",
     "format": "prettier --write ."
   },

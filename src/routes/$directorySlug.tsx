@@ -8,12 +8,55 @@ import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { SupplierCard, VenueCard } from "@/components/site/Cards";
 import { JsonLd } from "@/components/site/JsonLd";
 import { getDirectoryStats, listSuppliers, listVenues } from "@/lib/directory.functions";
-import { CATEGORIES, COUNTIES, VENUE_SLUG, countySlug, parseDirectorySlug } from "@/lib/taxonomy";
+import {
+  CATEGORIES,
+  LOCATIONS,
+  VENUE_SLUG,
+  countySlug,
+  listingLocationLabel,
+  parseDirectorySlug,
+} from "@/lib/taxonomy";
 import { euro, priceGuide, weightedRating } from "@/lib/stats";
 import { SEO_YEAR, absoluteUrl, canonical, clamp, pageMeta } from "@/lib/seo";
 
 const PER_PAGE = 24;
 const TOP_N = 10;
+const SINGULAR_DIRECTORY_LABELS: Record<string, string> = {
+  "Wedding Photographers": "Wedding Photographer",
+  "Wedding Cakes": "Wedding Cake Supplier",
+  "Wedding Florists": "Wedding Florist",
+  "Wedding Bands": "Wedding Band",
+  "Wedding Singers": "Wedding Singer",
+  "Wedding Videographers": "Wedding Videographer",
+  "Wedding Content Creators": "Wedding Content Creator",
+  "Wedding Makeup Artists": "Wedding Makeup Artist",
+  "Wedding Beauty & Skincare": "Wedding Beauty Supplier",
+  "Wedding Hair Stylists": "Wedding Hair Stylist",
+  "Wedding DJs": "Wedding DJ",
+  "Wedding Celebrants": "Wedding Celebrant",
+  "Wedding Planners": "Wedding Planner",
+  "Wedding Transport": "Wedding Transport Supplier",
+  "Wedding Decor & Styling": "Wedding Decor Supplier",
+  "Wedding Entertainment": "Wedding Entertainment Supplier",
+  "Bridal Shops": "Bridal Shop",
+  "Bridesmaid Dresses": "Bridesmaid Dress Supplier",
+  Groomswear: "Groomswear Supplier",
+  "Wedding Stationery": "Wedding Stationery Supplier",
+  "Wedding Catering": "Wedding Caterer",
+  "Wedding Jewellers": "Wedding Jeweller",
+  "Wedding Gifts & Favours": "Wedding Gift Supplier",
+  "Marquee Hire": "Marquee Hire Supplier",
+  "Hen & Stag Suppliers": "Hen & Stag Supplier",
+  "Honeymoon Specialists": "Honeymoon Specialist",
+  "Wedding Health & Fitness": "Wedding Health & Fitness Supplier",
+  "Wedding Childcare": "Wedding Childcare Supplier",
+  "Other Wedding Services": "Wedding Service",
+  "Wedding Venues": "Wedding Venue",
+};
+
+function countLabel(plural: string, count: number) {
+  return count === 1 ? (SINGULAR_DIRECTORY_LABELS[plural] ?? plural) : plural;
+}
 
 const searchSchema = z.object({
   page: fallback(z.number().int(), 1).optional(),
@@ -31,12 +74,13 @@ function buildCopy(opts: {
   const { plural, place, count, page, priced } = opts;
   const ranked = count > 0;
   const listingCount = count.toLocaleString();
+  const label = countLabel(plural, count);
   const heading = ranked
-    ? `${listingCount} ${plural} in ${place} (${SEO_YEAR})`
+    ? `${listingCount} ${label} in ${place} (${SEO_YEAR})`
     : `${plural} in ${place}`;
 
   const title = ranked
-    ? `${listingCount} ${plural} in ${place} ${SEO_YEAR} - Prices & Reviews`
+    ? `${listingCount} ${label} in ${place} ${SEO_YEAR} - Prices & Reviews`
     : `${plural} in ${place} — ${count} Listed | WedHQ`;
 
   const priceBit = priced ? ` Typical spend around ${euro(priced.median)}.` : "";
@@ -60,18 +104,31 @@ export const Route = createFileRoute("/$directorySlug")({
     const target = parseDirectorySlug(params.directorySlug);
     if (!target) throw notFound();
     const page = Math.max(1, Math.min(deps.page ?? 1, 200));
-    const place = target.county ?? "Ireland";
+    const place =
+      target.scope === "all"
+        ? "the UK and Ireland"
+        : target.country === "United Kingdom" && !target.county
+          ? "the UK"
+          : target.county
+            ? listingLocationLabel(target.county, target.country)
+            : "Ireland";
 
     const statsInput = {
       kind: target.kind,
       ...(target.category ? { category: target.category.key } : {}),
+      ...(target.country ? { country: target.country } : {}),
       ...(target.county ? { county: target.county } : {}),
     } as const;
 
     if (target.kind === "venues") {
       const [result, stats] = await Promise.all([
         listVenues({
-          data: { ...(target.county ? { county: target.county } : {}), page, perPage: PER_PAGE },
+          data: {
+            ...(target.country ? { country: target.country } : {}),
+            ...(target.county ? { county: target.county } : {}),
+            page,
+            perPage: PER_PAGE,
+          },
         }),
         getDirectoryStats({ data: statsInput }),
       ]);
@@ -82,6 +139,7 @@ export const Route = createFileRoute("/$directorySlug")({
       listSuppliers({
         data: {
           ...(target.category ? { category: target.category.key } : {}),
+          ...(target.country ? { country: target.country } : {}),
           ...(target.county ? { county: target.county } : {}),
           page,
           perPage: PER_PAGE,
@@ -114,7 +172,10 @@ export const Route = createFileRoute("/$directorySlug")({
         description: copy.description,
         path,
         image: hero,
-        noindex: loaderData.page > 1 || count === 0,
+        noindex:
+          loaderData.page > 1 ||
+          count === 0 ||
+          (target.country === "United Kingdom" && count <= 2),
       }),
       links: canonical(path),
     };
@@ -153,6 +214,13 @@ function DirectoryPage() {
   const lastPage = Math.max(1, Math.ceil(total / PER_PAGE));
   const hasNext = page < lastPage;
   const baseSlug = target.category ? target.category.slug : VENUE_SLUG;
+  const scopeSlug = target.county
+    ? countySlug(target.county)
+    : target.country === "United Kingdom"
+      ? "uk"
+      : target.country === "Ireland"
+        ? "ireland"
+        : "uk-and-ireland";
   const plural = target.category?.plural ?? "Wedding Venues";
   const singular = target.category?.label ?? "venue";
 
@@ -183,7 +251,7 @@ function DirectoryPage() {
   });
   faqs.push({
     q: `When should we book ${plural.toLowerCase()} in ${place}?`,
-    a: `For a Saturday in peak season, ${place} suppliers are commonly booked twelve to eighteen months out. Off-season and midweek dates are far easier — enquire with three or four options and compare what's actually available for your date.`,
+    a: `For a Saturday in peak season, ${plural.toLowerCase()} in ${place} are commonly booked twelve to eighteen months out. Off-season and midweek dates are far easier, so enquire with three or four options and compare what's actually available for your date.`,
   });
   if (rating) {
     faqs.push({
@@ -260,8 +328,14 @@ function DirectoryPage() {
           <Stat
             icon={<MapPin className="size-4" />}
             label="Area"
-            value={target.county ?? "All Ireland"}
-            detail={target.county ? "plus suppliers who travel" : "27 counties covered"}
+            value={
+              target.scope === "all"
+                ? "UK & Ireland"
+                : target.county
+                  ? listingLocationLabel(target.county, target.country)
+                  : place
+            }
+            detail={target.county ? "plus suppliers who travel" : "live database coverage"}
           />
         </div>
       </div>
@@ -271,11 +345,11 @@ function DirectoryPage() {
           <div className="rounded-xl border border-dashed border-border p-10 text-center">
             <h2 className="font-serif text-xl">Nothing listed here yet</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Try a neighbouring county, or browse the whole of Ireland.
+              Try a nearby location, or browse the full UK and Ireland directory.
             </p>
             <Button asChild className="mt-5">
-              <Link to="/$directorySlug" params={{ directorySlug: `${baseSlug}-ireland` }}>
-                View all of Ireland
+              <Link to="/$directorySlug" params={{ directorySlug: `${baseSlug}-uk-and-ireland` }}>
+                View all locations
               </Link>
             </Button>
           </div>
@@ -394,30 +468,34 @@ function DirectoryPage() {
         </div>
       </Section>
 
-      <Section tone="ivory" title={`${plural} by county`}>
+      <Section tone="ivory" title={`${plural} by location`}>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-          {COUNTIES.map((county) => (
+          {LOCATIONS.map((county) => (
             <Link
               key={county}
               to="/$directorySlug"
               params={{ directorySlug: `${baseSlug}-${countySlug(county)}` }}
               className="rounded-lg border border-border bg-card px-3 py-3 text-center text-sm shadow-soft hover:border-primary/40 hover:text-primary"
             >
-              {county}
+              {listingLocationLabel(county)}
             </Link>
           ))}
         </div>
       </Section>
 
       <Section
-        title={target.county ? `More suppliers in Co. ${target.county}` : "Other categories"}
-        description="Keep building your supplier list from the same area."
+        title={
+          target.county
+            ? `Related searches in ${listingLocationLabel(target.county, target.country)}`
+            : "Related searches"
+        }
+        description="Switch category while keeping the same location."
       >
         <div className="flex flex-wrap gap-2">
           <Link
             to="/$directorySlug"
             params={{
-              directorySlug: `${VENUE_SLUG}-${target.county ? countySlug(target.county) : "ireland"}`,
+              directorySlug: `${VENUE_SLUG}-${scopeSlug}`,
             }}
             className="rounded-full border border-border px-4 py-2 text-sm hover:border-primary/50 hover:text-primary"
           >
@@ -428,7 +506,7 @@ function DirectoryPage() {
               key={c.slug}
               to="/$directorySlug"
               params={{
-                directorySlug: `${c.slug}-${target.county ? countySlug(target.county) : "ireland"}`,
+                directorySlug: `${c.slug}-${scopeSlug}`,
               }}
               className="rounded-full border border-border px-4 py-2 text-sm hover:border-primary/50 hover:text-primary"
             >

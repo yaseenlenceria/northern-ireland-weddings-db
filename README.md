@@ -1,6 +1,6 @@
-# WedHQ Ireland Directory
+# WedHQ Wedding Directory
 
-TanStack Start and React directory website for Irish wedding venues, suppliers, wedding fairs, planning tools, and enquiries.
+TanStack Start and React directory website for wedding venues, suppliers, wedding fairs, planning tools, and enquiries across Ireland and the UK.
 
 The public directory pages use a Postgres database connection and are prepared for Vercel deployment. The legacy Supabase files remain only for auth/planning-tool areas that have not yet been migrated.
 

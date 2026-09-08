@@ -7,11 +7,13 @@ import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CATEGORIES, COUNTIES, VENUE_SLUG, countySlug } from "@/lib/taxonomy";
+import { CATEGORIES, LOCATION_GROUPS, VENUE_SLUG, countySlug } from "@/lib/taxonomy";
 
 function Field({
   icon,
@@ -49,18 +51,18 @@ function Field({
 const CONTROL =
   "mt-0.5 h-8 w-full border-0 bg-transparent px-0 text-base font-medium text-foreground shadow-none focus-visible:ring-0 focus:ring-0 [&>span]:truncate";
 
-/** Hero search: category + county + optional date, routes to a landing page. */
+/** Hero search: category + location + optional date, routes to a landing page. */
 export function SearchBar({ compact = false }: { compact?: boolean }) {
   const navigate = useNavigate();
   const [category, setCategory] = useState(VENUE_SLUG);
-  const [county, setCounty] = useState("ireland");
+  const [location, setLocation] = useState("uk-and-ireland");
   const [date, setDate] = useState("");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     navigate({
       to: "/$directorySlug",
-      params: { directorySlug: `${category}-${county}` },
+      params: { directorySlug: `${category}-${location}` },
       search: date ? { date } : {},
     });
   };
@@ -90,17 +92,24 @@ export function SearchBar({ compact = false }: { compact?: boolean }) {
         </Select>
       </Field>
 
-      <Field icon={<MapPin className="size-4" />} label="Where in Ireland?">
-        <Select value={county} onValueChange={setCounty}>
+      <Field icon={<MapPin className="size-4" />} label="Where?">
+        <Select value={location} onValueChange={setLocation}>
           <SelectTrigger className={CONTROL}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="max-h-80">
-            <SelectItem value="ireland">Anywhere in Ireland</SelectItem>
-            {COUNTIES.map((c) => (
-              <SelectItem key={c} value={countySlug(c)}>
-                Co. {c}
-              </SelectItem>
+            <SelectItem value="uk-and-ireland">UK &amp; Ireland</SelectItem>
+            <SelectItem value="ireland">Ireland</SelectItem>
+            <SelectItem value="uk">United Kingdom</SelectItem>
+            {LOCATION_GROUPS.map((group) => (
+              <SelectGroup key={group.label}>
+                <SelectLabel>{group.label}</SelectLabel>
+                {group.locations.map((c) => (
+                  <SelectItem key={c} value={countySlug(c)}>
+                    {group.country === "Ireland" ? `Co. ${c}` : c}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             ))}
           </SelectContent>
         </Select>

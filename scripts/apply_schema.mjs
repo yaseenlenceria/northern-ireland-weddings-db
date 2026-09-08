@@ -1,6 +1,27 @@
 import fs from "node:fs/promises";
 import postgres from "postgres";
 
+async function loadEnvFile(file) {
+  try {
+    const text = await fs.readFile(file, "utf8");
+    for (const rawLine of text.split(/\r?\n/)) {
+      const line = rawLine.trim();
+      if (!line || line.startsWith("#") || !line.includes("=")) continue;
+      const [key, ...rest] = line.split("=");
+      if (process.env[key]) continue;
+      process.env[key] = rest
+        .join("=")
+        .trim()
+        .replace(/^['"]|['"]$/g, "");
+    }
+  } catch {
+    // Local env files are optional in Vercel builds and CI.
+  }
+}
+
+await loadEnvFile(".env.local");
+await loadEnvFile(".env");
+
 const url = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 
 if (!url) {

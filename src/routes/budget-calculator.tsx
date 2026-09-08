@@ -16,9 +16,9 @@ import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { JsonLd } from "@/components/site/JsonLd";
 import { SITE_NAME, absoluteUrl, pageMeta, canonical } from "@/lib/seo";
 
-const TITLE = "Wedding Budget Calculator (Ireland) | WedHQ";
+const TITLE = "Wedding Budget Calculator | WedHQ";
 const DESCRIPTION =
-  "Free wedding budget calculator for Irish couples. Add quotes, track deposits and see what is left to pay without needing an account.";
+  "Free wedding budget calculator for couples. Add quotes, track deposits and see what is left to pay without needing an account.";
 const STORAGE_KEY = "wedhq-budget-items";
 const LEGACY_STORAGE_KEYS = ["shortlist-ie-budget-items", "niamh-weddings-budget-items"];
 

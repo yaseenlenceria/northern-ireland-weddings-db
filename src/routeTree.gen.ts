@@ -26,6 +26,7 @@ import { Route as WeddingChecklistRouteImport } from './routes/wedding-checklist
 import { Route as WeddingFairsRouteImport } from './routes/wedding-fairs'
 import { Route as WeddingTimelineRouteImport } from './routes/wedding-timeline'
 import { Route as CountyCountyRouteImport } from './routes/county.$county'
+import { Route as ImageEncodedRouteImport } from './routes/image.$encoded'
 import { Route as SupplierSlugRouteImport } from './routes/supplier.$slug'
 import { Route as VenueSlugRouteImport } from './routes/venue.$slug'
 import { Route as WeddingGuidesIndexRouteImport } from './routes/wedding-guides.index'
@@ -116,6 +117,11 @@ const CountyCountyRoute = CountyCountyRouteImport.update({
   path: '/county/$county',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ImageEncodedRoute = ImageEncodedRouteImport.update({
+  id: '/image/$encoded',
+  path: '/image/$encoded',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SupplierSlugRoute = SupplierSlugRouteImport.update({
   id: '/supplier/$slug',
   path: '/supplier/$slug',
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/wedding-fairs': typeof WeddingFairsRoute
   '/wedding-timeline': typeof WeddingTimelineRoute
   '/county/$county': typeof CountyCountyRoute
+  '/image/$encoded': typeof ImageEncodedRoute
   '/supplier/$slug': typeof SupplierSlugRoute
   '/venue/$slug': typeof VenueSlugRoute
   '/wedding-guides/$slug': typeof WeddingGuidesSlugRoute
@@ -178,6 +185,7 @@ export interface FileRoutesByTo {
   '/wedding-fairs': typeof WeddingFairsRoute
   '/wedding-timeline': typeof WeddingTimelineRoute
   '/county/$county': typeof CountyCountyRoute
+  '/image/$encoded': typeof ImageEncodedRoute
   '/supplier/$slug': typeof SupplierSlugRoute
   '/venue/$slug': typeof VenueSlugRoute
   '/wedding-guides/$slug': typeof WeddingGuidesSlugRoute
@@ -202,6 +210,7 @@ export interface FileRoutesById {
   '/wedding-fairs': typeof WeddingFairsRoute
   '/wedding-timeline': typeof WeddingTimelineRoute
   '/county/$county': typeof CountyCountyRoute
+  '/image/$encoded': typeof ImageEncodedRoute
   '/supplier/$slug': typeof SupplierSlugRoute
   '/venue/$slug': typeof VenueSlugRoute
   '/wedding-guides/$slug': typeof WeddingGuidesSlugRoute
@@ -227,6 +236,7 @@ export interface FileRouteTypes {
     | '/wedding-fairs'
     | '/wedding-timeline'
     | '/county/$county'
+    | '/image/$encoded'
     | '/supplier/$slug'
     | '/venue/$slug'
     | '/wedding-guides/$slug'
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
     | '/wedding-fairs'
     | '/wedding-timeline'
     | '/county/$county'
+    | '/image/$encoded'
     | '/supplier/$slug'
     | '/venue/$slug'
     | '/wedding-guides/$slug'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/wedding-fairs'
     | '/wedding-timeline'
     | '/county/$county'
+    | '/image/$encoded'
     | '/supplier/$slug'
     | '/venue/$slug'
     | '/wedding-guides/$slug'
@@ -297,6 +309,7 @@ export interface RootRouteChildren {
   WeddingFairsRoute: typeof WeddingFairsRoute
   WeddingTimelineRoute: typeof WeddingTimelineRoute
   CountyCountyRoute: typeof CountyCountyRoute
+  ImageEncodedRoute: typeof ImageEncodedRoute
   SupplierSlugRoute: typeof SupplierSlugRoute
   VenueSlugRoute: typeof VenueSlugRoute
   WeddingGuidesSlugRoute: typeof WeddingGuidesSlugRoute
@@ -424,6 +437,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CountyCountyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/image/$encoded': {
+      id: '/image/$encoded'
+      path: '/image/$encoded'
+      fullPath: '/image/$encoded'
+      preLoaderRoute: typeof ImageEncodedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/supplier/$slug': {
       id: '/supplier/$slug'
       path: '/supplier/$slug'
@@ -473,6 +493,7 @@ const rootRouteChildren: RootRouteChildren = {
   WeddingFairsRoute: WeddingFairsRoute,
   WeddingTimelineRoute: WeddingTimelineRoute,
   CountyCountyRoute: CountyCountyRoute,
+  ImageEncodedRoute: ImageEncodedRoute,
   SupplierSlugRoute: SupplierSlugRoute,
   VenueSlugRoute: VenueSlugRoute,
   WeddingGuidesSlugRoute: WeddingGuidesSlugRoute,

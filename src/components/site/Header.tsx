@@ -10,9 +10,10 @@ import { getHeaderHighlights } from "@/lib/directory.functions";
 import {
   CATEGORIES,
   CATEGORY_BY_KEY,
-  FEATURED_COUNTIES,
+  FEATURED_LOCATIONS,
   VENUE_SLUG,
   countySlug,
+  listingLocationLabel,
 } from "@/lib/taxonomy";
 
 const NAV = [
@@ -76,7 +77,7 @@ export function Header() {
                         <Link
                           key={slug}
                           to="/$directorySlug"
-                          params={{ directorySlug: `${slug}-ireland` }}
+                          params={{ directorySlug: `${slug}-uk-and-ireland` }}
                           className="rounded-md px-2 py-1.5 text-sm text-foreground/80 hover:bg-primary-soft hover:text-primary"
                         >
                           {isVenue ? "Wedding Venues" : category?.plural}
@@ -87,16 +88,16 @@ export function Header() {
                 </div>
 
                 <div>
-                  <p className="eyebrow text-muted-foreground">Counties</p>
+                  <p className="eyebrow text-muted-foreground">Locations</p>
                   <div className="mt-3 grid grid-cols-2 gap-2">
-                    {FEATURED_COUNTIES.slice(0, 10).map((county) => (
+                    {FEATURED_LOCATIONS.slice(0, 10).map((county) => (
                       <Link
                         key={county}
                         to="/county/$county"
                         params={{ county: countySlug(county) }}
                         className="rounded-md px-2 py-1.5 text-sm text-foreground/80 hover:bg-primary-soft hover:text-primary"
                       >
-                        Co. {county}
+                        {listingLocationLabel(county)}
                       </Link>
                     ))}
                   </div>
@@ -130,8 +131,8 @@ export function Header() {
                           </span>
                           <span className="line-clamp-1 block text-xs text-muted-foreground">
                             {item.kind === "venue"
-                              ? `Venue${item.county ? ` in Co. ${item.county}` : ""}`
-                              : `${CATEGORY_BY_KEY.get(item.category ?? "")?.label ?? "Supplier"}${item.county ? ` in Co. ${item.county}` : ""}`}
+                              ? `Venue in ${listingLocationLabel(item.county, item.country)}`
+                              : `${CATEGORY_BY_KEY.get(item.category ?? "")?.label ?? "Supplier"} in ${listingLocationLabel(item.county, item.country)}`}
                           </span>
                         </span>
                       </Link>
@@ -221,7 +222,7 @@ export function Header() {
                   <Link
                     key={slug}
                     to="/$directorySlug"
-                    params={{ directorySlug: `${slug}-ireland` }}
+                    params={{ directorySlug: `${slug}-uk-and-ireland` }}
                     onClick={() => setOpen(false)}
                     className="rounded-md bg-primary-soft px-3 py-2 text-sm text-accent-foreground"
                   >

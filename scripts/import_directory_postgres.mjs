@@ -78,6 +78,13 @@ function assignmentFor(table, column) {
       "video_urls",
     ].includes(column)
   ) {
+    if (column === "service_areas") {
+      return `${quoteIdentifier(column)} = CASE
+        WHEN ${incoming} IS NULL OR cardinality(${incoming}) = 0 THEN ${target}
+        ELSE ${incoming}
+      END`;
+    }
+
     return `${quoteIdentifier(column)} = CASE
       WHEN ${incoming} IS NULL OR cardinality(${incoming}) = 0 THEN ${target}
       WHEN ${target} IS NULL OR cardinality(${target}) = 0 THEN ${incoming}
@@ -115,7 +122,6 @@ function columnType(column) {
 function unavailableImagePredicate(column) {
   return `
     lower(${column}) LIKE '%://cdn0.hitched.ie/%' OR
-    lower(${column}) LIKE '%://cdn0.hitched.co.uk/%' OR
     lower(${column}) LIKE '%://www.weddingsuppliers.ie/uploads/%' OR
     lower(${column}) LIKE '%://www.weddingsuppliers.ie/public/uploads/%'
   `;
@@ -271,6 +277,18 @@ async function normalizeSupplierCategories(sql) {
   `);
 }
 
+async function cleanupSourceSocialLinks(sql) {
+  for (const table of ["venues", "suppliers"]) {
+    for (const column of ["facebook_url", "instagram_url", "twitter_url"]) {
+      await sql.unsafe(`
+        UPDATE ${quoteIdentifier(table)}
+        SET ${quoteIdentifier(column)} = NULL
+        WHERE lower(COALESCE(${quoteIdentifier(column)}, '')) LIKE '%hitched.%'
+      `);
+    }
+  }
+}
+
 const env = {
   ...(await fs
     .readFile(path.join(root, ".env"), "utf8")
@@ -296,9 +314,10 @@ if (!url) {
 }
 
 const python = await pythonCommand();
+const importArgs = process.argv.slice(2);
 const build = spawnSync(
   python,
-  ["scripts/import_directory_data.py", "--dry-run", "--out", payloadPath],
+  ["scripts/import_directory_data.py", "--dry-run", "--out", payloadPath, ...importArgs],
   {
     cwd: root,
     stdio: "inherit",
@@ -317,11 +336,19 @@ const sql = postgres(url, {
 
 try {
   await sql.unsafe(schema);
+  await sql`
+    DELETE FROM imported_reviews
+    WHERE venue_id IN (SELECT id FROM venues WHERE source_url = 'wedhq-demo')
+       OR supplier_id IN (SELECT id FROM suppliers WHERE source_url = 'wedhq-demo')
+  `;
+  await sql`DELETE FROM venues WHERE source_url = 'wedhq-demo'`;
+  await sql`DELETE FROM suppliers WHERE source_url = 'wedhq-demo'`;
   for (const table of ["venues", "suppliers", "wedding_fairs", "imported_reviews"]) {
     await upsertBatch(sql, table, payload[table] ?? []);
   }
   await cleanMediaPlaceholders(sql);
   await normalizeSupplierCategories(sql);
+  await cleanupSourceSocialLinks(sql);
   const [counts] = await sql`
     SELECT
       (SELECT count(*)::int FROM venues) AS venues,

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { SITE_URL } from "@/lib/seo";
-import { CATEGORIES, COUNTIES, VENUE_SLUG, countySlug } from "@/lib/taxonomy";
+import { CATEGORIES, LOCATIONS, VENUE_SLUG, countySlug } from "@/lib/taxonomy";
 import { GUIDES } from "@/lib/guides";
 
 interface SitemapEntry {
@@ -38,18 +38,28 @@ export const Route = createFileRoute("/sitemap.xml")({
 
         const supplierCounties = new Map<string, Set<string>>();
         const venueCounties = new Set<string>();
+        const supplierCountries = new Map<string, Set<string>>();
+        const venueCountries = new Set<string>();
 
         try {
           const { sql: getSql } = await import("@/lib/postgres.server");
           const sql = getSql();
 
-          const suppliers = await sql<{ slug: string; county: string | null; categories: string[] | null }[]>`
-            SELECT slug, county, categories
+          const suppliers = await sql<{ slug: string; country: string | null; county: string | null; categories: string[] | null }[]>`
+            SELECT slug, country, county, categories
             FROM suppliers
+            WHERE COALESCE(source_url, '') <> 'wedhq-demo'
             ORDER BY slug ASC
           `;
           for (const row of suppliers) {
             entries.push({ path: `/supplier/${row.slug}`, changefreq: "monthly", priority: "0.7" });
+            if (row.country) {
+              for (const cat of row.categories ?? []) {
+                const set = supplierCountries.get(cat) ?? new Set<string>();
+                set.add(row.country);
+                supplierCountries.set(cat, set);
+              }
+            }
             for (const cat of row.categories ?? []) {
               if (!row.county) continue;
               const set = supplierCounties.get(cat) ?? new Set<string>();
@@ -58,14 +68,16 @@ export const Route = createFileRoute("/sitemap.xml")({
             }
           }
 
-          const venues = await sql<{ slug: string; county: string | null }[]>`
-            SELECT slug, county
+          const venues = await sql<{ slug: string; country: string | null; county: string | null }[]>`
+            SELECT slug, country, county
             FROM venues
+            WHERE COALESCE(source_url, '') <> 'wedhq-demo'
             ORDER BY slug ASC
           `;
           for (const row of venues) {
             entries.push({ path: `/venue/${row.slug}`, changefreq: "monthly", priority: "0.7" });
             if (row.county) venueCounties.add(row.county);
+            if (row.country) venueCountries.add(row.country);
           }
         } catch (error) {
           console.error("[Sitemap] Database-backed sitemap entries unavailable", error);
@@ -74,22 +86,31 @@ export const Route = createFileRoute("/sitemap.xml")({
         // County hubs — only counties that actually have listings.
         const liveCounties = new Set<string>(venueCounties);
         for (const set of supplierCounties.values()) for (const c of set) liveCounties.add(c);
-        for (const county of COUNTIES) {
+        for (const county of LOCATIONS) {
           if (liveCounties.has(county)) {
             entries.push({ path: `/county/${countySlug(county)}`, changefreq: "weekly", priority: "0.7" });
           }
         }
 
         // National category pages plus the county pages that have listings.
+        entries.push({ path: `/${VENUE_SLUG}-uk-and-ireland`, changefreq: "weekly", priority: "0.8" });
         entries.push({ path: `/${VENUE_SLUG}-ireland`, changefreq: "weekly", priority: "0.8" });
+        if (venueCountries.has("United Kingdom")) {
+          entries.push({ path: `/${VENUE_SLUG}-uk`, changefreq: "weekly", priority: "0.8" });
+        }
         for (const county of venueCounties) {
           entries.push({ path: `/${VENUE_SLUG}-${countySlug(county)}`, changefreq: "weekly", priority: "0.8" });
         }
         for (const category of CATEGORIES) {
           const counties = supplierCounties.get(category.key);
-          if (!counties?.size) continue;
+          const countries = supplierCountries.get(category.key);
+          if (!counties?.size && !countries?.size) continue;
+          entries.push({ path: `/${category.slug}-uk-and-ireland`, changefreq: "weekly", priority: "0.8" });
           entries.push({ path: `/${category.slug}-ireland`, changefreq: "weekly", priority: "0.8" });
-          for (const county of counties) {
+          if (countries?.has("United Kingdom")) {
+            entries.push({ path: `/${category.slug}-uk`, changefreq: "weekly", priority: "0.8" });
+          }
+          for (const county of counties ?? []) {
             entries.push({ path: `/${category.slug}-${countySlug(county)}`, changefreq: "weekly", priority: "0.8" });
           }
         }

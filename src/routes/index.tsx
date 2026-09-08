@@ -18,14 +18,20 @@ import { SearchBar } from "@/components/site/SearchBar";
 import { SupplierCard, VenueCard } from "@/components/site/Cards";
 import { JsonLd } from "@/components/site/JsonLd";
 import { getHomeData } from "@/lib/directory.functions";
-import { CATEGORIES, FEATURED_COUNTIES, VENUE_SLUG, countySlug } from "@/lib/taxonomy";
+import {
+  CATEGORIES,
+  FEATURED_LOCATIONS,
+  VENUE_SLUG,
+  countySlug,
+  listingLocationLabel,
+} from "@/lib/taxonomy";
 import { GUIDES } from "@/lib/guides";
 import { SITE_NAME, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 import heroImage from "@/assets/hero-wedding-ireland.jpg";
 
-const TITLE = "Wedding Suppliers & Venues in Ireland | WedHQ";
+const TITLE = "Wedding Suppliers & Venues in the UK & Ireland | WedHQ";
 const DESCRIPTION =
-  "Compare Irish wedding suppliers and venues across every county. Live directory counts, real prices, reviews and free direct enquiries.";
+  "Find wedding venues and suppliers across Ireland and the UK. Compare real listings, prices, reviews, photos and direct enquiries.";
 
 export const Route = createFileRoute("/")({
   loader: () => getHomeData(),
@@ -91,8 +97,8 @@ const REASONS = [
   },
   {
     icon: MapPin,
-    title: "Ireland-focused listings",
-    copy: "Every venue and supplier is based here, with county and service areas shown up front.",
+    title: "Location-first listings",
+    copy: "Every profile shows where the business is based and the areas it serves.",
   },
   {
     icon: MessagesSquare,
@@ -175,8 +181,11 @@ function HomePage() {
                 height: 214,
               },
               description:
-                "Directory of wedding venues and suppliers across the Republic of Ireland.",
-              areaServed: { "@type": "Country", name: "Ireland" },
+                "Directory of wedding venues and suppliers across Ireland and the United Kingdom.",
+              areaServed: [
+                { "@type": "Country", name: "Ireland" },
+                { "@type": "Country", name: "United Kingdom" },
+              ],
             },
           ],
         }}
@@ -186,13 +195,13 @@ function HomePage() {
       <section className="relative overflow-hidden border-b border-border bg-ivory">
         <div className="relative mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-20">
           <div>
-            <p className="eyebrow text-primary">Ireland's wedding directory</p>
+            <p className="eyebrow text-primary">WedHQ wedding directory</p>
             <h1 className="mt-3 text-4xl leading-[1.05] sm:text-5xl lg:text-6xl">
-              Wedding suppliers and venues across Ireland
+              Find wedding venues and suppliers faster
             </h1>
             <p className="mt-5 max-w-xl text-lg text-muted-foreground">
-              Find the right people and places for your day, with real price guides, published
-              reviews and enquiries that go straight to the supplier.
+              Search live UK and Ireland listings now, with venues, suppliers, reviews, images and
+              direct enquiry tools in one place.
             </p>
 
             <div className="mt-8">
@@ -203,15 +212,16 @@ function HomePage() {
           <div className="relative">
             <img
               src={heroImage}
-              alt="Bride and groom walking through the gardens of an Irish country house wedding venue"
+              alt="Bride and groom walking through the gardens of a country house wedding venue"
               width={1600}
               height={1104}
               className="aspect-4/5 w-full rounded-2xl object-cover shadow-lift sm:aspect-16/12 lg:aspect-4/5"
             />
             <div className="absolute -bottom-5 left-5 right-5 rounded-xl border border-border bg-card/95 p-4 shadow-lift backdrop-blur sm:left-8 sm:right-auto sm:max-w-xs">
-              <p className="eyebrow text-primary">Ranked lists</p>
+              <p className="eyebrow text-primary">Search first</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Live category pages for every county, ranked on portfolios and real review scores.
+                Start with a location, supplier type or venue search, then compare profiles side by
+                side.
               </p>
             </div>
           </div>
@@ -230,7 +240,7 @@ function HomePage() {
             <Search className="size-5 text-primary" />
             <h2 className="mt-4 font-serif text-xl group-hover:text-primary">Find suppliers</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Search {counts.suppliers.toLocaleString()} suppliers by category, county and name.
+              Search {counts.suppliers.toLocaleString()} suppliers by category, location and name.
             </p>
           </Link>
           <Link
@@ -278,13 +288,13 @@ function HomePage() {
             const label = category ? category.plural : "Wedding Venues";
             const blurb = category
               ? category.blurb
-              : "Ceremony and reception venues across Ireland.";
+              : "Ceremony and reception venues across Ireland and the UK.";
             const count = category ? (countByCategory.get(category.key) ?? 0) : counts.venues;
             return (
               <Link
                 key={slug}
                 to="/$directorySlug"
-                params={{ directorySlug: `${slug}-ireland` }}
+                params={{ directorySlug: `${slug}-uk-and-ireland` }}
                 className="group rounded-xl border border-border bg-card p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lift"
               >
                 <h3 className="font-serif text-lg leading-snug group-hover:text-primary">
@@ -302,18 +312,18 @@ function HomePage() {
 
       {/* Counties */}
       <Section
-        title="Browse by county"
+        title="Browse by location"
         description="Jump straight to the venues and suppliers working in your area."
       >
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {FEATURED_COUNTIES.map((county) => (
+          {FEATURED_LOCATIONS.map((county) => (
             <Link
               key={county}
               to="/county/$county"
               params={{ county: countySlug(county) }}
               className="rounded-lg border border-border bg-card px-4 py-4 text-center text-sm shadow-soft transition-colors hover:border-primary/40 hover:text-primary"
             >
-              Co. {county}
+              {listingLocationLabel(county)}
             </Link>
           ))}
         </div>
@@ -403,7 +413,7 @@ function HomePage() {
           <div className="overflow-hidden rounded-2xl border border-primary/25 bg-primary-soft px-6 py-14 text-center sm:px-12">
             <h2 className="text-3xl sm:text-4xl">Are you a wedding supplier?</h2>
             <p className="mx-auto mt-3 max-w-xl text-accent-foreground">
-              List your business and get discovered by couples across Ireland.
+              List your business and get discovered by couples across Ireland and the UK.
             </p>
             <Button asChild size="lg" className="mt-7">
               <Link to="/list-your-business">List Your Business</Link>
@@ -415,7 +425,7 @@ function HomePage() {
       {/* Guides */}
       <Section
         title="Latest wedding guides"
-        description="Practical reading on budgets, timings and booking order in Ireland."
+        description="Practical reading on budgets, timings and booking order for UK and Ireland weddings."
         action={
           <Button asChild variant="outline">
             <Link to="/wedding-guides">

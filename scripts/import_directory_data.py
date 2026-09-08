@@ -24,6 +24,7 @@ SOURCE_FILES = {
     "hitched_top_50": Path(r"C:\Users\Seenu\weddingdates-scrape\Hitched_Ireland_Top50.xlsx"),
     "wedding_suppliers": Path(r"C:\Users\Seenu\weddingdates-scrape\WeddingSuppliers_Ireland.xlsx"),
     "wedding_suppliers_2": Path(r"C:\Users\Seenu\weddingdates-scrape\WeddingSuppliers_Ireland2.xlsx"),
+    "hitched_uk": Path(r"C:\Users\Seenu\weddingdates-scrape\Hitched_UK.xlsx"),
 }
 
 FULL_SUPPLIER_SHEETS = [
@@ -77,7 +78,6 @@ PLACEHOLDER_IMAGE_MARKERS = (
 )
 UNAVAILABLE_IMAGE_MARKERS = (
     "://cdn0.hitched.ie/",
-    "://cdn0.hitched.co.uk/",
     "://www.weddingsuppliers.ie/uploads/",
     "://www.weddingsuppliers.ie/public/uploads/",
 )
@@ -153,6 +153,33 @@ def split_list(value: Any) -> list[str] | None:
     return out or None
 
 
+def combine_lists(*values: Any) -> list[str] | None:
+    out: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        for item in split_list(value) or []:
+            key = item.casefold()
+            if key not in seen:
+                seen.add(key)
+                out.append(item)
+    return out or None
+
+
+def location_list(*values: Any) -> list[str] | None:
+    out: list[str] = []
+    seen: set[str] = set()
+    for item in combine_lists(*values) or []:
+        if re.search(r"(https?://|www\.|\.(?:co\.uk|ie|com|net|org)\b)", item, re.I):
+            continue
+        if re.fullmatch(r"[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}", item.strip(), re.I):
+            continue
+        key = item.casefold()
+        if key not in seen:
+            seen.add(key)
+            out.append(item)
+    return out or None
+
+
 def split_images(value: Any) -> list[str] | None:
     text = clean(value)
     if text is None:
@@ -220,6 +247,8 @@ def has_listing_image(record: dict[str, Any]) -> bool:
 
 
 def should_import_supplier(record: dict[str, Any]) -> bool:
+    if record.get("country") == "United Kingdom":
+        return True
     if "wedding-cars" in (record.get("categories") or []) and not has_listing_image(record):
         return False
     return True
@@ -451,6 +480,7 @@ CANONICAL_CATEGORY_ALIASES = {
     "celebrants-and-solemnisers": "wedding-celebrants",
     "content-creators": "wedding-content-creators",
     "decor-and-event-styling": "wedding-decor-lighting-styling",
+    "decorative-hire": "wedding-decor-lighting-styling",
     "destinations": "honeymoon",
     "entertainment": "wedding-entertainment-photobooths",
     "favours": "wedding-gifts-favours",
@@ -486,6 +516,7 @@ CANONICAL_CATEGORY_ALIASES = {
     "something-different": "wedding-entertainment-photobooths",
     "stationery": "wedding-invitations-stationery",
     "sweets": "cakes-sweet-treats",
+    "toastmaster": "wedding-services",
     "transport": "wedding-cars",
     "venue": "wedding-venues",
     "videographers": "wedding-videographers",
@@ -533,7 +564,7 @@ def boolish(value: Any) -> bool:
 
 
 def profile_url_from_row(row: dict[str, Any]) -> str | None:
-    return first(row.get("Profile URL"), row.get("Source URL"))
+    return first(row.get("Profile URL"), row.get("Source URL"), row.get("Breadcrumb"))
 
 
 def date_iso(value: str | None) -> str | None:
@@ -829,6 +860,129 @@ def supplier_from_wedding_suppliers(row: dict[str, Any], sheet_name: str) -> dic
     }
 
 
+def venue_from_hitched_uk(row: dict[str, Any]) -> dict[str, Any] | None:
+    name = clean_mojibake(row.get("Name"))
+    if not name:
+        return None
+    county = clean_mojibake(row.get("County/Region"))
+    gallery = split_images(row.get("Gallery Images (all)"))
+    capacity_text = clean_mojibake(row.get("Capacity (range)"))
+    source_url = profile_url_from_row(row)
+    return {
+        "slug": slugify(f"{name}-{county or ''}-uk"),
+        "name": name,
+        "country": "United Kingdom",
+        "county": county,
+        "town_city": clean_mojibake(row.get("Town/City")),
+        "badge": "Wedding Venue",
+        "guest_capacity": capacity_text,
+        "capacity_min": integer(row.get("Min Guests")),
+        "capacity_max": integer(first(row.get("Max Guests"), capacity_text)),
+        "per_person_price": clean_mojibake(row.get("Price From")),
+        "per_person_price_num": number(row.get("Price From")),
+        "venue_hire_price": None,
+        "rating": number(row.get("Rating")),
+        "review_count": integer(row.get("Review Count")),
+        "rating_label": clean_mojibake(row.get("Rating Label")),
+        "recommended_percent": clean_mojibake(row.get("Recommended %")),
+        "overview": useful_profile_text(row.get("Description")),
+        "description": first(useful_profile_text(row.get("Description")), useful_profile_text(row.get("All FAQs"))),
+        "logo_image": clean_image_url(row.get("Logo Image")),
+        "gallery_images": gallery,
+        "image_count": integer(row.get("Image Count")) or (len(gallery) if gallery else None),
+        "venue_types": split_list(row.get("Venue Types")),
+        "styles": split_list(row.get("Ceremony Options")),
+        "facilities": combine_lists(
+            row.get("Dining Options"),
+            row.get("Evening Entertainment"),
+            row.get("Overnight Accommodation"),
+            row.get("Staff Assistance"),
+            row.get("Leisure Facilities"),
+            row.get("Other Features"),
+            row.get("All FAQs"),
+        ),
+        "real_weddings": None,
+        "brochures": None,
+        "featured": boolish(row.get("Premium Listing")),
+        "address": clean_mojibake(first(row.get("Full Address"), row.get("Street"))),
+        "postcode": clean_mojibake(row.get("Postcode")),
+        "contact_person": None,
+        "contact_role": None,
+        "latitude": number(row.get("Latitude")),
+        "longitude": number(row.get("Longitude")),
+        "google_maps_url": clean_url(row.get("Google Maps URL")),
+        "phone": clean_phone(row.get("Phone")),
+        "source_url": source_url,
+        "source_site": clean_mojibake(row.get("Source Site")) or "hitched.co.uk",
+        "website": clean_url(row.get("Website")),
+        "facebook_url": clean_url(row.get("Facebook"), "www.facebook.com"),
+        "instagram_url": clean_url(row.get("Instagram"), "www.instagram.com"),
+        "twitter_url": clean_url(row.get("Twitter/X"), "twitter.com"),
+    }
+
+
+def supplier_from_hitched_uk(row: dict[str, Any]) -> dict[str, Any] | None:
+    name = clean_mojibake(row.get("Name"))
+    if not name:
+        return None
+    county = clean_mojibake(first(row.get("Category"), row.get("County/Region")))
+    category = clean_mojibake(row.get("Description Word Count")) or "Wedding Suppliers"
+    gallery = split_images(row.get("All FAQs"))
+    logo = clean_image_url(row.get("Other Features"))
+    source_url = clean_url(row.get("Breadcrumb"))
+    return {
+        "slug": slugify(f"{name}-{county or ''}-uk"),
+        "name": name,
+        "categories": [category_key(category)],
+        "country": "United Kingdom",
+        "county": county,
+        "town_city": clean_mojibake(row.get("Town/City")),
+        "avg_price": clean_mojibake(row.get("Max Guests")),
+        "avg_price_num": number(row.get("Max Guests")),
+        "rating": number(row.get("Price From")),
+        "review_count": integer(row.get("Rating Label")),
+        "rating_label": clean_mojibake(row.get("Review Count")),
+        "recommended_percent": clean_mojibake(row.get("Recommended %")),
+        "overview": useful_profile_text(row.get("Twitter/X")),
+        "description": first(useful_profile_text(row.get("Twitter/X")), useful_profile_text(row.get("Services"))),
+        "slogan": None,
+        "logo_image": logo,
+        "banner_image": logo,
+        "gallery_images": gallery,
+        "video_urls": None,
+        "featured": boolish(row.get("On Platform Since")),
+        "award_winner": False,
+        "package_plan": "UK directory",
+        "service_areas": location_list(county, row.get("Category"), row.get("Town/City")),
+        "image_count": integer(row.get("Logo Image")) or (len(gallery) if gallery else None),
+        "address": clean_mojibake(first(row.get("Full Address"), row.get("Town/City"))),
+        "latitude": number(row.get("Recommended %")),
+        "longitude": number(row.get("Latitude")),
+        "google_maps_url": clean_url(row.get("Longitude")),
+        "phone": None,
+        "email": None,
+        "contact_person": None,
+        "source_url": source_url,
+        "source_site": "hitched.co.uk",
+        "profile_url": source_url,
+        "website": clean_url(row.get("Phone")),
+        "facebook_url": clean_url(row.get("Website"), "www.facebook.com"),
+        "instagram_url": clean_url(row.get("Facebook"), "www.instagram.com"),
+        "tiktok_url": None,
+        "youtube_url": None,
+        "twitter_url": clean_url(row.get("Instagram"), "twitter.com"),
+    }
+
+
+def hitched_uk_supplier_review_row(row: dict[str, Any]) -> dict[str, Any]:
+    source = dict(row)
+    source["All Reviews (verbatim)"] = first(row.get("Image Count"), row.get("Image Captions"))
+    source["Rating"] = row.get("Price From")
+    source["Source Site"] = "hitched.co.uk"
+    source["Profile URL"] = clean_url(row.get("Breadcrumb"))
+    return source
+
+
 def fair_from_weddingdates(row: dict[str, Any]) -> dict[str, Any] | None:
     name = clean_text(row.get("Event Name"))
     if not name:
@@ -918,11 +1072,46 @@ def workbook_sheets(path_key: str) -> list[str]:
     ]
 
 
-def build_payload() -> dict[str, list[dict[str, Any]]]:
+def add_hitched_uk_payload(
+    venues: dict[str, dict[str, Any]],
+    suppliers: dict[str, dict[str, Any]],
+    reviews: dict[str, dict[str, Any]],
+) -> None:
+    if not SOURCE_FILES["hitched_uk"].exists():
+        return
+
+    for _, row in frame("hitched_uk", "UK Venues").iterrows():
+        row_dict = row.to_dict()
+        record = venue_from_hitched_uk(row_dict)
+        if record:
+            added = add_unique(venues, record, "venue")
+            for review in review_records("venue", added["id"], row_dict):
+                reviews[review["id"]] = review
+
+    for _, row in frame("hitched_uk", "UK Suppliers").iterrows():
+        row_dict = row.to_dict()
+        record = supplier_from_hitched_uk(row_dict)
+        if record and should_import_supplier(record):
+            added = add_unique(suppliers, record, "supplier")
+            review_source = hitched_uk_supplier_review_row(row_dict)
+            for review in review_records("supplier", added["id"], review_source):
+                reviews[review["id"]] = review
+
+
+def build_payload(uk_only: bool = False) -> dict[str, list[dict[str, Any]]]:
     venues: dict[str, dict[str, Any]] = {}
     suppliers: dict[str, dict[str, Any]] = {}
     fairs: dict[str, dict[str, Any]] = {}
     reviews: dict[str, dict[str, Any]] = {}
+
+    if uk_only:
+        add_hitched_uk_payload(venues, suppliers, reviews)
+        return {
+            "venues": list(venues.values()),
+            "suppliers": list(suppliers.values()),
+            "wedding_fairs": [],
+            "imported_reviews": list(reviews.values()),
+        }
 
     primary_key = "weddingdates_full" if SOURCE_FILES["weddingdates_full"].exists() else "weddingdates"
     use_master = SOURCE_FILES["master"].exists()
@@ -1011,6 +1200,8 @@ def build_payload() -> dict[str, list[dict[str, Any]]]:
         if record:
             fairs[record["slug"]] = best_record(fairs.get(record["slug"]), record)
 
+    add_hitched_uk_payload(venues, suppliers, reviews)
+
     return {
         "venues": list(venues.values()),
         "suppliers": list(suppliers.values()),
@@ -1023,9 +1214,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Build the wedding directory import payload from spreadsheets.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--out", default=None, help="Optional JSON output file for the generated payload.")
+    parser.add_argument("--uk-only", action="store_true", help="Only build the Hitched UK import payload.")
     args = parser.parse_args()
 
-    payload = build_payload()
+    payload = build_payload(uk_only=args.uk_only)
     summary = {table: len(rows) for table, rows in payload.items()}
     print(json.dumps(summary, indent=2))
 
