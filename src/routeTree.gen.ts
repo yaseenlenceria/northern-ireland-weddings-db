@@ -156,7 +156,6 @@ export interface FileRoutesByFullPath {
   '/budget-calculator': typeof BudgetCalculatorRoute
   '/contact': typeof ContactRoute
   '/information/$slug': typeof InformationSlugRoute
-  '/information/$slug': typeof InformationSlugRoute
   '/dashboard': typeof DashboardRoute
   '/find-suppliers': typeof FindSuppliersRoute
   '/guest-list': typeof GuestListRoute
