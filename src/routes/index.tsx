@@ -26,7 +26,7 @@ import {
   listingLocationLabel,
 } from "@/lib/taxonomy";
 import { GUIDES } from "@/lib/guides";
-import { SITE_NAME, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
+import { SITE_NAME, SOCIAL_PROFILES, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 import heroImage from "@/assets/hero-wedding-ireland.jpg";
 
 const TITLE = "Wedding Suppliers & Venues in the UK & Ireland | WedHQ";
@@ -182,6 +182,7 @@ function HomePage() {
               },
               description:
                 "Directory of wedding venues and suppliers across Ireland and the United Kingdom.",
+              sameAs: SOCIAL_PROFILES,
               areaServed: [
                 { "@type": "Country", name: "Ireland" },
                 { "@type": "Country", name: "United Kingdom" },

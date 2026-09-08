@@ -16,6 +16,12 @@ export const SITE_URL = (import.meta.env["VITE_SITE_URL"] ?? "https://wedhq.co.u
 /** Site-wide fallback for pages that do not have a listing image yet. */
 export const DEFAULT_OG_IMAGE = "/logo.png";
 
+export const SOCIAL_PROFILES = [
+  "https://www.instagram.com/wedhq.co.uk/",
+  "https://www.facebook.com/profile.php?id=61594043240176",
+  "https://www.youtube.com/@wedhq-g5r",
+] as const;
+
 /** Absolute URL for a site-relative path. */
 export const absoluteUrl = (path: string) =>
   `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`.replace(/\/$/, "") || SITE_URL;

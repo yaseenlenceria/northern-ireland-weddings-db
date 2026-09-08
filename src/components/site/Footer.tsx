@@ -1,5 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Building2, CalendarDays, HeartHandshake, MapPin, Search } from "lucide-react";
+import {
+  ArrowRight,
+  Building2,
+  CalendarDays,
+  Facebook,
+  HeartHandshake,
+  Instagram,
+  MapPin,
+  Search,
+  Youtube,
+} from "lucide-react";
 import {
   CATEGORIES,
   IRELAND_COUNTIES,
@@ -9,7 +19,7 @@ import {
   listingLocationLabel,
 } from "@/lib/taxonomy";
 import { BrandLogo } from "@/components/site/BrandMark";
-import { SITE_NAME } from "@/lib/seo";
+import { SITE_NAME, SOCIAL_PROFILES } from "@/lib/seo";
 
 type FooterLink = {
   label: string;
@@ -40,6 +50,24 @@ const legalLinks: FooterLink[] = [
   { label: "Privacy notice", to: "/information/privacy" },
   { label: "Cookie notice", to: "/information/cookies" },
   { label: "Privacy choices", to: "/information/your-privacy-choices" },
+];
+
+const socialLinks = [
+  {
+    label: "Instagram",
+    href: SOCIAL_PROFILES[0],
+    icon: Instagram,
+  },
+  {
+    label: "Facebook",
+    href: SOCIAL_PROFILES[1],
+    icon: Facebook,
+  },
+  {
+    label: "YouTube",
+    href: SOCIAL_PROFILES[2],
+    icon: Youtube,
+  },
 ];
 
 function FooterNav({ id, title, links }: { id: string; title: string; links: FooterLink[] }) {
@@ -95,6 +123,21 @@ export function Footer() {
               Search wedding venues, suppliers, reviews and planning tools across Ireland and the
               UK from one calm, organised directory.
             </p>
+            <div className="mt-5 flex items-center gap-2" aria-label="WedHQ social profiles">
+              {socialLinks.map(({ label, href, icon: Icon }) => (
+                <a
+                  key={href}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer me"
+                  aria-label={label}
+                  title={label}
+                  className="flex size-9 items-center justify-center rounded-full border border-border bg-card text-foreground/70 transition hover:border-gold/60 hover:text-primary"
+                >
+                  <Icon className="size-4" aria-hidden="true" />
+                </a>
+              ))}
+            </div>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
@@ -221,10 +264,27 @@ export function Footer() {
           </nav>
           <div className="mt-5 flex flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
             <p>{`© ${new Date().getFullYear()} ${SITE_NAME}. All rights reserved.`}</p>
-            <p className="inline-flex items-center gap-1.5">
-              <HeartHandshake className="size-3.5" aria-hidden="true" />
-              Built for couples and wedding businesses across Ireland and the UK.
-            </p>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <p className="inline-flex items-center gap-1.5">
+                <HeartHandshake className="size-3.5" aria-hidden="true" />
+                Built for couples and wedding businesses across Ireland and the UK.
+              </p>
+              <div className="flex items-center gap-2" aria-label="Social profiles">
+                {socialLinks.map(({ label, href, icon: Icon }) => (
+                  <a
+                    key={href}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer me"
+                    aria-label={label}
+                    title={label}
+                    className="text-foreground/60 transition hover:text-primary"
+                  >
+                    <Icon className="size-4" aria-hidden="true" />
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
