@@ -137,6 +137,56 @@ export function Footer() {
                 Contact
               </Link>
             </li>
+            <li>
+              <Link to="/information/about" className="text-foreground/80 hover:text-primary">
+                About WedHQ
+              </Link>
+            </li>
+            <li>
+              <Link to="/information/editorial-team" className="text-foreground/80 hover:text-primary">
+                Editorial team &amp; policies
+              </Link>
+            </li>
+            <li>
+              <Link to="/information/careers" className="text-foreground/80 hover:text-primary">
+                Careers
+              </Link>
+            </li>
+            <li>
+              <Link to="/information/legal-hub" className="text-foreground/80 hover:text-primary">
+                Legal hub
+              </Link>
+            </li>
+            <li>
+              <Link to="/information/transparency-hub" className="text-foreground/80 hover:text-primary">
+                Transparency hub
+              </Link>
+            </li>
+            <li>
+              <Link to="/information/terms-of-use" className="text-foreground/80 hover:text-primary">
+                Terms of use
+              </Link>
+            </li>
+            <li>
+              <Link to="/information/terms-of-purchase" className="text-foreground/80 hover:text-primary">
+                Terms of purchase
+              </Link>
+            </li>
+            <li>
+              <Link to="/information/privacy" className="text-foreground/80 hover:text-primary">
+                Privacy notice
+              </Link>
+            </li>
+            <li>
+              <Link to="/information/cookies" className="text-foreground/80 hover:text-primary">
+                Cookie notice
+              </Link>
+            </li>
+            <li>
+              <Link to="/information/your-privacy-choices" className="text-foreground/80 hover:text-primary">
+                Your Privacy Choices
+              </Link>
+            </li>
           </ul>
         </nav>
       </div>
