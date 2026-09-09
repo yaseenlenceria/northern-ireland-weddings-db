@@ -94,6 +94,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "google-site-verification",
         content: "xiJoR2UKPN0J8mz-vSJeI5JxEPMfnZMh-XO_XXvpP1s",
       },
+      {
+        name: "p:domain_verify",
+        content: "a6f09f8b5348801513d9c74efab0aabb",
+      },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: absoluteUrl(DEFAULT_OG_IMAGE) },
       { name: "theme-color", content: "#6b7f68" },
