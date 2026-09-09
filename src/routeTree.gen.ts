@@ -23,6 +23,7 @@ import { Route as FindSuppliersRouteImport } from './routes/find-suppliers'
 import { Route as GuestListRouteImport } from './routes/guest-list'
 import { Route as LegalRouteImport } from './routes/legal'
 import { Route as ListYourBusinessRouteImport } from './routes/list-your-business'
+import { Route as PinterestFeedDotxmlRouteImport } from './routes/pinterest-feed[.]xml'
 import { Route as PlanningToolsRouteImport } from './routes/planning-tools'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PrivacyChoicesRouteImport } from './routes/privacy-choices'
@@ -120,6 +121,11 @@ const LegalRoute = LegalRouteImport.update({
 const ListYourBusinessRoute = ListYourBusinessRouteImport.update({
   id: '/list-your-business',
   path: '/list-your-business',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PinterestFeedDotxmlRoute = PinterestFeedDotxmlRouteImport.update({
+  id: '/pinterest-feed.xml',
+  path: '/pinterest-feed.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlanningToolsRoute = PlanningToolsRouteImport.update({
@@ -282,6 +288,7 @@ export interface FileRoutesByFullPath {
   '/guest-list': typeof GuestListRoute
   '/legal': typeof LegalRoute
   '/list-your-business': typeof ListYourBusinessRoute
+  '/pinterest-feed.xml': typeof PinterestFeedDotxmlRoute
   '/planning-tools': typeof PlanningToolsRoute
   '/privacy': typeof PrivacyRoute
   '/privacy-choices': typeof PrivacyChoicesRoute
@@ -326,6 +333,7 @@ export interface FileRoutesByTo {
   '/guest-list': typeof GuestListRoute
   '/legal': typeof LegalRoute
   '/list-your-business': typeof ListYourBusinessRoute
+  '/pinterest-feed.xml': typeof PinterestFeedDotxmlRoute
   '/planning-tools': typeof PlanningToolsRoute
   '/privacy': typeof PrivacyRoute
   '/privacy-choices': typeof PrivacyChoicesRoute
@@ -371,6 +379,7 @@ export interface FileRoutesById {
   '/guest-list': typeof GuestListRoute
   '/legal': typeof LegalRoute
   '/list-your-business': typeof ListYourBusinessRoute
+  '/pinterest-feed.xml': typeof PinterestFeedDotxmlRoute
   '/planning-tools': typeof PlanningToolsRoute
   '/privacy': typeof PrivacyRoute
   '/privacy-choices': typeof PrivacyChoicesRoute
@@ -417,6 +426,7 @@ export interface FileRouteTypes {
     | '/guest-list'
     | '/legal'
     | '/list-your-business'
+    | '/pinterest-feed.xml'
     | '/planning-tools'
     | '/privacy'
     | '/privacy-choices'
@@ -461,6 +471,7 @@ export interface FileRouteTypes {
     | '/guest-list'
     | '/legal'
     | '/list-your-business'
+    | '/pinterest-feed.xml'
     | '/planning-tools'
     | '/privacy'
     | '/privacy-choices'
@@ -505,6 +516,7 @@ export interface FileRouteTypes {
     | '/guest-list'
     | '/legal'
     | '/list-your-business'
+    | '/pinterest-feed.xml'
     | '/planning-tools'
     | '/privacy'
     | '/privacy-choices'
@@ -550,6 +562,7 @@ export interface RootRouteChildren {
   GuestListRoute: typeof GuestListRoute
   LegalRoute: typeof LegalRoute
   ListYourBusinessRoute: typeof ListYourBusinessRoute
+  PinterestFeedDotxmlRoute: typeof PinterestFeedDotxmlRoute
   PlanningToolsRoute: typeof PlanningToolsRoute
   PrivacyRoute: typeof PrivacyRoute
   PrivacyChoicesRoute: typeof PrivacyChoicesRoute
@@ -678,6 +691,13 @@ declare module '@tanstack/react-router' {
       path: '/list-your-business'
       fullPath: '/list-your-business'
       preLoaderRoute: typeof ListYourBusinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pinterest-feed.xml': {
+      id: '/pinterest-feed.xml'
+      path: '/pinterest-feed.xml'
+      fullPath: '/pinterest-feed.xml'
+      preLoaderRoute: typeof PinterestFeedDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/planning-tools': {
@@ -894,6 +914,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuestListRoute: GuestListRoute,
   LegalRoute: LegalRoute,
   ListYourBusinessRoute: ListYourBusinessRoute,
+  PinterestFeedDotxmlRoute: PinterestFeedDotxmlRoute,
   PlanningToolsRoute: PlanningToolsRoute,
   PrivacyRoute: PrivacyRoute,
   PrivacyChoicesRoute: PrivacyChoicesRoute,
