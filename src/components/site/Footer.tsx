@@ -7,6 +7,7 @@ import {
   HeartHandshake,
   Instagram,
   MapPin,
+  Pin,
   Search,
   Youtube,
 } from "lucide-react";
@@ -67,6 +68,11 @@ const socialLinks = [
     label: "YouTube",
     href: SOCIAL_PROFILES[2],
     icon: Youtube,
+  },
+  {
+    label: "Pinterest",
+    href: SOCIAL_PROFILES[3],
+    icon: Pin,
   },
 ];
 

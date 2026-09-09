@@ -20,6 +20,7 @@ export const SOCIAL_PROFILES = [
   "https://www.instagram.com/wedhq.co.uk/",
   "https://www.facebook.com/profile.php?id=61594043240176",
   "https://www.youtube.com/@wedhq-g5r",
+  "https://www.pinterest.com/weddingshq/",
 ] as const;
 
 /** Absolute URL for a site-relative path. */
