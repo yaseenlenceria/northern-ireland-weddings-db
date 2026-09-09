@@ -14,7 +14,7 @@ type FeedItem = {
   overview: string | null;
   rating: string | number | null;
   review_count: string | number | null;
-  image: string | null;
+  images: string[] | null;
   category: string | null;
   updated_at: string | null;
 };
@@ -43,6 +43,17 @@ function absoluteImageUrl(image: string | null) {
   if (publicUrl.startsWith("/")) return absoluteUrl(publicUrl);
   if (/^https?:\/\//i.test(publicUrl)) return publicUrl;
   return null;
+}
+
+function itemImages(item: FeedItem) {
+  const images = item.images ?? [];
+  return [
+    ...new Set(
+      images
+        .map((image) => absoluteImageUrl(image))
+        .filter((image): image is string => Boolean(image)),
+    ),
+  ].slice(0, 3);
 }
 
 function itemUrl(item: FeedItem) {
@@ -76,15 +87,13 @@ function itemDescription(item: FeedItem) {
 
 function rssItem(item: FeedItem) {
   const link = itemUrl(item);
-  const image = absoluteImageUrl(item.image);
+  const images = itemImages(item);
   const pubDate = item.updated_at ? new Date(item.updated_at) : new Date();
   const date = Number.isNaN(pubDate.getTime()) ? new Date() : pubDate;
-  const media = image
-    ? [
-        `      <media:content url="${escapeXml(image)}" medium="image" />`,
-        `      <media:thumbnail url="${escapeXml(image)}" />`,
-      ]
-    : [];
+  const media = images.flatMap((image) => [
+    `      <media:content url="${escapeXml(image)}" medium="image" />`,
+    `      <media:thumbnail url="${escapeXml(image)}" />`,
+  ]);
 
   return [
     "    <item>",
@@ -126,7 +135,22 @@ export const Route = createFileRoute("/pinterest-feed.xml")({
                 overview,
                 rating::text,
                 review_count::text,
-                COALESCE(logo_image, gallery_images[1]) AS image,
+                (
+                  SELECT array_agg(image)
+                  FROM (
+                    SELECT DISTINCT image
+                    FROM unnest(
+                      ARRAY[
+                        logo_image,
+                        gallery_images[1],
+                        gallery_images[2],
+                        gallery_images[3]
+                      ]
+                    ) AS image
+                    WHERE image IS NOT NULL AND image <> ''
+                    LIMIT 3
+                  ) AS images
+                ) AS images,
                 NULL::text AS category,
                 COALESCE(updated_at, created_at)::text AS updated_at
               FROM venues
@@ -143,7 +167,23 @@ export const Route = createFileRoute("/pinterest-feed.xml")({
                 overview,
                 rating::text,
                 review_count::text,
-                COALESCE(banner_image, logo_image, gallery_images[1]) AS image,
+                (
+                  SELECT array_agg(image)
+                  FROM (
+                    SELECT DISTINCT image
+                    FROM unnest(
+                      ARRAY[
+                        banner_image,
+                        logo_image,
+                        gallery_images[1],
+                        gallery_images[2],
+                        gallery_images[3]
+                      ]
+                    ) AS image
+                    WHERE image IS NOT NULL AND image <> ''
+                    LIMIT 3
+                  ) AS images
+                ) AS images,
                 categories[1] AS category,
                 COALESCE(updated_at, created_at)::text AS updated_at
               FROM suppliers
