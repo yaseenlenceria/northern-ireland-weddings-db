@@ -7,10 +7,13 @@ export function ListingImage({
   src,
   alt,
   className = "",
+  priority = false,
 }: {
   src?: string | string[] | null;
   alt: string;
   className?: string;
+  /** Above-the-fold hero images load eagerly with high fetch priority (LCP). */
+  priority?: boolean;
 }) {
   const [failedIndex, setFailedIndex] = useState(0);
   const images = imageCandidates(src);
@@ -36,8 +39,9 @@ export function ListingImage({
     <img
       src={publicImageUrl(image)}
       alt={alt}
-      loading="lazy"
-      decoding="async"
+      loading={priority ? "eager" : "lazy"}
+      decoding={priority ? "sync" : "async"}
+      fetchPriority={priority ? "high" : undefined}
       onError={() => setFailedIndex((index) => index + 1)}
       className={className}
     />

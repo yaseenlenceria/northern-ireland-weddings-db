@@ -189,6 +189,7 @@ function VenueProfile() {
                 src={[venue.logo_image, ...gallery]}
                 alt={`${venue.name}, wedding venue in ${location}`}
                 className="aspect-16/10 w-full object-cover"
+                priority
               />
             </div>
 
@@ -276,7 +277,7 @@ function VenueProfile() {
                   <ListingImage
                     key={`${src}-${i}`}
                     src={src}
-                    alt={`${venue.name} photo ${i + 1}`}
+                    alt={`${venue.name}, wedding venue in ${location} — photo ${i + 1}`}
                     className="aspect-square w-full rounded-lg object-cover"
                   />
                 ))}

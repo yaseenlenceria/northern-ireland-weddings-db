@@ -30,13 +30,7 @@ import { ReviewList } from "@/components/site/Reviews";
 import { getSupplier } from "@/lib/directory.functions";
 import { firstImage, videoEmbed } from "@/lib/media";
 import { CATEGORY_BY_KEY, countrySlug, countySlug, listingLocationLabel } from "@/lib/taxonomy";
-import {
-  absoluteUrl,
-  averageRating,
-  canonical,
-  clamp,
-  pageMeta,
-} from "@/lib/seo";
+import { absoluteUrl, averageRating, canonical, clamp, pageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/supplier/$slug")({
   loader: async ({ params }) => {
@@ -274,6 +268,7 @@ function SupplierProfile() {
                 src={[supplier.banner_image, supplier.logo_image, ...gallery]}
                 alt={`${supplier.name}${category ? ` — ${category.label.toLowerCase()}` : ""} in ${location}`}
                 className="aspect-16/10 w-full object-cover"
+                priority
               />
             </div>
 
@@ -392,7 +387,7 @@ function SupplierProfile() {
                   <ListingImage
                     key={`${src}-${i}`}
                     src={src}
-                    alt={`${supplier.name} photo ${i + 1}`}
+                    alt={`${supplier.name}${category ? `, ${category.label.toLowerCase()}` : ""} in ${location} — photo ${i + 1}`}
                     className="aspect-square w-full rounded-lg object-cover"
                   />
                 ))}

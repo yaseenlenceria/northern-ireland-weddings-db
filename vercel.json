@@ -11,5 +11,16 @@
       "destination": "https://wedhq.co.uk/$1",
       "permanent": true
     }
+  ],
+  "headers": [
+    {
+      "source": "/((?!assets/|favicon|logo|robots.txt|site.webmanifest).*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, s-maxage=600, stale-while-revalidate=86400"
+        }
+      ]
+    }
   ]
 }
