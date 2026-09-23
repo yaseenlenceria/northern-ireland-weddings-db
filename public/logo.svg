@@ -1,6 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 80" role="img" aria-label="Vow Visibility">
-  <rect width="80" height="80" rx="18" fill="#2b2925"/>
-  <path d="M16 24 32.5 58h1L50 24" fill="none" stroke="#c9a35c" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M35 24 51.5 58h1L68 24" fill="none" stroke="#c9a35c" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.45"/>
-  <text x="98" y="52" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="600" fill="#2b2925">Vow <tspan fill="#c9a35c">Visibility</tspan></text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" role="img" aria-label="WedHQ logo">
+  <rect width="420" height="120" rx="24" fill="#fffaf0"/>
+  <circle cx="62" cy="60" r="38" fill="#5f7b61"/>
+  <text x="62" y="73" fill="#fffaf0" font-family="Georgia, serif" font-size="42" font-weight="700" text-anchor="middle">W</text>
+  <circle cx="90" cy="86" r="14" fill="#d7a64a"/>
+  <path d="m83 86 5 5 10-12" fill="none" stroke="#2f332d" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="122" y="58" fill="#2f332d" font-family="Outfit, Arial, sans-serif" font-size="34" font-weight="700">WedHQ</text>
+  <text x="122" y="86" fill="#5f7b61" font-family="Figtree, Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="2">WEDHQ.CO.UK</text>
 </svg>

@@ -5,20 +5,30 @@
  * so crawlers and social scrapers resolve one authoritative URL per page.
  */
 
-export const SITE_NAME = "Vow Visibility";
+export const SITE_NAME = "WedHQ";
 
 /** Public origin used for canonical, og:url and sitemap entries. */
-export const SITE_URL = (import.meta.env["VITE_SITE_URL"] ?? "https://vowvisibility.com").replace(
+export const SITE_URL = (import.meta.env["VITE_SITE_URL"] ?? "https://wedhq.co.uk").replace(
   /\/+$/,
   "",
 );
 
-/** Site-wide fallback for pages that do not have a dedicated social image. */
-export const DEFAULT_OG_IMAGE = "/og-default.png";
+/** Site-wide fallback for pages that do not have a listing image yet. */
+export const DEFAULT_OG_IMAGE = "/logo.png";
+
+export const SOCIAL_PROFILES = [
+  "https://www.instagram.com/wedhq.co.uk/",
+  "https://www.facebook.com/profile.php?id=61594043240176",
+  "https://www.youtube.com/@wedhq-g5r",
+  "https://www.pinterest.com/weddingshq/",
+] as const;
 
 /** Absolute URL for a site-relative path. */
 export const absoluteUrl = (path: string) =>
   `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`.replace(/\/$/, "") || SITE_URL;
+
+/** Current year, used in directory titles and guide pages. */
+export const SEO_YEAR = new Date().getFullYear();
 
 export type MetaInput = {
   title: string;
@@ -67,9 +77,101 @@ export function canonical(path: string) {
   return [{ rel: "canonical", href: absoluteUrl(path) }];
 }
 
+/** Truncates copy to a safe meta-description length. */
+export const clamp = (text: string, max = 155) =>
+  text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
+
+/** AggregateRating node, or undefined when there is no real rating to show. */
+export function aggregateRating(rating?: number | string | null, count?: number | string | null) {
+  const numericRating = typeof rating === "string" ? Number(rating) : rating;
+  const numericCount = typeof count === "string" ? Number(count) : count;
+  if (!numericRating || !numericCount || numericCount < 1) return undefined;
+  return {
+    "@type": "AggregateRating",
+    ratingValue: Number(numericRating.toFixed(1)),
+    reviewCount: numericCount,
+    bestRating: 5,
+    worstRating: 1,
+  };
+}
+
+export type ReviewRow = {
+  id: string;
+  author_name: string | null;
+  rating: number | string | null;
+  title: string | null;
+  body: string | null;
+  created_at: string;
+};
+
+/** Review nodes for rich results, built only from stored review rows. */
+export function reviewSchema(reviews: ReviewRow[]) {
+  return reviews
+    .filter((r) => r.rating)
+    .slice(0, 10)
+    .map((r) => ({
+      "@type": "Review",
+      ...(r.title ? { name: r.title } : {}),
+      reviewBody: r.body ?? undefined,
+      datePublished: r.created_at.slice(0, 10),
+      author: { "@type": "Person", name: r.author_name || "Verified couple" },
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: r.rating,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }));
+}
+
+export type SourcedReviewRow = {
+  id: string;
+  author_name: string | null;
+  rating: number | string | null;
+  title: string | null;
+  body: string;
+  review_date: string | null;
+  source_name: string | null;
+  source_url: string | null;
+};
+
+/** Review nodes for imported third-party reviews, attributed to their source. */
+export function sourcedReviewSchema(reviews: SourcedReviewRow[]) {
+  return reviews
+    .filter((r) => r.rating)
+    .slice(0, 10)
+    .map((r) => ({
+      "@type": "Review",
+      ...(r.title ? { name: r.title } : {}),
+      reviewBody: r.body,
+      ...(r.review_date ? { datePublished: r.review_date } : {}),
+      author: { "@type": "Person", name: r.author_name || "Verified couple" },
+      ...(r.source_name ? { publisher: { "@type": "Organization", name: r.source_name } } : {}),
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: r.rating,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }));
+}
+
+/** Average of stored review ratings. */
+export function averageRating(reviews: ReviewRow[]) {
+  const scored = reviews
+    .map((r) => (typeof r.rating === "string" ? Number(r.rating) : r.rating))
+    .filter((rating): rating is number => typeof rating === "number" && Number.isFinite(rating));
+  if (!scored.length) return null;
+  return scored.reduce((sum, rating) => sum + rating, 0) / scored.length;
+}
+
+/** A visible question-and-answer pair, reused by FAQ copy and schema. */
 export type FaqInput = { question: string; answer: string };
 
-/** FAQPage node — only use where the questions are visibly rendered on the page. */
+/** Re-exported so route files can import all schema helpers from one place. */
+export { breadcrumbSchema } from "@/components/site/Breadcrumbs";
+
+/** FAQPage node — only emit for pages that visibly list the same questions. */
 export function faqSchema(faqs: FaqInput[]) {
   return {
     "@context": "https://schema.org",
@@ -82,49 +184,31 @@ export function faqSchema(faqs: FaqInput[]) {
   };
 }
 
-export type ServiceSchemaInput = {
+/** Service node for the /seo service pages, attributed to WedHQ. */
+export function serviceSchema({
+  name,
+  description,
+  path,
+}: {
   name: string;
   description: string;
   path: string;
-};
-
-/** Service node for pages that visibly describe one of our services. */
-export function serviceSchema({ name, description, path }: ServiceSchemaInput) {
+}) {
   return {
+    "@context": "https://schema.org",
     "@type": "Service",
     name,
     description,
     url: absoluteUrl(path),
     serviceType: name,
-    areaServed: { "@type": "Country", name: "Ireland" },
-    provider: { "@id": absoluteUrl("/#organization") },
-  };
-}
-
-export function organizationSchema() {
-  return {
-    "@context": "https://schema.org",
-    "@type": "ProfessionalService",
-    "@id": `${absoluteUrl("/#organization")}`,
-    name: SITE_NAME,
-    url: SITE_URL,
-    logo: absoluteUrl("/logo.png"),
-    description:
-      "SEO and digital marketing for Irish wedding businesses. Vow Visibility helps wedding venues, photographers, planners and suppliers improve their Google visibility and turn search traffic into enquiries.",
-    areaServed: { "@type": "Country", name: "Ireland" },
-    founder: { "@type": "Person", name: "Yasin" },
-  };
-}
-
-export function breadcrumbSchema(items: Array<{ name: string; path: string }>) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: items.map((item, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      name: item.name,
-      item: absoluteUrl(item.path),
-    })),
+    areaServed: [
+      { "@type": "Country", name: "Ireland" },
+      { "@type": "Country", name: "United Kingdom" },
+    ],
+    provider: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
   };
 }

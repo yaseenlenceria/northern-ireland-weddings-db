@@ -1,8 +1,8 @@
 export const BRAND = {
-  name: "Vow Visibility",
+  name: "WedHQ",
   tagline: "Marketing & SEO for Irish Wedding Businesses",
   promise:
-    "Get found by couples searching on Google. Vow Visibility helps wedding venues, photographers, planners and suppliers turn search visibility into real enquiries.",
+    "Get found by couples searching on Google. WedHQ helps wedding venues, photographers, planners and suppliers turn search visibility into real enquiries.",
   promiseShort: "More visibility. More relevant enquiries. More bookings.",
 } as const;
 
@@ -170,9 +170,9 @@ export type Faq = { question: string; answer: string };
 
 export const HOME_FAQS: Faq[] = [
   {
-    question: "Who is Vow Visibility for?",
+    question: "Who is WedHQ for?",
     answer:
-      "Vow Visibility is for wedding businesses in Ireland — venues, photographers, videographers, planners, florists, bands, DJs, celebrants, bridal boutiques, cake makers, transport companies, décor hire and other suppliers — who want more couples to find them through Google.",
+      "WedHQ is for wedding businesses in Ireland — venues, photographers, videographers, planners, florists, bands, DJs, celebrants, bridal boutiques, cake makers, transport companies, décor hire and other suppliers — who want more couples to find them through Google.",
   },
   {
     question: "Do you only work with Irish wedding businesses?",

@@ -6,18 +6,18 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { ARTICLES } from "@/lib/articles";
 import { absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 
-const PATH = "/resources";
+const PATH = "/seo/resources";
 
-export const Route = createFileRoute("/resources/")({
+export const Route = createFileRoute("/seo/resources/")({
   head: () => ({
+    links: canonical(PATH),
     meta: [
       ...pageMeta({
-        title: "Wedding Marketing & SEO Resources | Free Guides | Vow Visibility",
+        title: "Wedding Marketing & SEO Resources | Free Guides | WedHQ",
         description:
           "Free SEO and marketing guides for Irish wedding businesses: local SEO, Google Business Profile, real wedding content, keyword research and more.",
         path: PATH,
       }),
-      ...canonical(PATH),
     ],
   }),
   component: ResourcesIndex,
@@ -33,12 +33,12 @@ function ResourcesIndex() {
         title="Practical guides for wedding businesses"
         description="Free, plain-English resources on wedding SEO, local visibility, content and conversion — written for Irish wedding businesses, not SEO professionals."
       >
-        <Breadcrumbs items={[{ name: "Resources" }]} />
+        <Breadcrumbs items={[{ label: "Resources" }]} />
       </PageHeader>
 
       <Section>
         <Link
-          to="/resources/$slug"
+          to="/seo/resources/$slug"
           params={{ slug: featured.slug }}
           className="card-lift block rounded-xl border border-border bg-card p-7 sm:p-9"
         >
@@ -57,7 +57,7 @@ function ResourcesIndex() {
           {rest.map((article) => (
             <Link
               key={article.slug}
-              to="/resources/$slug"
+              to="/seo/resources/$slug"
               params={{ slug: article.slug }}
               className="card-lift flex flex-col rounded-xl border border-border bg-card p-6"
             >
@@ -81,13 +81,13 @@ function ResourcesIndex() {
         data={{
           "@context": "https://schema.org",
           "@type": "Blog",
-          name: "Vow Visibility Resource Hub",
+          name: "WedHQ Resource Hub",
           url: absoluteUrl(PATH),
           description: "SEO and marketing guides for Irish wedding businesses.",
           blogPost: ARTICLES.map((article) => ({
             "@type": "BlogPosting",
             headline: article.title,
-            url: absoluteUrl(`/resources/${article.slug}`),
+            url: absoluteUrl(`/seo/resources/${article.slug}`),
             datePublished: article.datePublished,
           })),
         }}
@@ -96,9 +96,9 @@ function ResourcesIndex() {
         title="Reading is step one. Knowing where you stand is step two."
         description="Get a free SEO audit and find out exactly what's stopping your wedding business from ranking."
         primaryLabel="Get a Free SEO Audit"
-        primaryTo="/free-seo-audit"
+        primaryTo="/seo/free-audit"
         secondaryLabel="Get the Wedding SEO Checklist"
-        secondaryTo="/wedding-seo-checklist"
+        secondaryTo="/seo/checklist"
       />
     </SiteLayout>
   );

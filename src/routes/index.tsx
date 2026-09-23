@@ -1,344 +1,458 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, CheckCircle2, Search, TrendingUp, MapPin, FileText } from "lucide-react";
-import heroImage from "@/assets/hero-wedding-ireland.jpg";
+import {
+  ArrowRight,
+  CalendarCheck,
+  Calculator,
+  ClipboardList,
+  Heart,
+  MapPin,
+  MessagesSquare,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CtaBand, Section, SiteLayout } from "@/components/site/Layout";
-import { FaqSection } from "@/components/site/FaqSection";
-import { LeadForm } from "@/components/site/LeadForm";
+import { SiteLayout, Section } from "@/components/site/Layout";
+import { SearchBar } from "@/components/site/SearchBar";
+import { SupplierCard, VenueCard } from "@/components/site/Cards";
 import { JsonLd } from "@/components/site/JsonLd";
-import { ARTICLES } from "@/lib/articles";
-import { HOME_FAQS, SERVICES, STEPS, WHO_WE_HELP } from "@/lib/site";
-import { absoluteUrl, canonical, pageMeta } from "@/lib/seo";
+import { getHomeData } from "@/lib/directory.functions";
+import {
+  CATEGORIES,
+  FEATURED_LOCATIONS,
+  VENUE_SLUG,
+  countySlug,
+  listingLocationLabel,
+} from "@/lib/taxonomy";
+import { GUIDES } from "@/lib/guides";
+import { SITE_NAME, SOCIAL_PROFILES, absoluteUrl, canonical, pageMeta } from "@/lib/seo";
+import heroImage from "@/assets/hero-wedding-ireland.jpg";
 
-const PATH = "/";
+const TITLE = "Wedding Suppliers & Venues in the UK & Ireland | WedHQ";
+const DESCRIPTION =
+  "Find wedding venues and suppliers across Ireland and the UK. Compare real listings, prices, reviews, photos and direct enquiries.";
 
 export const Route = createFileRoute("/")({
+  loader: () => getHomeData(),
   head: () => ({
-    meta: [
-      ...pageMeta({
-        title: "Vow Visibility | Marketing & SEO for Irish Wedding Businesses",
-        description:
-          "Get found by couples searching on Google. We help wedding venues, photographers, planners and suppliers improve their search visibility and turn website traffic into real enquiries.",
-        path: PATH,
-      }),
-      ...canonical(PATH),
-    ],
+    meta: pageMeta({ title: TITLE, description: DESCRIPTION, path: "/" }),
+    links: canonical("/"),
   }),
-  component: Home,
+  component: HomePage,
 });
 
-function ServiceIcon({ index }: { index: number }) {
-  const icons = [Search, MapPin, TrendingUp, FileText, ArrowRight, CheckCircle2];
-  const Icon = icons[index % icons.length];
-  return (
-    <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-      <Icon className="h-5 w-5 text-gold" aria-hidden="true" />
-    </span>
-  );
-}
+const POPULAR = [
+  VENUE_SLUG,
+  "wedding-planners",
+  "wedding-beauty-skincare",
+  "wedding-singers",
+  "wedding-photographers",
+  "wedding-videographers",
+  "wedding-florists",
+  "wedding-makeup-artists",
+  "wedding-djs",
+  "wedding-celebrants",
+  "wedding-cakes",
+];
 
-function Home() {
-  const featuredArticles = ARTICLES.slice(0, 3);
+const TOOLS = [
+  {
+    to: "/wedding-checklist" as const,
+    icon: ClipboardList,
+    title: "Wedding Checklist",
+    copy: "A month-by-month task list you can tick off as you go.",
+  },
+  {
+    to: "/budget-calculator" as const,
+    icon: Calculator,
+    title: "Budget Calculator",
+    copy: "Set a total, split it by category and track what you've actually paid.",
+  },
+  {
+    to: "/guest-list" as const,
+    icon: Users,
+    title: "Guest List Planner",
+    copy: "Track invites, sides, party sizes and RSVPs in one table.",
+  },
+  {
+    to: "/dashboard" as const,
+    icon: Heart,
+    title: "Supplier Shortlist",
+    copy: "Save the venues and suppliers you love and compare them later.",
+  },
+  {
+    to: "/wedding-timeline" as const,
+    icon: CalendarCheck,
+    title: "Wedding Timeline",
+    copy: "Build a running order for the day, from morning prep to last dance.",
+  },
+];
+
+const REASONS = [
+  {
+    icon: Search,
+    title: "Search that makes sense",
+    copy: "Pick what you need and where, and get a page of real listings — not adverts.",
+  },
+  {
+    icon: MapPin,
+    title: "Location-first listings",
+    copy: "Every profile shows where the business is based and the areas it serves.",
+  },
+  {
+    icon: MessagesSquare,
+    title: "Direct enquiries",
+    copy: "Message a supplier straight from their profile. No middlemen, no booking fees.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Reviews you can read",
+    copy: "Couple reviews sit on the profile beside pricing and capacity, not behind a signup.",
+  },
+  {
+    icon: Sparkles,
+    title: "Planning tools included",
+    copy: "Checklist, budget, guest list and timeline work free in your browser.",
+  },
+];
+
+function HomePage() {
+  const { suppliers, venues, counts, categoryCounts } = Route.useLoaderData();
+  const countByCategory = new Map(categoryCounts.map((row) => [row.category, row.count]));
+  // Keep the homepage showcase on the categories couples shop first, so the
+  // featured strip reads as a curated edit rather than a random sample.
+  const showcaseCategories = new Set([
+    "wedding-photographers",
+    "wedding-videographers",
+    "wedding-bands",
+    "church-singers-music",
+    "wedding-florists",
+    "wedding-planners",
+    "wedding-djs",
+    "wedding-celebrants",
+  ]);
+  // Hen/stag entertainment is in the directory but is not the right first
+  // impression for a wedding homepage, so it is kept out of the showcase.
+  const excludedCategories = new Set(["hens-stags"]);
+  const preferred = suppliers.filter(
+    (s) =>
+      (s.categories ?? []).some((c) => showcaseCategories.has(c)) &&
+      !(s.categories ?? []).some((c) => excludedCategories.has(c)),
+  );
+
+  const wedding = suppliers.filter(
+    (s) => !(s.categories ?? []).some((c) => excludedCategories.has(c)),
+  );
+  const featuredSuppliers = (preferred.length >= 4 ? preferred : wedding).slice(0, 4);
 
   return (
     <SiteLayout>
-      {/* 1. Hero */}
-      <section className="surface-ivory border-b border-border">
-        <div className="mx-auto grid w-full max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebSite",
+              "@id": absoluteUrl("/") + "#website",
+              url: absoluteUrl("/"),
+              name: SITE_NAME,
+              description: DESCRIPTION,
+              inLanguage: "en-IE",
+              publisher: { "@id": absoluteUrl("/") + "#organization" },
+              potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate: `${absoluteUrl("/find-suppliers")}?q={search_term_string}`,
+                },
+                "query-input": "required name=search_term_string",
+              },
+            },
+            {
+              "@type": "Organization",
+              "@id": absoluteUrl("/") + "#organization",
+              url: absoluteUrl("/"),
+              name: SITE_NAME,
+              logo: {
+                "@type": "ImageObject",
+                url: absoluteUrl("/logo.png"),
+                width: 679,
+                height: 214,
+              },
+              description:
+                "Directory of wedding venues and suppliers across Ireland and the United Kingdom.",
+              sameAs: SOCIAL_PROFILES,
+              areaServed: [
+                { "@type": "Country", name: "Ireland" },
+                { "@type": "Country", name: "United Kingdom" },
+              ],
+            },
+          ],
+        }}
+      />
+
+      {/* Hero */}
+      <section className="relative overflow-hidden border-b border-border bg-ivory">
+        <div className="relative mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-20">
           <div>
-            <p className="eyebrow text-gold">Marketing &amp; SEO for Irish Wedding Businesses</p>
-            <h1 className="mt-3 text-4xl leading-[1.1] sm:text-5xl lg:text-[3.4rem]">
-              Get found by couples searching on Google
+            <p className="eyebrow text-primary">WedHQ wedding directory</p>
+            <h1 className="mt-3 text-4xl leading-[1.05] sm:text-5xl lg:text-6xl">
+              Find wedding venues and suppliers faster
             </h1>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">
-              We help wedding venues, photographers, planners and suppliers improve their search
-              visibility and turn website traffic into real enquiries.
+            <p className="mt-5 max-w-xl text-lg text-muted-foreground">
+              Search live UK and Ireland listings now, with venues, suppliers, reviews, images and
+              direct enquiry tools in one place.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Button asChild size="lg" variant="gold">
-                <Link to="/free-seo-audit">Get a Free SEO Audit</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link to="/wedding-seo-checklist">Download the Wedding SEO Checklist</Link>
-              </Button>
+
+            <div className="mt-8">
+              <SearchBar />
             </div>
-            <p className="mt-6 text-sm text-muted-foreground">
-              Free, honest review of your website's Google visibility — no obligation.
-            </p>
           </div>
+
           <div className="relative">
             <img
               src={heroImage}
-              alt="A newly engaged couple walking through the walled gardens of an Irish country house wedding venue"
-              className="aspect-[4/3] w-full rounded-2xl border border-border object-cover shadow-lift"
+              alt="Bride and groom walking through the gardens of a country house wedding venue"
               width={1600}
-              height={1200}
-              fetchPriority="high"
+              height={1104}
+              className="aspect-4/5 w-full rounded-2xl object-cover shadow-lift sm:aspect-16/12 lg:aspect-4/5"
             />
-            <div className="absolute -bottom-5 -left-5 hidden rounded-xl border border-border bg-card px-5 py-4 shadow-soft sm:block">
-              <p className="text-sm font-medium">Instagram fades. Google compounds.</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Build a channel that works while you work.
+            <div className="absolute -bottom-5 left-5 right-5 rounded-xl border border-border bg-card/95 p-4 shadow-lift backdrop-blur sm:left-8 sm:right-auto sm:max-w-xs">
+              <p className="eyebrow text-primary">Search first</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Start with a location, supplier type or venue search, then compare profiles side by
+                side.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 2. Who we help */}
       <Section
-        eyebrow="Who We Help"
-        title="Built for every kind of Irish wedding business"
-        description="From venues to videographers, we understand how couples search for each service — and what it takes to rank for it."
+        title="Start planning"
+        description="Choose the shortest route for what you need today."
       >
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {WHO_WE_HELP.map((category) => (
-            <li
-              key={category}
-              className="card-lift rounded-lg border border-border bg-card px-4 py-3.5 text-sm font-medium"
-            >
-              {category}
-            </li>
-          ))}
-        </ul>
-        <p className="mt-6 text-sm text-muted-foreground">
-          Specialist pages:{" "}
-          {[
-            ["wedding-venue-seo", "venues"],
-            ["wedding-photographer-seo", "photographers"],
-            ["wedding-planner-seo", "planners"],
-            ["bridal-shop-seo", "bridal shops"],
-          ].map(([slug, label], index) => (
-            <span key={slug}>
-              {index > 0 ? ", " : ""}
-              <Link
-                to="/$industrySlug"
-                params={{ industrySlug: slug }}
-                className="text-gold underline-offset-4 hover:underline"
-              >
-                {label}
-              </Link>
-            </span>
-          ))}{" "}
-          — and{" "}
-          <Link to="/services" className="text-gold underline-offset-4 hover:underline">
-            more here
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Link
+            to="/find-suppliers"
+            className="group rounded-xl border border-border bg-card p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lift"
+          >
+            <Search className="size-5 text-primary" />
+            <h2 className="mt-4 font-serif text-xl group-hover:text-primary">Find suppliers</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Search {counts.suppliers.toLocaleString()} suppliers by category, location and name.
+            </p>
           </Link>
-          .
-        </p>
+          <Link
+            to="/venues"
+            className="group rounded-xl border border-border bg-card p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lift"
+          >
+            <MapPin className="size-5 text-primary" />
+            <h2 className="mt-4 font-serif text-xl group-hover:text-primary">Browse venues</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Compare {counts.venues.toLocaleString()} hotels, houses, barns and private venues.
+            </p>
+          </Link>
+          <Link
+            to="/wedding-fairs"
+            className="group rounded-xl border border-border bg-card p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lift"
+          >
+            <CalendarCheck className="size-5 text-primary" />
+            <h2 className="mt-4 font-serif text-xl group-hover:text-primary">Wedding fairs</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              See {counts.fairs.toLocaleString()} fairs, showcases and open days.
+            </p>
+          </Link>
+          <Link
+            to="/planning-tools"
+            className="group rounded-xl border border-border bg-card p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lift"
+          >
+            <Calculator className="size-5 text-primary" />
+            <h2 className="mt-4 font-serif text-xl group-hover:text-primary">Planning tools</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Use the checklist, budget, guest list and timeline in your browser.
+            </p>
+          </Link>
+        </div>
       </Section>
 
-      {/* 3. Core services */}
+      {/* Popular categories */}
       <Section
         tone="ivory"
-        eyebrow="Core Services"
-        title="SEO services for the wedding industry"
-        description="Everything is focused on one outcome: more of the right couples finding you on Google and getting in touch."
-        action={
-          <Button asChild variant="outline">
-            <Link to="/services">
-              Explore services <ArrowRight />
-            </Link>
-          </Button>
-        }
+        title="Popular searches"
+        description="Start with the parts of the day most couples book first."
       >
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {SERVICES.map((service, index) => (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          {POPULAR.map((slug) => {
+            const category = CATEGORIES.find((c) => c.slug === slug);
+            const label = category ? category.plural : "Wedding Venues";
+            const blurb = category
+              ? category.blurb
+              : "Ceremony and reception venues across Ireland and the UK.";
+            const count = category ? (countByCategory.get(category.key) ?? 0) : counts.venues;
+            return (
+              <Link
+                key={slug}
+                to="/$directorySlug"
+                params={{ directorySlug: `${slug}-uk-and-ireland` }}
+                className="group rounded-xl border border-border bg-card p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lift"
+              >
+                <h3 className="font-serif text-lg leading-snug group-hover:text-primary">
+                  {label}
+                </h3>
+                <p className="line-clamp-2 mt-2 text-xs text-muted-foreground">{blurb}</p>
+                <span className="mt-3 inline-flex items-center gap-1 text-xs text-primary">
+                  {count.toLocaleString()} listed <ArrowRight className="size-3" />
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </Section>
+
+      {/* Counties */}
+      <Section
+        title="Browse by location"
+        description="Jump straight to the venues and suppliers working in your area."
+      >
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {FEATURED_LOCATIONS.map((county) => (
             <Link
-              key={service.slug}
-              to="/services/$slug"
-              params={{ slug: service.slug }}
-              className="card-lift flex flex-col rounded-xl border border-border bg-card p-6"
+              key={county}
+              to="/county/$county"
+              params={{ county: countySlug(county) }}
+              className="rounded-lg border border-border bg-card px-4 py-4 text-center text-sm shadow-soft transition-colors hover:border-primary/40 hover:text-primary"
             >
-              <ServiceIcon index={index} />
-              <h3 className="mt-4 text-lg">{service.name}</h3>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                {service.summary}
-              </p>
-              <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-gold">
-                Learn more <ArrowRight className="h-4 w-4" />
-              </span>
+              {listingLocationLabel(county)}
             </Link>
           ))}
         </div>
       </Section>
 
-      {/* 4. Why wedding SEO matters */}
+      {/* Featured venues */}
       <Section
-        eyebrow="Why Wedding SEO"
-        title="Instagram is where couples dream. Google is where they decide."
-        description="Couples collect ideas on Instagram for months. But when they're ready to compare suppliers and check availability, they search Google — “wedding venues in Kerry”, “wedding photographer Dublin prices”, “wedding florist Galway”. If your business isn't in those results, you're invisible at the exact moment couples are choosing."
+        tone="ivory"
+        title="Venues couples are viewing"
+        description="Hotels, country houses, barns and city spaces with capacity and pricing shown."
+        action={
+          <Button asChild variant="outline">
+            <Link to="/venues">
+              See all venues <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        }
       >
-        <div className="grid gap-5 md:grid-cols-3">
-          {[
-            {
-              title: "Your website should be a channel, not a brochure",
-              body: "Most wedding websites are online brochures: pretty, static, quiet. SEO turns yours into an acquisition channel that attracts couples and brings in enquiries every week — whether or not you posted today.",
-            },
-            {
-              title: "Rankings compound; posting doesn't",
-              body: "A real wedding published today can bring enquiries for years. County pages, venue pages and guides keep working through your busiest season and your quietest month alike.",
-            },
-            {
-              title: "Specialist beats generic",
-              body: "Generic SEO agencies don't understand wedding search: the seasonality, the county targeting, the venues, the trust couples need before they enquire. We work only with this industry, so nothing gets learned on your budget.",
-            },
-          ].map((item) => (
-            <div key={item.title} className="rounded-xl border border-border bg-card p-6">
-              <h3 className="text-lg leading-snug">{item.title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {venues.map((venue) => (
+            <VenueCard key={venue.id} venue={venue} />
+          ))}
+        </div>
+      </Section>
+
+      {/* Featured suppliers */}
+      <Section
+        title="Supplier examples"
+        description="A compact sample from core booking categories. Use search for the full directory."
+        action={
+          <Button asChild variant="outline">
+            <Link to="/find-suppliers">
+              See all suppliers <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        }
+      >
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {featuredSuppliers.map((supplier) => (
+            <SupplierCard key={supplier.id} supplier={supplier} />
+          ))}
+        </div>
+      </Section>
+
+      {/* Planning tools */}
+      <Section
+        title="Wedding planning tools"
+        description="Free tools that work straight away and save in this browser."
+      >
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {TOOLS.map((tool) => (
+            <Link
+              key={tool.title}
+              to={tool.to}
+              className="group rounded-xl border border-border bg-card p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-lift"
+            >
+              <span className="flex size-10 items-center justify-center rounded-full bg-primary-soft text-accent-foreground">
+                <tool.icon className="size-5" />
+              </span>
+              <h3 className="mt-4 font-serif text-lg group-hover:text-primary">{tool.title}</h3>
+              <p className="mt-2 text-xs text-muted-foreground">{tool.copy}</p>
+            </Link>
+          ))}
+        </div>
+      </Section>
+
+      {/* Why */}
+      <Section
+        tone="ivory"
+        title="Why couples use WedHQ"
+        description="A directory built to be read, not clicked through."
+      >
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+          {REASONS.map((reason) => (
+            <div key={reason.title} className="rounded-xl border border-border bg-card p-5">
+              <reason.icon className="size-5 text-primary" />
+              <h3 className="mt-3 font-serif text-lg">{reason.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{reason.copy}</p>
             </div>
           ))}
         </div>
       </Section>
 
-      {/* 5. Process */}
-      <Section tone="ivory" eyebrow="The Process" title="A clear path from invisible to booked">
-        <ol className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((step) => (
-            <li key={step.number} className="rounded-xl border border-border bg-card p-6">
-              <p className="font-display text-3xl text-gold">{step.number}</p>
-              <h3 className="mt-3 text-lg">{step.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{step.body}</p>
-            </li>
-          ))}
-        </ol>
-      </Section>
-
-      {/* 6. Free SEO audit */}
-      <Section
-        eyebrow="Free SEO Audit"
-        title="See what's stopping your website from ranking"
-        description="We'll review your website, its Google visibility, local signals and conversion opportunities — then email you a plain-English summary of what we'd fix first."
-        id="audit"
-      >
-        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-          <div>
-            <ul className="space-y-4">
-              {[
-                "Where you rank today for the searches that matter in your counties",
-                "Technical issues that could be holding every page back",
-                "Local SEO and Google Business Profile opportunities",
-                "Service pages and content your competitors are winning with",
-                "Quick conversion wins to get more from your existing traffic",
-              ].map((point) => (
-                <li key={point} className="flex gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-gold" aria-hidden="true" />
-                  <span className="leading-relaxed text-muted-foreground">{point}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-6 text-sm text-muted-foreground">
-              Prefer to talk first? Use the{" "}
-              <Link
-                to="/contact"
-                className="font-medium text-gold underline-offset-4 hover:underline"
-              >
-                contact page
-              </Link>{" "}
-              and ask us anything.
+      {/* Supplier CTA */}
+      <section>
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
+          <div className="overflow-hidden rounded-2xl border border-primary/25 bg-primary-soft px-6 py-14 text-center sm:px-12">
+            <h2 className="text-3xl sm:text-4xl">Are you a wedding supplier?</h2>
+            <p className="mx-auto mt-3 max-w-xl text-accent-foreground">
+              List your business and get discovered by couples across Ireland and the UK.
             </p>
+            <Button asChild size="lg" className="mt-7">
+              <Link to="/list-your-business">List Your Business</Link>
+            </Button>
           </div>
-          <LeadForm variant="audit" />
         </div>
-      </Section>
+      </section>
 
-      {/* 7. Lead magnet */}
-      <CtaBand
-        title="The 21-Point Wedding Website SEO Checklist — Ireland Edition"
-        description="Find out whether couples can actually find your wedding business on Google. Twenty-one practical checks covering indexing, local SEO, page titles, speed, content and conversion."
-        primaryLabel="Get the Free Checklist"
-        primaryTo="/wedding-seo-checklist"
-        secondaryLabel="Get a Free SEO Audit"
-        secondaryTo="/free-seo-audit"
-      />
-
-      {/* 8. Resource hub preview */}
+      {/* Guides */}
       <Section
-        eyebrow="Resource Hub"
-        title="Guides for wedding businesses that want to be found"
+        title="Latest wedding guides"
+        description="Practical reading on budgets, timings and booking order for UK and Ireland weddings."
         action={
           <Button asChild variant="outline">
-            <Link to="/resources">
-              All resources <ArrowRight />
+            <Link to="/wedding-guides">
+              All guides <ArrowRight className="size-4" />
             </Link>
           </Button>
         }
       >
-        <div className="grid gap-5 md:grid-cols-3">
-          {featuredArticles.map((article) => (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {GUIDES.slice(0, 3).map((guide) => (
             <Link
-              key={article.slug}
-              to="/resources/$slug"
-              params={{ slug: article.slug }}
-              className="card-lift flex flex-col rounded-xl border border-border bg-card p-6"
+              key={guide.slug}
+              to="/wedding-guides/$slug"
+              params={{ slug: guide.slug }}
+              className="group rounded-xl border border-border bg-card p-6 shadow-soft transition-shadow hover:shadow-lift"
             >
-              <p className="eyebrow text-gold">{article.category}</p>
-              <h3 className="mt-3 text-lg leading-snug">{article.title}</h3>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                {article.excerpt}
-              </p>
-              <span className="mt-4 text-xs text-muted-foreground">
-                {article.readMinutes} min read
+              <p className="eyebrow text-primary">{guide.topic}</p>
+              <h3 className="mt-2 font-serif text-xl group-hover:text-primary">{guide.title}</h3>
+              <p className="line-clamp-3 mt-2 text-sm text-muted-foreground">{guide.excerpt}</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-xs text-primary">
+                Read guide <ArrowRight className="size-3" />
               </span>
             </Link>
           ))}
         </div>
       </Section>
-
-      {/* 9. Trust */}
-      <Section
-        tone="ivory"
-        eyebrow="Proof"
-        title="Case studies coming soon"
-        description="Vow Visibility is a young specialist agency, so instead of inventing results, we offer the next best thing."
-      >
-        <div className="grid gap-5 md:grid-cols-2">
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h3 className="text-lg">Ask to see a sample SEO audit</h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Want to judge the quality of the work before committing? Request the free audit and
-              see exactly the kind of findings and recommendations you'd get.
-            </p>
-            <Button asChild variant="gold" className="mt-4">
-              <Link to="/free-seo-audit">Request a Website Review</Link>
-            </Button>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h3 className="text-lg">Honest expectations, always</h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              We don't promise guaranteed rankings or overnight results — no one honestly can. What
-              you get is a proven process, transparent reporting and recommendations we'd make for
-              our own business.
-            </p>
-            <Button asChild variant="outline" className="mt-4">
-              <Link to="/about">About Vow Visibility</Link>
-            </Button>
-          </div>
-        </div>
-      </Section>
-
-      {/* 10. FAQ */}
-      <Section eyebrow="FAQ" title="Questions wedding business owners ask">
-        <FaqSection faqs={[...HOME_FAQS]} withSchema />
-      </Section>
-
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "WebSite",
-          name: "Vow Visibility",
-          url: absoluteUrl(PATH),
-        }}
-      />
-      <CtaBand
-        title="Ready to see where you stand on Google?"
-        description="Get a free, honest review of your website's visibility — and a clear list of what to fix first."
-        primaryLabel="Get a Free SEO Audit"
-        primaryTo="/free-seo-audit"
-        secondaryLabel="Get the Wedding SEO Checklist"
-        secondaryTo="/wedding-seo-checklist"
-      />
     </SiteLayout>
   );
 }

@@ -2,11 +2,18 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { CtaBand, PageHeader, Section, SiteLayout } from "@/components/site/Layout";
-import { FaqSection } from "@/components/site/FaqSection";
+import { FaqSection } from "@/components/seo/FaqSection";
 import { JsonLd } from "@/components/site/JsonLd";
 import { SERVICES_DATA } from "@/lib/services";
 import { SERVICES } from "@/lib/site";
-import { absoluteUrl, breadcrumbSchema, canonical, pageMeta, serviceSchema } from "@/lib/seo";
+import {
+  SITE_URL,
+  absoluteUrl,
+  breadcrumbSchema,
+  canonical,
+  pageMeta,
+  serviceSchema,
+} from "@/lib/seo";
 
 function getService(slug: string) {
   const service = SERVICES_DATA[slug];
@@ -14,20 +21,20 @@ function getService(slug: string) {
   return service;
 }
 
-export const Route = createFileRoute("/services/$slug")({
+export const Route = createFileRoute("/seo/services/$slug")({
   beforeLoad: ({ params }) => {
     if (!SERVICES_DATA[params.slug]) throw notFound();
   },
   head: ({ params }) => {
     const service = getService(params.slug);
     return {
+      links: canonical(`/seo/services/${service.slug}`),
       meta: [
         ...pageMeta({
           title: service.metaTitle,
           description: service.metaDescription,
-          path: `/services/${service.slug}`,
+          path: `/seo/services/${service.slug}`,
         }),
-        ...canonical(`/services/${service.slug}`),
       ],
     };
   },
@@ -37,13 +44,13 @@ export const Route = createFileRoute("/services/$slug")({
 function ServicePage() {
   const { slug } = Route.useParams();
   const service = getService(slug);
-  const path = `/services/${service.slug}`;
+  const path = `/seo/services/${service.slug}`;
   const others = SERVICES.filter((item) => item.slug !== service.slug).slice(0, 3);
 
   return (
     <SiteLayout>
       <PageHeader eyebrow="Service" title={service.h1} description={service.intro}>
-        <Breadcrumbs items={[{ name: "Services", path: "/services" }, { name: service.name }]} />
+        <Breadcrumbs items={[{ label: "SEO", to: "/seo" }, { label: service.name }]} />
       </PageHeader>
 
       <Section>
@@ -100,7 +107,7 @@ function ServicePage() {
               </ul>
               <div className="mt-6">
                 <Link
-                  to="/free-seo-audit"
+                  to="/seo/free-audit"
                   className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-gold px-4 py-2.5 text-sm font-medium text-gold-foreground shadow-soft transition-colors hover:bg-gold/90"
                 >
                   See What Is Stopping Your Website From Ranking
@@ -114,7 +121,7 @@ function ServicePage() {
                 {others.map((item) => (
                   <li key={item.slug}>
                     <Link
-                      to="/services/$slug"
+                      to="/seo/services/$slug"
                       params={{ slug: item.slug }}
                       className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                     >
@@ -136,9 +143,9 @@ function ServicePage() {
         data={{
           "@context": "https://schema.org",
           "@graph": [
-            breadcrumbSchema([
+            breadcrumbSchema(SITE_URL, [
               { name: "Home", path: "/" },
-              { name: "Services", path: "/services" },
+              { name: "Services", path: "/seo/services" },
               { name: service.name, path },
             ]),
             serviceSchema({
@@ -162,9 +169,9 @@ function ServicePage() {
         title="Find out what your website could be doing for you"
         description="Request the free SEO audit and get a clear, honest picture of your current visibility and opportunities."
         primaryLabel="Get a Free SEO Audit"
-        primaryTo="/free-seo-audit"
+        primaryTo="/seo/free-audit"
         secondaryLabel="Get the Wedding SEO Checklist"
-        secondaryTo="/wedding-seo-checklist"
+        secondaryTo="/seo/checklist"
       />
     </SiteLayout>
   );

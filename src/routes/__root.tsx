@@ -12,29 +12,21 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
-import { JsonLd } from "@/components/site/JsonLd";
-import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, absoluteUrl, organizationSchema } from "@/lib/seo";
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/seo";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-[60vh] items-center justify-center px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <p className="eyebrow text-gold">404</p>
-        <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Page not found</h1>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          The page you're looking for doesn't exist or has moved. If you were looking for SEO help
-          for your wedding business, start here:
+        <h1 className="text-7xl font-bold text-foreground">404</h1>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          The page you're looking for doesn't exist or has been moved.
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Link
-            to="/free-seo-audit"
-            className="inline-flex items-center justify-center rounded-md bg-gold px-4 py-2 text-sm font-medium text-gold-foreground transition-colors hover:bg-gold/90"
-          >
-            Get a Free SEO Audit
-          </Link>
+        <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Go home
           </Link>
@@ -52,9 +44,11 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   }, [error]);
 
   return (
-    <div className="flex min-h-[60vh] items-center justify-center px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight">This page didn't load</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">
+          This page didn't load
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
@@ -85,35 +79,44 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: `${SITE_NAME} | Marketing & SEO for Irish Wedding Businesses` },
+      { title: `${SITE_NAME} - Wedding Suppliers & Venues in the UK & Ireland` },
       {
         name: "description",
         content:
-          "Vow Visibility helps Irish wedding venues, photographers, planners and suppliers improve their Google visibility and turn search traffic into real enquiries.",
+          "Wedding directory for Ireland and the UK: venues, photographers, bands, florists and more by location.",
       },
       { property: "og:site_name", content: SITE_NAME },
       { property: "og:url", content: SITE_URL },
       { property: "og:type", content: "website" },
       { property: "og:image", content: absoluteUrl(DEFAULT_OG_IMAGE) },
-      { property: "og:locale", content: "en_IE" },
+      { property: "og:locale", content: "en_GB" },
+      {
+        name: "google-site-verification",
+        content: "xiJoR2UKPN0J8mz-vSJeI5JxEPMfnZMh-XO_XXvpP1s",
+      },
+      {
+        name: "p:domain_verify",
+        content: "a6f09f8b5348801513d9c74efab0aabb",
+      },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: absoluteUrl(DEFAULT_OG_IMAGE) },
-      { name: "theme-color", content: "#2b2925" },
+      { name: "theme-color", content: "#6b7f68" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Figtree:wght@400;500;600&display=swap",
       },
       {
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "icon", href: "/favicon.png", type: "image/png", sizes: "512x512" },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
-      { rel: "icon", href: "/favicon.png", type: "image/png", sizes: "48x48" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "alternate icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "apple-touch-icon", href: "/favicon.png" },
       { rel: "manifest", href: "/site.webmanifest" },
     ],
   }),
@@ -125,10 +128,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en-IE">
+    <html lang="en-GB">
       <head>
         <HeadContent />
-        <JsonLd data={organizationSchema()} />
       </head>
       <body>
         {children}

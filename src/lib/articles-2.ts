@@ -4,7 +4,7 @@ export const ARTICLES_PART_2: Article[] = [
   {
     slug: "instagram-vs-google-for-wedding-businesses",
     title: "Instagram vs Google for Wedding Businesses: Which Actually Books Weddings?",
-    metaTitle: "Instagram vs Google for Wedding Businesses | Vow Visibility",
+    metaTitle: "Instagram vs Google for Wedding Businesses | WedHQ",
     metaDescription:
       "Instagram builds desire; Google captures intent. How Irish wedding businesses should split their marketing between the two — and why Google compounds.",
     excerpt:
@@ -53,7 +53,7 @@ export const ARTICLES_PART_2: Article[] = [
   {
     slug: "how-to-use-real-weddings-for-seo",
     title: "How to Use Real Weddings for SEO (The Format That Actually Ranks)",
-    metaTitle: "How to Use Real Weddings for SEO | Vow Visibility",
+    metaTitle: "How to Use Real Weddings for SEO | WedHQ",
     metaDescription:
       "Real weddings are the best SEO content a wedding business can publish — if formatted correctly. Titles, structure, venue names and internal links that rank.",
     excerpt:
@@ -99,7 +99,7 @@ export const ARTICLES_PART_2: Article[] = [
   {
     slug: "best-website-pages-for-wedding-suppliers",
     title: "The 7 Website Pages Every Wedding Supplier Needs",
-    metaTitle: "Best Website Pages for Wedding Suppliers | Vow Visibility",
+    metaTitle: "Best Website Pages for Wedding Suppliers | WedHQ",
     metaDescription:
       "The seven pages every Irish wedding business website needs — service pages, county pages, real weddings, pricing — and what each one has to do.",
     excerpt:
@@ -163,7 +163,7 @@ export const ARTICLES_PART_2: Article[] = [
   {
     slug: "google-business-profile-for-wedding-businesses",
     title: "Google Business Profile for Wedding Businesses: The Complete Basics",
-    metaTitle: "Google Business Profile for Wedding Businesses | Vow Visibility",
+    metaTitle: "Google Business Profile for Wedding Businesses | WedHQ",
     metaDescription:
       "Set up and optimise a Google Business Profile for your Irish wedding business: categories, photos, reviews and posts that win the map pack.",
     excerpt:
@@ -214,7 +214,7 @@ export const ARTICLES_PART_2: Article[] = [
   {
     slug: "wedding-keyword-research-guide",
     title: "Wedding Keyword Research: Finding the Searches That Book Weddings",
-    metaTitle: "Wedding Keyword Research Guide for Irish Suppliers | Vow Visibility",
+    metaTitle: "Wedding Keyword Research Guide for Irish Suppliers | WedHQ",
     metaDescription:
       "How to find the keywords Irish wedding businesses should target: county terms, style terms, question searches and the intent behind them. No tools expertise needed.",
     excerpt:
@@ -268,7 +268,7 @@ export const ARTICLES_PART_2: Article[] = [
   {
     slug: "how-to-generate-more-wedding-enquiries-from-your-website",
     title: "How to Generate More Wedding Enquiries from Your Website",
-    metaTitle: "More Wedding Enquiries From Your Website | Vow Visibility",
+    metaTitle: "More Wedding Enquiries From Your Website | WedHQ",
     metaDescription:
       "Why wedding websites don't convert: unclear next steps, hidden answers and slow pages. Practical fixes that turn existing visitors into enquiries.",
     excerpt:

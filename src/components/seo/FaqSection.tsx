@@ -4,7 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { JsonLd } from "./JsonLd";
+import { JsonLd } from "@/components/site/JsonLd";
 import { faqSchema, type FaqInput } from "@/lib/seo";
 
 export function FaqSection({

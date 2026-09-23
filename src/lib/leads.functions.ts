@@ -24,7 +24,7 @@ type LeadData = z.infer<typeof submitLeadSchema>;
 const KIND_SUBJECTS: Record<LeadData["kind"], string> = {
   audit: "New free SEO audit request",
   checklist: "New wedding SEO checklist download",
-  contact: "New Vow Visibility contact message",
+  contact: "New WedHQ contact message",
 };
 
 function rows(label: string, value?: string | null) {

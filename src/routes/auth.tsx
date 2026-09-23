@@ -1,0 +1,205 @@
+import { useEffect, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { zodValidator } from "@tanstack/zod-adapter";
+import { toast } from "sonner";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SiteLayout, Section } from "@/components/site/Layout";
+import { isNeonAuthConfigured, neonAuth } from "@/integrations/neon/auth-client";
+import { useAuth } from "@/hooks/useAuth";
+import { pageMeta, canonical } from "@/lib/seo";
+
+const TITLE = "Sign In or Create a Free Account | WedHQ";
+const DESCRIPTION =
+  "Create a free WedHQ account to shortlist suppliers, send enquiries and save your wedding checklist, budget and guest list.";
+
+const searchSchema = z.object({
+  mode: z.enum(["signin", "signup"]).optional().catch("signin"),
+  email: z.string().optional().catch(""),
+});
+
+export const Route = createFileRoute("/auth")({
+  validateSearch: zodValidator(searchSchema),
+  head: () => ({
+    meta: pageMeta({
+      title: TITLE,
+      description: DESCRIPTION,
+      path: "/auth",
+      noindex: true,
+    }),
+    links: canonical("/auth"),
+  }),
+  component: AuthPage,
+});
+
+function AuthPage() {
+  const search = Route.useSearch();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const [busy, setBusy] = useState(false);
+  const initialTab = search.mode === "signup" ? "signup" : "signin";
+
+  useEffect(() => {
+    if (!loading && user) void navigate({ to: "/dashboard" });
+  }, [loading, user, navigate]);
+
+  const signIn = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    if (!neonAuth) {
+      toast.error("Account login is not connected yet.");
+      return;
+    }
+    setBusy(true);
+    const { error } = await neonAuth.signInWithPassword({
+      email: String(form.get("email") ?? ""),
+      password: String(form.get("password") ?? ""),
+    });
+    setBusy(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    void navigate({ to: "/dashboard" });
+  };
+
+  const signUp = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    if (!neonAuth) {
+      toast.error("Account login is not connected yet.");
+      return;
+    }
+    setBusy(true);
+    const { error } = await neonAuth.signUp({
+      email: String(form.get("email") ?? ""),
+      password: String(form.get("password") ?? ""),
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+        data: { full_name: String(form.get("full_name") ?? "") },
+      },
+    });
+    setBusy(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Check your email to confirm your account.");
+  };
+
+  const google = async () => {
+    if (!neonAuth) {
+      toast.error("Account login is not connected yet.");
+      return;
+    }
+    const { error } = await neonAuth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/dashboard` },
+    });
+    if (error) toast.error(error.message);
+  };
+
+  return (
+    <SiteLayout>
+      <Section>
+        <div className="mx-auto max-w-md">
+          <h1 className="text-center text-3xl">Your WedHQ account</h1>
+          <p className="mt-2 text-center text-sm text-muted-foreground">
+            Free for couples. Shortlist suppliers, track enquiries and keep your planning tools in
+            one place.
+          </p>
+
+          <div className="mt-8 rounded-xl border border-border bg-card p-6">
+            {!isNeonAuthConfigured ? (
+              <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                Account login is waiting for Neon Auth environment variables. You can still browse,
+                enquire and use the planning tools.
+              </p>
+            ) : null}
+            <Button variant="outline" className="w-full" onClick={google}>
+              Continue with Google
+            </Button>
+
+            <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
+              <span className="h-px flex-1 bg-border" /> or use email
+              <span className="h-px flex-1 bg-border" />
+            </div>
+
+            <Tabs defaultValue={initialTab}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="signin">Sign in</TabsTrigger>
+                <TabsTrigger value="signup">Create account</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="signin">
+                <form onSubmit={signIn} className="grid gap-4 pt-4">
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="in-email">Email</Label>
+                    <Input
+                      id="in-email"
+                      name="email"
+                      type="email"
+                      required
+                      autoComplete="email"
+                      defaultValue={search.email ?? ""}
+                    />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="in-password">Password</Label>
+                    <Input
+                      id="in-password"
+                      name="password"
+                      type="password"
+                      required
+                      autoComplete="current-password"
+                    />
+                  </div>
+                  <Button type="submit" disabled={busy}>
+                    {busy ? "Signing in…" : "Sign in"}
+                  </Button>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="signup">
+                <form onSubmit={signUp} className="grid gap-4 pt-4">
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="up-name">Your name</Label>
+                    <Input id="up-name" name="full_name" autoComplete="name" />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="up-email">Email</Label>
+                    <Input
+                      id="up-email"
+                      name="email"
+                      type="email"
+                      required
+                      autoComplete="email"
+                      defaultValue={search.email ?? ""}
+                    />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="up-password">Password</Label>
+                    <Input
+                      id="up-password"
+                      name="password"
+                      type="password"
+                      required
+                      minLength={8}
+                      autoComplete="new-password"
+                    />
+                  </div>
+                  <Button type="submit" disabled={busy}>
+                    {busy ? "Creating account…" : "Create free account"}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
+      </Section>
+    </SiteLayout>
+  );
+}

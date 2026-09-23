@@ -23,7 +23,7 @@ export const SERVICES_DATA: Record<string, ServicePageData> = {
   "wedding-seo": {
     slug: "wedding-seo",
     name: "Wedding SEO",
-    metaTitle: "Wedding SEO Services Ireland | Rank for Searches That Matter | Vow Visibility",
+    metaTitle: "Wedding SEO Services Ireland | Rank for Searches That Matter | WedHQ",
     metaDescription:
       "Specialist SEO for wedding businesses in Ireland. Keyword research, on-page SEO, internal linking and content strategy that turns Google visibility into enquiries.",
     h1: "Wedding SEO that puts your business in front of couples who are ready to book",
@@ -79,7 +79,7 @@ export const SERVICES_DATA: Record<string, ServicePageData> = {
   "local-seo": {
     slug: "local-seo",
     name: "Local SEO",
-    metaTitle: "Local SEO for Wedding Businesses in Ireland | Vow Visibility",
+    metaTitle: "Local SEO for Wedding Businesses in Ireland | WedHQ",
     metaDescription:
       "County, city and service-area SEO for Irish wedding suppliers. Google Business Profile optimisation, local pages and reviews so nearby couples find you first.",
     h1: "Local SEO that makes you the obvious choice in your county",
@@ -130,8 +130,7 @@ export const SERVICES_DATA: Record<string, ServicePageData> = {
   "technical-seo": {
     slug: "technical-seo",
     name: "Technical SEO",
-    metaTitle:
-      "Technical SEO for Wedding Websites | Speed, Indexing & Site Health | Vow Visibility",
+    metaTitle: "Technical SEO for Wedding Websites | Speed, Indexing & Site Health | WedHQ",
     metaDescription:
       "Technical SEO for Irish wedding businesses: site speed, Core Web Vitals, indexing, crawlability and mobile experience. Fix what's holding every other effort back.",
     h1: "Technical SEO that stops your website quietly underperforming",
@@ -182,8 +181,7 @@ export const SERVICES_DATA: Record<string, ServicePageData> = {
   "content-seo": {
     slug: "content-seo",
     name: "Content & SEO Strategy",
-    metaTitle:
-      "Wedding Content Strategy & SEO | Real Weddings, Guides & Topical Authority | Vow Visibility",
+    metaTitle: "Wedding Content Strategy & SEO | Real Weddings, Guides & Topical Authority | WedHQ",
     metaDescription:
       "Content strategy for Irish wedding businesses: real weddings, venue guides, FAQs and advice content planned around what couples actually search for.",
     h1: "Content strategy that turns your wedding work into search traffic",
@@ -234,7 +232,7 @@ export const SERVICES_DATA: Record<string, ServicePageData> = {
   "seo-audits": {
     slug: "seo-audits",
     name: "SEO Audits",
-    metaTitle: "Wedding Website SEO Audit Ireland | See What's Holding You Back | Vow Visibility",
+    metaTitle: "Wedding Website SEO Audit Ireland | See What's Holding You Back | WedHQ",
     metaDescription:
       "A clear, prioritised SEO audit for Irish wedding businesses: rankings, technical issues, local visibility, content gaps and conversion problems. Free audit available.",
     h1: "Find out exactly what's stopping your website from ranking",
@@ -290,7 +288,7 @@ export const SERVICES_DATA: Record<string, ServicePageData> = {
   "website-optimisation": {
     slug: "website-optimisation",
     name: "Website Optimisation",
-    metaTitle: "Wedding Website Optimisation | Better Pages, More Enquiries | Vow Visibility",
+    metaTitle: "Wedding Website Optimisation | Better Pages, More Enquiries | WedHQ",
     metaDescription:
       "Improve the wedding website you already have: sharper service pages, clearer structure, stronger calls to action and copy that converts visitors into enquiries.",
     h1: "Get more enquiries from the website you already have",

@@ -1,11 +1,11 @@
 {
-  "name": "Vow Visibility",
-  "short_name": "Vow Visibility",
-  "description": "Marketing & SEO for Irish wedding businesses. Get found by couples searching on Google and turn visibility into enquiries.",
+  "name": "WedHQ",
+  "short_name": "WedHQ",
+  "description": "UK and Ireland wedding venue and supplier directory with reviews, prices and free planning tools.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#faf6ee",
-  "theme_color": "#2b2925",
+  "background_color": "#fffaf0",
+  "theme_color": "#5f7b61",
   "icons": [
     {
       "src": "/favicon.png",

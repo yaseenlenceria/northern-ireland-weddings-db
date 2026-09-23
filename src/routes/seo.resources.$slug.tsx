@@ -4,23 +4,23 @@ import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { CtaBand, PageHeader, Section, SiteLayout } from "@/components/site/Layout";
 import { JsonLd } from "@/components/site/JsonLd";
 import { ARTICLES, getArticle } from "@/lib/articles";
-import { absoluteUrl, breadcrumbSchema, canonical, pageMeta } from "@/lib/seo";
+import { SITE_URL, absoluteUrl, breadcrumbSchema, canonical, pageMeta } from "@/lib/seo";
 
-export const Route = createFileRoute("/resources/$slug")({
+export const Route = createFileRoute("/seo/resources/$slug")({
   beforeLoad: ({ params }) => {
     if (!getArticle(params.slug)) throw notFound();
   },
   head: ({ params }) => {
     const article = getArticle(params.slug)!;
     return {
+      links: canonical(`/seo/resources/${article.slug}`),
       meta: [
         ...pageMeta({
           title: article.metaTitle,
           description: article.metaDescription,
-          path: `/resources/${article.slug}`,
+          path: `/seo/resources/${article.slug}`,
           type: "article",
         }),
-        ...canonical(`/resources/${article.slug}`),
       ],
     };
   },
@@ -30,15 +30,13 @@ export const Route = createFileRoute("/resources/$slug")({
 function ArticlePage() {
   const { slug } = Route.useParams();
   const article = getArticle(slug)!;
-  const path = `/resources/${article.slug}`;
+  const path = `/seo/resources/${article.slug}`;
   const related = getRelated(slug);
 
   return (
     <SiteLayout>
       <PageHeader eyebrow={article.category} title={article.title} description={article.excerpt}>
-        <Breadcrumbs
-          items={[{ name: "Resources", path: "/resources" }, { name: article.category }]}
-        />
+        <Breadcrumbs items={[{ label: "SEO", to: "/seo" }, { label: article.category }]} />
         <p className="mt-4 text-sm text-muted-foreground">{article.readMinutes} min read</p>
       </PageHeader>
 
@@ -82,7 +80,7 @@ function ArticlePage() {
                 couples can actually find your business on Google.
               </p>
               <Link
-                to="/wedding-seo-checklist"
+                to="/seo/checklist"
                 className="mt-4 inline-flex w-full items-center justify-center rounded-md bg-gold px-4 py-2.5 text-sm font-medium text-gold-foreground shadow-soft transition-colors hover:bg-gold/90"
               >
                 Get the Free Checklist
@@ -94,7 +92,7 @@ function ArticlePage() {
                 {related.map((item) => (
                   <li key={item.slug}>
                     <Link
-                      to="/resources/$slug"
+                      to="/seo/resources/$slug"
                       params={{ slug: item.slug }}
                       className="inline-flex items-start gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                     >
@@ -113,9 +111,9 @@ function ArticlePage() {
         data={{
           "@context": "https://schema.org",
           "@graph": [
-            breadcrumbSchema([
+            breadcrumbSchema(SITE_URL, [
               { name: "Home", path: "/" },
-              { name: "Resources", path: "/resources" },
+              { name: "Resources", path: "/seo/resources" },
               { name: article.title, path },
             ]),
             {
@@ -127,7 +125,7 @@ function ArticlePage() {
               datePublished: article.datePublished,
               dateModified: article.datePublished,
               author: { "@type": "Person", name: "Yasin" },
-              publisher: { "@id": absoluteUrl("/#organization") },
+              publisher: { "@type": "Organization", name: "WedHQ", url: absoluteUrl("/") },
               mainEntityOfPage: absoluteUrl(path),
             },
           ],
@@ -137,9 +135,9 @@ function ArticlePage() {
         title="Turn what you've just read into rankings"
         description="Request a free SEO audit and we'll show you exactly which of these fixes your website needs most."
         primaryLabel="Get a Free SEO Audit"
-        primaryTo="/free-seo-audit"
+        primaryTo="/seo/free-audit"
         secondaryLabel="Request a Website Review"
-        secondaryTo="/contact"
+        secondaryTo="/seo/contact"
       />
     </SiteLayout>
   );

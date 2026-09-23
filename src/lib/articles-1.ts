@@ -21,7 +21,7 @@ export const ARTICLES_PART_1: Article[] = [
   {
     slug: "seo-for-wedding-photographers-ireland",
     title: "SEO for Wedding Photographers in Ireland: A Practical Guide",
-    metaTitle: "SEO for Wedding Photographers in Ireland | Practical Guide | Vow Visibility",
+    metaTitle: "SEO for Wedding Photographers in Ireland | Practical Guide | WedHQ",
     metaDescription:
       "How Irish wedding photographers can rank on Google: county pages, real weddings, venue targeting and portfolio structure that turns searches into bookings.",
     excerpt:
@@ -73,7 +73,7 @@ export const ARTICLES_PART_1: Article[] = [
   {
     slug: "seo-for-wedding-venues-ireland",
     title: "SEO for Wedding Venues in Ireland: Win Searches Before Directories Do",
-    metaTitle: "SEO for Wedding Venues in Ireland | Venue SEO Guide | Vow Visibility",
+    metaTitle: "SEO for Wedding Venues in Ireland | Venue SEO Guide | WedHQ",
     metaDescription:
       "How Irish wedding venues can outrank directories: county and style pages, Google Maps visibility, real weddings and site speed that keeps couples browsing.",
     excerpt:
@@ -126,7 +126,7 @@ export const ARTICLES_PART_1: Article[] = [
   {
     slug: "seo-for-wedding-planners",
     title: "SEO for Wedding Planners: Get Found by Couples Who Are Ready",
-    metaTitle: "SEO for Wedding Planners | Rank & Get Consultations | Vow Visibility",
+    metaTitle: "SEO for Wedding Planners | Rank & Get Consultations | WedHQ",
     metaDescription:
       "A practical SEO guide for wedding planners: service-specific pages, cost content, county targeting and trust signals that turn searches into consultations.",
     excerpt:
@@ -178,7 +178,7 @@ export const ARTICLES_PART_1: Article[] = [
   {
     slug: "local-seo-for-wedding-suppliers",
     title: "Local SEO for Wedding Suppliers: Win Your County Before You Dream of National Rankings",
-    metaTitle: "Local SEO for Wedding Suppliers in Ireland | Vow Visibility",
+    metaTitle: "Local SEO for Wedding Suppliers in Ireland | WedHQ",
     metaDescription:
       "Local SEO for Irish wedding businesses: Google Business Profile, county pages, reviews and service-area signals that put you in front of nearby couples.",
     excerpt:
@@ -231,7 +231,7 @@ export const ARTICLES_PART_1: Article[] = [
   {
     slug: "wedding-website-seo-checklist",
     title: "The Wedding Website SEO Checklist: 21 Points to Check Today",
-    metaTitle: "Wedding Website SEO Checklist | 21 Points for Irish Suppliers | Vow Visibility",
+    metaTitle: "Wedding Website SEO Checklist | 21 Points for Irish Suppliers | WedHQ",
     metaDescription:
       "A 21-point SEO checklist for wedding websites: indexing, page titles, local signals, speed, content and conversion checks. Work through it in an afternoon.",
     excerpt:
@@ -306,7 +306,7 @@ export const ARTICLES_PART_1: Article[] = [
   {
     slug: "how-wedding-businesses-can-rank-on-google",
     title: "How Wedding Businesses Can Rank on Google (Without an Agency Budget)",
-    metaTitle: "How Wedding Businesses Can Rank on Google | Vow Visibility",
+    metaTitle: "How Wedding Businesses Can Rank on Google | WedHQ",
     metaDescription:
       "How Irish wedding businesses actually rank on Google: keyword realism, page structure, content depth and patience. A plain-English explanation of the process.",
     excerpt:

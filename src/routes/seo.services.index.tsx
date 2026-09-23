@@ -4,20 +4,20 @@ import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { CtaBand, PageHeader, Section, SiteLayout } from "@/components/site/Layout";
 import { JsonLd } from "@/components/site/JsonLd";
 import { SERVICES } from "@/lib/site";
-import { absoluteUrl, breadcrumbSchema, canonical, pageMeta } from "@/lib/seo";
+import { absoluteUrl, canonical, pageMeta } from "@/lib/seo";
 
-const PATH = "/services";
+const PATH = "/seo/services";
 
-export const Route = createFileRoute("/services/")({
+export const Route = createFileRoute("/seo/services/")({
   head: () => ({
+    links: canonical(PATH),
     meta: [
       ...pageMeta({
-        title: "SEO Services for Wedding Businesses in Ireland | Vow Visibility",
+        title: "SEO Services for Wedding Businesses in Ireland | WedHQ",
         description:
           "Wedding SEO, local SEO, technical SEO, content strategy, audits and website optimisation — specialist services for Irish wedding businesses.",
         path: PATH,
       }),
-      ...canonical(PATH),
     ],
   }),
   component: ServicesIndex,
@@ -31,7 +31,7 @@ function ServicesIndex() {
         title="SEO services built for the wedding industry"
         description="Every service below exists for one reason: to help Irish wedding businesses get found by couples on Google and turn that visibility into enquiries."
       >
-        <Breadcrumbs items={[{ name: "Services" }]} />
+        <Breadcrumbs items={[{ label: "Services" }]} />
       </PageHeader>
 
       <Section>
@@ -39,7 +39,7 @@ function ServicesIndex() {
           {SERVICES.map((service) => (
             <Link
               key={service.slug}
-              to="/services/$slug"
+              to="/seo/services/$slug"
               params={{ slug: service.slug }}
               className="card-lift flex flex-col rounded-xl border border-border bg-card p-7"
             >
@@ -67,7 +67,7 @@ function ServicesIndex() {
         data={{
           "@context": "https://schema.org",
           "@type": "ItemList",
-          name: "Vow Visibility SEO services",
+          name: "WedHQ SEO services",
           itemListElement: SERVICES.map((service, index) => ({
             "@type": "ListItem",
             position: index + 1,
@@ -80,9 +80,9 @@ function ServicesIndex() {
         title="Not sure which service you need?"
         description="Start with the free SEO audit. We'll tell you what's holding your website back and which work would make the biggest difference first."
         primaryLabel="Get a Free SEO Audit"
-        primaryTo="/free-seo-audit"
-        secondaryLabel="Read the FAQ"
-        secondaryTo="/#audit"
+        primaryTo="/seo/free-audit"
+        secondaryLabel="Get the Wedding SEO Checklist"
+        secondaryTo="/seo/checklist"
       />
     </SiteLayout>
   );

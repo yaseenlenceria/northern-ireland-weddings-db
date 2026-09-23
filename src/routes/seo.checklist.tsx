@@ -2,11 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { CheckCircle2, ListChecks } from "lucide-react";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { CtaBand, PageHeader, Section, SiteLayout } from "@/components/site/Layout";
-import { LeadForm } from "@/components/site/LeadForm";
+import { LeadForm } from "@/components/seo/LeadForm";
 import { JsonLd } from "@/components/site/JsonLd";
 import { canonical, pageMeta } from "@/lib/seo";
 
-const PATH = "/wedding-seo-checklist";
+const PATH = "/seo/checklist";
 
 const CHECKLIST_GROUPS: Array<{ title: string; items: string[] }> = [
   {
@@ -54,16 +54,16 @@ const CHECKLIST_GROUPS: Array<{ title: string; items: string[] }> = [
 
 const TOTAL_CHECKS = CHECKLIST_GROUPS.reduce((sum, group) => sum + group.items.length, 0);
 
-export const Route = createFileRoute("/wedding-seo-checklist")({
+export const Route = createFileRoute("/seo/checklist")({
   head: () => ({
+    links: canonical(PATH),
     meta: [
       ...pageMeta({
-        title: "The 21-Point Wedding Website SEO Checklist — Ireland Edition | Vow Visibility",
+        title: "The 21-Point Wedding Website SEO Checklist — Ireland Edition | WedHQ",
         description:
           "Find out whether couples can actually find your wedding business on Google. A free 21-point checklist covering indexing, local SEO, pages, speed and conversion.",
         path: PATH,
       }),
-      ...canonical(PATH),
     ],
   }),
   component: ChecklistPage,
@@ -77,7 +77,7 @@ function ChecklistPage() {
         title={`The ${TOTAL_CHECKS}-Point Wedding Website SEO Checklist — Ireland Edition`}
         description="Find out whether couples can actually find your wedding business on Google. Twenty-one practical checks — no jargon, no tools expertise needed."
       >
-        <Breadcrumbs items={[{ name: "Wedding SEO Checklist" }]} />
+        <Breadcrumbs items={[{ label: "Wedding SEO Checklist" }]} />
       </PageHeader>
 
       <Section>
@@ -123,9 +123,9 @@ function ChecklistPage() {
         title="Scored a few fails? That's exactly what the audit is for."
         description="Request a free SEO audit and we'll prioritise the fixes for your website, your counties and your competition."
         primaryLabel="Get a Free SEO Audit"
-        primaryTo="/free-seo-audit"
+        primaryTo="/seo/free-audit"
         secondaryLabel="Read the SEO Guides"
-        secondaryTo="/resources"
+        secondaryTo="/seo/resources"
       />
     </SiteLayout>
   );

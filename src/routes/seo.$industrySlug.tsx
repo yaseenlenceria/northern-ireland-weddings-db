@@ -2,26 +2,26 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowRight, CheckCircle2, XCircle } from "lucide-react";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { CtaBand, PageHeader, Section, SiteLayout } from "@/components/site/Layout";
-import { FaqSection } from "@/components/site/FaqSection";
+import { FaqSection } from "@/components/seo/FaqSection";
 import { JsonLd } from "@/components/site/JsonLd";
 import { INDUSTRY_DATA } from "@/lib/industries";
 import { INDUSTRIES } from "@/lib/site";
-import { breadcrumbSchema, canonical, faqSchema, pageMeta } from "@/lib/seo";
+import { SITE_URL, breadcrumbSchema, canonical, faqSchema, pageMeta } from "@/lib/seo";
 
-export const Route = createFileRoute("/$industrySlug")({
+export const Route = createFileRoute("/seo/$industrySlug")({
   beforeLoad: ({ params }) => {
     if (!INDUSTRY_DATA[params.industrySlug]) throw notFound();
   },
   head: ({ params }) => {
     const industry = INDUSTRY_DATA[params.industrySlug];
     return {
+      links: canonical(`/seo/${industry.slug}`),
       meta: [
         ...pageMeta({
           title: industry.metaTitle,
           description: industry.metaDescription,
-          path: `/${industry.slug}`,
+          path: `/seo/${industry.slug}`,
         }),
-        ...canonical(`/${industry.slug}`),
       ],
     };
   },
@@ -31,7 +31,7 @@ export const Route = createFileRoute("/$industrySlug")({
 function IndustryPage() {
   const { industrySlug } = Route.useParams();
   const industry = INDUSTRY_DATA[industrySlug];
-  const path = `/${industry.slug}`;
+  const path = `/seo/${industry.slug}`;
   const otherIndustries = INDUSTRIES.filter((item) => item.slug !== industry.slug).slice(0, 5);
 
   return (
@@ -41,7 +41,7 @@ function IndustryPage() {
         title={industry.h1}
         description={industry.intro}
       >
-        <Breadcrumbs items={[{ name: `SEO for ${industry.name}` }]} />
+        <Breadcrumbs items={[{ label: `SEO for ${industry.name}` }]} />
       </PageHeader>
 
       <Section>
@@ -159,7 +159,7 @@ function IndustryPage() {
                 missing, what to fix first, and where the realistic wins are in your counties.
               </p>
               <Link
-                to="/free-seo-audit"
+                to="/seo/free-audit"
                 className="mt-5 inline-flex items-center gap-2 rounded-md bg-gold px-5 py-2.5 text-sm font-medium text-gold-foreground shadow-soft transition-colors hover:bg-gold/90"
               >
                 Request My Free SEO Audit <ArrowRight className="h-4 w-4" />
@@ -174,7 +174,7 @@ function IndustryPage() {
                 {otherIndustries.map((item) => (
                   <li key={item.slug}>
                     <Link
-                      to="/$industrySlug"
+                      to="/seo/$industrySlug"
                       params={{ industrySlug: item.slug }}
                       className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                     >
@@ -189,7 +189,7 @@ function IndustryPage() {
               <ul className="mt-4 space-y-2.5">
                 <li>
                   <Link
-                    to="/wedding-seo-checklist"
+                    to="/seo/checklist"
                     className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                   >
                     The Wedding Website SEO Checklist
@@ -233,7 +233,7 @@ function IndustryPage() {
         data={{
           "@context": "https://schema.org",
           "@graph": [
-            breadcrumbSchema([
+            breadcrumbSchema(SITE_URL, [
               { name: "Home", path: "/" },
               { name: `SEO for ${industry.name}`, path },
             ]),
@@ -245,9 +245,9 @@ function IndustryPage() {
         title={`Ready to win more ${industry.name.toLowerCase()} searches?`}
         description="Get a free, honest review of where your business stands on Google today — and the fixes we'd make first."
         primaryLabel="Get a Free SEO Audit"
-        primaryTo="/free-seo-audit"
+        primaryTo="/seo/free-audit"
         secondaryLabel="Get the Wedding SEO Checklist"
-        secondaryTo="/wedding-seo-checklist"
+        secondaryTo="/seo/checklist"
       />
     </SiteLayout>
   );

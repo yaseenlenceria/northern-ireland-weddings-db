@@ -25,7 +25,7 @@ export const INDUSTRY_DATA: Record<string, IndustryPageData> = {
   "wedding-photographer-seo": {
     slug: "wedding-photographer-seo",
     name: "Wedding Photographers",
-    metaTitle: "SEO for Wedding Photographers in Ireland | Get Booked on Google | Vow Visibility",
+    metaTitle: "SEO for Wedding Photographers in Ireland | Get Booked on Google | WedHQ",
     metaDescription:
       "SEO for Irish wedding photographers: rank in your counties, turn your portfolio into search traffic and get enquiries from couples actively looking to book.",
     h1: "SEO for wedding photographers in Ireland",
@@ -93,7 +93,7 @@ export const INDUSTRY_DATA: Record<string, IndustryPageData> = {
   "wedding-venue-seo": {
     slug: "wedding-venue-seo",
     name: "Wedding Venues",
-    metaTitle: "SEO for Wedding Venues in Ireland | More Tours & Bookings | Vow Visibility",
+    metaTitle: "SEO for Wedding Venues in Ireland | More Tours & Bookings | WedHQ",
     metaDescription:
       "SEO for Irish wedding venues: rank for county and style searches, show up on Google Maps, and turn venue browsers into show-around bookings.",
     h1: "SEO for wedding venues in Ireland",
@@ -162,8 +162,7 @@ export const INDUSTRY_DATA: Record<string, IndustryPageData> = {
   "wedding-planner-seo": {
     slug: "wedding-planner-seo",
     name: "Wedding Planners",
-    metaTitle:
-      "SEO for Wedding Planners in Ireland | Visibility for Your Services | Vow Visibility",
+    metaTitle: "SEO for Wedding Planners in Ireland | Visibility for Your Services | WedHQ",
     metaDescription:
       "SEO for wedding planners in Ireland: rank for planning, coordination and destination searches in your counties and turn website visits into consultations.",
     h1: "SEO for wedding planners in Ireland",
@@ -231,7 +230,7 @@ export const INDUSTRY_DATA: Record<string, IndustryPageData> = {
   "wedding-videographer-seo": {
     slug: "wedding-videographer-seo",
     name: "Wedding Videographers",
-    metaTitle: "SEO for Wedding Videographers in Ireland | Get Found & Booked | Vow Visibility",
+    metaTitle: "SEO for Wedding Videographers in Ireland | Get Found & Booked | WedHQ",
     metaDescription:
       "SEO for Irish wedding videographers: rank in your counties, make your films load fast and rank, and capture couples searching for their wedding video.",
     h1: "SEO for wedding videographers in Ireland",
@@ -297,7 +296,7 @@ export const INDUSTRY_DATA: Record<string, IndustryPageData> = {
   "wedding-florist-seo": {
     slug: "wedding-florist-seo",
     name: "Florists",
-    metaTitle: "SEO for Wedding Florists in Ireland | Get Found by Couples | Vow Visibility",
+    metaTitle: "SEO for Wedding Florists in Ireland | Get Found by Couples | WedHQ",
     metaDescription:
       "SEO for wedding florists in Ireland: rank in your counties, show up for seasonal and style searches, and turn your portfolio into a steady stream of enquiries.",
     h1: "SEO for wedding florists in Ireland",
@@ -363,7 +362,7 @@ export const INDUSTRY_DATA: Record<string, IndustryPageData> = {
   "wedding-band-seo": {
     slug: "wedding-band-seo",
     name: "Bands",
-    metaTitle: "SEO for Wedding Bands in Ireland | Get Booked Direct | Vow Visibility",
+    metaTitle: "SEO for Wedding Bands in Ireland | Get Booked Direct | WedHQ",
     metaDescription:
       "SEO for wedding bands in Ireland: compete with agencies, rank in your counties and turn couples searching for live music into direct bookings.",
     h1: "SEO for wedding bands in Ireland",
@@ -430,7 +429,7 @@ export const INDUSTRY_DATA: Record<string, IndustryPageData> = {
   "wedding-dj-seo": {
     slug: "wedding-dj-seo",
     name: "DJs",
-    metaTitle: "SEO for Wedding DJs in Ireland | Direct Bookings from Google | Vow Visibility",
+    metaTitle: "SEO for Wedding DJs in Ireland | Direct Bookings from Google | WedHQ",
     metaDescription:
       "SEO for wedding DJs in Ireland: rank for county and venue searches, show up for add-on searches like photo booths, and win bookings without agency fees.",
     h1: "SEO for wedding DJs in Ireland",
@@ -496,7 +495,7 @@ export const INDUSTRY_DATA: Record<string, IndustryPageData> = {
   "wedding-celebrant-seo": {
     slug: "wedding-celebrant-seo",
     name: "Celebrants",
-    metaTitle: "SEO for Wedding Celebrants in Ireland | Be Found by Couples | Vow Visibility",
+    metaTitle: "SEO for Wedding Celebrants in Ireland | Be Found by Couples | WedHQ",
     metaDescription:
       "SEO for wedding celebrants in Ireland: rank for celebrant and ceremony searches in your counties and turn curious couples into consultations.",
     h1: "SEO for wedding celebrants in Ireland",
@@ -562,7 +561,7 @@ export const INDUSTRY_DATA: Record<string, IndustryPageData> = {
   "bridal-shop-seo": {
     slug: "bridal-shop-seo",
     name: "Bridal Boutiques",
-    metaTitle: "SEO for Bridal Shops in Ireland | More Appointment Bookings | Vow Visibility",
+    metaTitle: "SEO for Bridal Shops in Ireland | More Appointment Bookings | WedHQ",
     metaDescription:
       "SEO for bridal boutiques in Ireland: rank for “wedding dress shops near me”, designer stockist searches and county searches that fill your appointment diary.",
     h1: "SEO for bridal boutiques in Ireland",
@@ -628,7 +627,7 @@ export const INDUSTRY_DATA: Record<string, IndustryPageData> = {
   "wedding-hair-makeup-seo": {
     slug: "wedding-hair-makeup-seo",
     name: "Hair & Makeup Artists",
-    metaTitle: "SEO for Wedding Hair & Makeup Artists Ireland | More Bookings | Vow Visibility",
+    metaTitle: "SEO for Wedding Hair & Makeup Artists Ireland | More Bookings | WedHQ",
     metaDescription:
       "SEO for bridal hair and makeup artists in Ireland: rank for county and mobile searches, show up for trials and pricing searches and fill your wedding season.",
     h1: "SEO for wedding hair & makeup artists in Ireland",
@@ -694,7 +693,7 @@ export const INDUSTRY_DATA: Record<string, IndustryPageData> = {
   "wedding-cake-seo": {
     slug: "wedding-cake-seo",
     name: "Wedding Cake Businesses",
-    metaTitle: "SEO for Wedding Cake Businesses in Ireland | Get More Enquiries | Vow Visibility",
+    metaTitle: "SEO for Wedding Cake Businesses in Ireland | Get More Enquiries | WedHQ",
     metaDescription:
       "SEO for wedding cake designers in Ireland: rank for county, style and pricing searches, and turn cake browsing into consultations and bookings.",
     h1: "SEO for wedding cake businesses in Ireland",
@@ -760,7 +759,7 @@ export const INDUSTRY_DATA: Record<string, IndustryPageData> = {
   "wedding-transport-seo": {
     slug: "wedding-transport-seo",
     name: "Wedding Transport",
-    metaTitle: "SEO for Wedding Transport & Wedding Car Hire in Ireland | Vow Visibility",
+    metaTitle: "SEO for Wedding Transport & Wedding Car Hire in Ireland | WedHQ",
     metaDescription:
       "SEO for wedding car and transport businesses in Ireland: rank for county and vehicle searches, map results and get your fleet in front of booking couples.",
     h1: "SEO for wedding transport businesses in Ireland",
@@ -826,7 +825,7 @@ export const INDUSTRY_DATA: Record<string, IndustryPageData> = {
   "wedding-stationery-seo": {
     slug: "wedding-stationery-seo",
     name: "Stationery",
-    metaTitle: "SEO for Wedding Stationery Businesses in Ireland | Get Found | Vow Visibility",
+    metaTitle: "SEO for Wedding Stationery Businesses in Ireland | Get Found | WedHQ",
     metaDescription:
       "SEO for wedding stationery designers in Ireland: rank for invitation styles, wording searches and county queries that Etsy and big brands currently take.",
     h1: "SEO for wedding stationery businesses in Ireland",
@@ -892,7 +891,7 @@ export const INDUSTRY_DATA: Record<string, IndustryPageData> = {
   "wedding-decor-hire-seo": {
     slug: "wedding-decor-hire-seo",
     name: "Décor & Event Hire",
-    metaTitle: "SEO for Wedding Décor & Event Hire Companies in Ireland | Vow Visibility",
+    metaTitle: "SEO for Wedding Décor & Event Hire Companies in Ireland | WedHQ",
     metaDescription:
       "SEO for wedding décor and event hire businesses in Ireland: rank for flower walls, chair covers, tableware and county searches venues and couples are making.",
     h1: "SEO for wedding décor & event hire companies in Ireland",

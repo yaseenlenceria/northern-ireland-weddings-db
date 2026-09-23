@@ -2,13 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { CheckCircle2 } from "lucide-react";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { PageHeader, Section, SiteLayout } from "@/components/site/Layout";
-import { FaqSection } from "@/components/site/FaqSection";
-import { LeadForm } from "@/components/site/LeadForm";
+import { FaqSection } from "@/components/seo/FaqSection";
+import { LeadForm } from "@/components/seo/LeadForm";
 import { JsonLd } from "@/components/site/JsonLd";
 import { canonical, faqSchema, pageMeta } from "@/lib/seo";
 import type { Faq } from "@/lib/site";
 
-const PATH = "/free-seo-audit";
+const PATH = "/seo/free-audit";
 
 const AUDIT_FAQS: Faq[] = [
   {
@@ -38,16 +38,16 @@ const AUDIT_FAQS: Faq[] = [
   },
 ];
 
-export const Route = createFileRoute("/free-seo-audit")({
+export const Route = createFileRoute("/seo/free-audit")({
   head: () => ({
+    links: canonical(PATH),
     meta: [
       ...pageMeta({
-        title: "Free SEO Audit for Irish Wedding Businesses | Vow Visibility",
+        title: "Free SEO Audit for Irish Wedding Businesses | WedHQ",
         description:
           "Get a free, honest SEO audit of your wedding business website: rankings, technical issues, local visibility and conversion opportunities. No obligation.",
         path: PATH,
       }),
-      ...canonical(PATH),
     ],
   }),
   component: FreeSeoAudit,
@@ -61,7 +61,7 @@ function FreeSeoAudit() {
         title="See What Is Stopping Your Website From Ranking"
         description="A free, honest review of your wedding business website — what's working, what's broken, and the opportunities your competitors are taking while you read this."
       >
-        <Breadcrumbs items={[{ name: "Free SEO Audit" }]} />
+        <Breadcrumbs items={[{ label: "Free SEO Audit" }]} />
       </PageHeader>
 
       <Section>
