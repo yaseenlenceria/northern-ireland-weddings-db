@@ -1,16 +1,4 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
 
-Sitemap: https://wedhq.co.uk/sitemap.xml
+Sitemap: https://vowvisibility.com/sitemap.xml

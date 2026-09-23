@@ -1,49 +1,37 @@
-# WedHQ Wedding Directory
+# Vow Visibility
 
-TanStack Start and React directory website for wedding venues, suppliers, wedding fairs, planning tools, and enquiries across Ireland and the UK.
+Marketing & SEO website for Irish wedding businesses. Built with TanStack Start (SSR), React, Tailwind and Vite, deployed on Vercel.
 
-The public directory pages use a Postgres database connection and are prepared for Vercel deployment. The legacy Supabase files remain only for auth/planning-tool areas that have not yet been migrated.
+The site is fully static in content (no database): routes, SEO metadata, sitemap and lead forms are all handled in `src/`.
 
-## Vercel Setup
+## Structure
 
-Configure one of these environment variables in Vercel before building Preview or Production:
+- `src/routes/` — one route per page. Industry pages render from `src/lib/industries.ts`, service pages from `src/lib/services.ts`, resource articles from `src/lib/articles-1.ts` / `articles-2.ts`.
+- `src/lib/seo.ts` — canonical URLs, meta tags, JSON-LD helpers. The public origin comes from `VITE_SITE_URL` (default `https://vowvisibility.com`).
+- `src/lib/leads.functions.ts` — server function behind the audit / checklist / contact forms. Submissions are logged and emailed via Resend when `RESEND_API_KEY`, `EMAIL_FROM` and an admin recipient (`VOW_ADMIN_EMAIL` or `CONTACT_EMAIL`) are configured.
+- `src/routes/sitemap[.]xml.ts` — sitemap of all 39 URLs.
 
-- `POSTGRES_URL`
-- `DATABASE_URL`
-
-Do not commit real `.env` files. Use `.env.example` as the template.
-
-## Database Import
-
-After creating and connecting a Vercel/Neon Postgres database, load the spreadsheet directory data with:
+## Development
 
 ```sh
-npm run db:import
+npm install --ignore-scripts   # postinstall scripts fail on some machines
+npm run build
 ```
 
-The importer creates the public directory tables from `db/schema.sql`, then upserts venues, suppliers, wedding fairs, and imported reviews from the local spreadsheet exports.
+A local production-style server (Node nitro preset):
+
+```sh
+NITRO_PRESET=node_server npx vite build
+PORT=4173 node .output/server/index.mjs
+```
+
+## Notes
+
+- The repo is Lovable-connected: never force-push or rebase published history.
+- The former WedHQ directory code lives in git history; `db/`, `supabase/` and `scripts/` are unused by this site.
 
 ## Build with Lovable
 
 This project was built with [Lovable](https://lovable.dev).
 
 Continue developing this project in the [Lovable editor](https://lovable.dev/projects/f2801c21-49f7-4601-ae40-9518518bbdf5).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
-```
-
-## Migration Status
-
-See `docs/migration-status.md` for the current Laravel-to-Postgres migration status and the remaining blocked source-of-truth mapping work.

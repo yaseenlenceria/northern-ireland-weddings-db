@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="WedHQ">
-  <rect width="64" height="64" rx="16" fill="#2f332d"/>
-  <text x="32" y="43" fill="#d7a64a" font-family="Georgia, serif" font-size="36" font-weight="700" text-anchor="middle">W</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#2b2925"/>
+  <path d="M14 20 24.8 44h.6L36.2 20" fill="none" stroke="#c9a35c" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M31 20 41.8 44h.6L53.4 20" fill="none" stroke="#c9a35c" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.45"/>
 </svg>

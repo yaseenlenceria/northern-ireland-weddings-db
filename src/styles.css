@@ -5,9 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * WedHQ design system.
- * Palette: warm ivory grounds, graphite primary, antique gold accents,
- * restrained sage support. Type: Outfit for headings and display, Figtree for body.
+ * Vow Visibility design system.
+ * Palette: cream grounds, charcoal primary, champagne gold accents.
+ * Type: Fraunces (modern serif) for headings and display, Inter for body.
  */
 
 @theme inline {
@@ -55,10 +55,9 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  /* Kept as --font-serif so existing `font-serif` headings pick up the display face. */
-  --font-serif: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Fraunces", ui-serif, Georgia, serif;
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --shadow-soft: var(--shadow-soft-v);
   --shadow-lift: var(--shadow-lift-v);
   --shadow-glow: var(--shadow-glow-v);
