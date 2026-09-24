@@ -27,7 +27,7 @@ interface SitemapEntry {
 }
 
 /** Bump when static copy or guides change so crawlers see a fresh lastmod. */
-const STATIC_LASTMOD = "2026-09-22";
+const STATIC_LASTMOD = "2026-09-24";
 
 /**
  * Mirrors the $directorySlug robots rule: UK-country hubs with fewer listings
