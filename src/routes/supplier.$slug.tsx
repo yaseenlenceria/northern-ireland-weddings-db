@@ -29,7 +29,13 @@ import { Stars } from "@/components/site/Stars";
 import { ReviewList } from "@/components/site/Reviews";
 import { getSupplier } from "@/lib/directory.functions";
 import { firstImage, videoEmbed } from "@/lib/media";
-import { CATEGORY_BY_KEY, countrySlug, countySlug, listingLocationLabel } from "@/lib/taxonomy";
+import {
+  CATEGORY_BY_KEY,
+  countrySlug,
+  countySlug,
+  listingLocationLabel,
+  normalizeLocationName,
+} from "@/lib/taxonomy";
 import { absoluteUrl, averageRating, canonical, clamp, pageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/supplier/$slug")({
@@ -370,7 +376,12 @@ function SupplierProfile() {
           <section>
             <h2 className="text-3xl">About {supplier.name}</h2>
             <div className="mt-4 space-y-4 text-muted-foreground">
-              {(supplier.description ?? supplier.overview ?? "No description provided yet.")
+              {(supplier.description ??
+                supplier.overview ??
+                [
+                  `${supplier.name} is a ${category?.label.toLowerCase() ?? "wedding supplier"} based in ${location}, listed on WedHQ.`,
+                  `On this page you can see ${supplier.image_count ?? gallery.length} photos, their service areas and price guide, then send an enquiry directly — WedHQ passes your message to ${supplier.name} and never charges you a booking fee.`,
+                ].join("\n"))
                 .split(/\n+/)
                 .filter(Boolean)
                 .map((para: string, i: number) => (
@@ -378,6 +389,50 @@ function SupplierProfile() {
                 ))}
             </div>
           </section>
+
+          {category && supplier.county ? (
+            <section>
+              <h2 className="text-3xl">Planning {category.label.toLowerCase()} for a {location} wedding</h2>
+              <p className="mt-4 text-muted-foreground">
+                Compare {category.plural.toLowerCase()} serving {location} before you book: check who
+                covers your venue's county, what their price guide includes and how recent their work
+                looks. Shortlist two or three, send the same enquiry to each and compare replies on
+                price, availability and what happens if your date changes.
+              </p>
+              <ul className="mt-4 space-y-2 text-muted-foreground">
+                <li>
+                  <Link
+                    to="/$directorySlug"
+                    params={{ directorySlug: `${category.slug}-${countySlug(normalizeLocationName(supplier.county))}` }}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    Browse all {category.plural.toLowerCase()} in {location}
+                  </Link>{" "}
+                  — compare listings side by side.
+                </li>
+                <li>
+                  <Link
+                    to="/$directorySlug"
+                    params={{ directorySlug: `${category.slug}-${scopeSlug}` }}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    All {category.plural.toLowerCase()} across Ireland and the UK
+                  </Link>{" "}
+                  — useful if your wedding is near a county border.
+                </li>
+                <li>
+                  <Link
+                    to="/county/$county"
+                    params={{ county: countySlug(normalizeLocationName(supplier.county)) }}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    Every venue and supplier in {location}
+                  </Link>{" "}
+                  — build your shortlist in one place.
+                </li>
+              </ul>
+            </section>
+          ) : null}
 
           {gallery.length > 1 ? (
             <section>
