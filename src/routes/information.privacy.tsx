@@ -5,7 +5,7 @@ import { pageMeta, canonical } from "@/lib/seo";
 
 const TITLE = "Privacy Notice | WedHQ";
 const DESCRIPTION =
-  "How WedHQ collects, uses and protects personal data: what we hold, why we hold it, how long we keep it, and the rights you have under UK and EU data protection law. Last updated 8 September 2026.";
+  "How WedHQ collects, uses and protects personal data: what we hold, why we hold it, how long we keep it, and the rights you have under UK and EU data protection law. Last updated 8 November 2026.";
 
 export const Route = createFileRoute("/information/privacy")({
   head: () => ({
@@ -19,7 +19,7 @@ const SECTIONS = [
   {
     heading: "1. Who is responsible for your data",
     body: [
-      "WedHQ (\"we\", \"us\") is the data controller for personal data processed through the Site at wedhq.co.uk. You can reach us about privacy matters through the contact page.",
+      'WedHQ ("we", "us") is the data controller for personal data processed through the Site at wedhq.co.uk. You can reach us about privacy matters through the contact page.',
       "This notice explains what we collect, why, the legal bases we rely on, how long we keep it, who we share it with, and the rights you have.",
     ],
   },
@@ -32,6 +32,7 @@ const SECTIONS = [
       "Saved listings: the venues and suppliers you save to a shortlist, linked to your account.",
       "Contact messages: anything you send us through the contact page.",
       "Technical data: standard server logs (IP address, browser type, pages visited) used for security and performance.",
+      "Optional analytics: with your choice to accept analytics, Microsoft Clarity collects website interaction data for heatmaps and session recordings. You can withdraw this choice using Cookie settings.",
     ],
   },
   {
@@ -69,7 +70,7 @@ const SECTIONS = [
   {
     heading: "7. Cookies",
     body: [
-      "We use a small number of cookies to keep you signed in and to keep the Site secure. See our Cookie notice for the full list and how to control them.",
+      "We use essential cookies for sign-in and security, and optional Microsoft Clarity analytics after you accept it. See our Cookie notice and Cookie settings to manage your choice.",
     ],
   },
   {
@@ -100,10 +101,13 @@ function PrivacyPage() {
       <PageHeader
         eyebrow="Legal"
         title="Privacy notice"
-        description="What personal data WedHQ collects, why, how long we keep it, and the rights you have over it. Last updated 8 September 2026."
+        description="What personal data WedHQ collects, why, how long we keep it, and the rights you have over it. Last updated 8 November 2026."
       >
         <Breadcrumbs
-          items={[{ label: "Legal hub", to: "/information/legal-hub" }, { label: "Privacy notice" }]}
+          items={[
+            { label: "Legal hub", to: "/information/legal-hub" },
+            { label: "Privacy notice" },
+          ]}
         />
       </PageHeader>
 
@@ -113,7 +117,10 @@ function PrivacyPage() {
             <div key={section.heading} className="mb-10 last:mb-0">
               <h2 className="font-serif text-xl">{section.heading}</h2>
               {section.body.map((paragraph) => (
-                <p key={paragraph.slice(0, 40)} className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                <p
+                  key={paragraph.slice(0, 40)}
+                  className="mt-3 text-sm leading-relaxed text-muted-foreground"
+                >
                   {paragraph}
                 </p>
               ))}

@@ -111,8 +111,8 @@ function PrivacyChoicesPage() {
             at dataprotection.ie. We'd appreciate the chance to put things right first.
           </p>
           <p>
-            For cookie settings, see the Cookie notice — the Site sets no advertising or tracking
-            cookies, so there is no tracking preference to manage.
+            Use Cookie settings to accept or reject optional Microsoft Clarity analytics. You can
+            withdraw your choice at any time. See the Cookie notice for details.
           </p>
         </div>
       </Section>

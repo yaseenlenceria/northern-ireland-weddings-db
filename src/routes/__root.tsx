@@ -12,6 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
+import { AnalyticsChoice } from "@/components/site/AnalyticsChoice";
+import { clarityScript } from "@/lib/clarity-script";
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/seo";
 
 function NotFoundComponent() {
@@ -131,6 +133,13 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en-GB">
       <head>
         <HeadContent />
+        {import.meta.env.PROD ? (
+          <script
+            id="microsoft-clarity"
+            type="text/javascript"
+            dangerouslySetInnerHTML={{ __html: clarityScript }}
+          />
+        ) : null}
       </head>
       <body>
         {children}
@@ -149,6 +158,7 @@ function RootComponent() {
       <Outlet />
       {/* Mounted once so toast() calls across the app are actually visible. */}
       <Toaster />
+      {import.meta.env.PROD ? <AnalyticsChoice /> : null}
     </QueryClientProvider>
   );
 }

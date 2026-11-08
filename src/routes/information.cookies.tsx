@@ -6,9 +6,22 @@ import { pageMeta, canonical } from "@/lib/seo";
 
 const TITLE = "Cookie Notice | WedHQ";
 const DESCRIPTION =
-  "The cookies and similar technologies WedHQ uses, what each one is for, and how to manage or disable them in your browser. Last updated 8 September 2026.";
+  "The cookies and similar technologies WedHQ uses, what each one is for, and how to manage or disable them in your browser. Last updated 8 November 2026.";
 
 const COOKIES = [
+  {
+    name: "Microsoft Clarity (_clck, _clsk)",
+    type: "Optional analytics",
+    purpose:
+      "Heatmaps and session recordings help us understand site use. Clarity loads only after you accept analytics. Microsoft manages its cookie lifetimes.",
+    duration: "See Microsoft Clarity documentation for current lifetimes.",
+  },
+  {
+    name: "wedhq-analytics-consent",
+    type: "Preference (local storage)",
+    purpose: "Remembers whether you accepted or rejected optional analytics.",
+    duration: "Until you change your choice or clear browser storage.",
+  },
   {
     name: "Sign-in session",
     type: "Strictly necessary",
@@ -28,7 +41,7 @@ const COOKIES = [
 const FAQS = [
   {
     q: "Does WedHQ use advertising or tracking cookies?",
-    a: "No. We don't run third-party advertising on the directory and we don't set behavioural tracking cookies. You will not see ads that follow you around the web based on WedHQ browsing.",
+    a: "We use Microsoft Clarity for optional analytics, including heatmaps and session recordings, only after you accept analytics. Advertising storage consent is not granted. You can change your choice using Cookie settings.",
   },
   {
     q: "How do planning tools store my data?",
@@ -66,7 +79,7 @@ function CookiesPage() {
       <PageHeader
         eyebrow="Legal"
         title="Cookie notice"
-        description="The cookies WedHQ sets, what each one does, and how to control them. Last updated 8 September 2026."
+        description="The cookies WedHQ sets, what each one does, and how to control them. Last updated 8 November 2026."
       >
         <Breadcrumbs items={[{ label: "Legal hub", to: "/legal" }, { label: "Cookie notice" }]} />
       </PageHeader>
@@ -74,13 +87,13 @@ function CookiesPage() {
       <Section>
         <div className="max-w-3xl space-y-5 text-muted-foreground">
           <p>
-            This notice explains how WedHQ uses cookies and similar technologies on wedhq.co.uk
-            (the "Site"). It should be read alongside our Privacy notice.
+            This notice explains how WedHQ uses cookies and similar technologies on wedhq.co.uk (the
+            "Site"). It should be read alongside our Privacy notice.
           </p>
           <p>
             Cookies are small text files a website stores on your device. We keep our use of them
-            minimal: the cookies below are the ones the Site sets, and there are no advertising or
-            behavioural-tracking cookies to opt out of.
+            limited to essential functions and optional Microsoft Clarity analytics. Analytics stays
+            off until you accept it. Use Cookie settings to accept, reject or withdraw your choice.
           </p>
         </div>
       </Section>
@@ -123,13 +136,12 @@ function CookiesPage() {
           <p>
             Strictly necessary cookies can't be switched off through our Site because the Site
             wouldn't function without them, but you can block or delete all cookies through your
-            browser settings — usually under "Privacy" or "Site settings". Blocking them means
-            you can still browse, search and read profiles, but you'll need to sign in again each
-            visit.
+            browser settings — usually under "Privacy" or "Site settings". Blocking them means you
+            can still browse, search and read profiles, but you'll need to sign in again each visit.
           </p>
           <p>
-            Some browsers offer a "Do Not Track" or Global Privacy Control signal. Because we
-            don't set tracking cookies, there is no tracking for these signals to switch off.
+            Use Cookie settings to change your analytics preference. Rejecting analytics does not
+            prevent you from browsing, searching or using the planning tools.
           </p>
         </div>
       </Section>
