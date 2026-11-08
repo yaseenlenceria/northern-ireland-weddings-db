@@ -35,3 +35,9 @@ work/
 *.sln
 *.sw?
 .vercel
+
+# Local database exports must never be published with the application.
+database-export/
+*database*.zip
+*.dump
+*.backup

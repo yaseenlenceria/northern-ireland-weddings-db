@@ -95,7 +95,7 @@ export async function sendTransactionalEmail(message: EmailMessage): Promise<Ema
       };
     }
 
-    return { ok: true, providerId: body?.id };
+    return body?.id ? { ok: true, providerId: body.id } : { ok: true };
   } catch (error) {
     return {
       ok: false,

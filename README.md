@@ -11,6 +11,8 @@ Wedding directory for Ireland and the UK (venues, suppliers, planning tools, gui
 
 ## Development
 
+See [the local workflow](docs/local-workflow.md) for Windows setup and the `npm run sync` / `npm run ship` commands.
+
 ```sh
 npm install --ignore-scripts   # postinstall scripts fail on some machines
 npm run build

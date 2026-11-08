@@ -190,6 +190,8 @@ export const submitEnquiry = createServerFn({ method: "POST" })
       RETURNING id
     `;
 
+    if (!enquiry) throw new Error("The enquiry could not be saved.");
+
     const notification = await sendEnquiryNotifications(db, data);
 
     await db`

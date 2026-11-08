@@ -8,6 +8,8 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
+    "sync": "node scripts/git-flow.mjs sync",
+    "ship": "node scripts/git-flow.mjs ship",
     "db:schema": "node scripts/apply_schema.mjs",
     "db:import": "node scripts/import_directory_postgres.mjs",
     "db:import:uk": "node scripts/import_directory_postgres.mjs --uk-only",
@@ -49,9 +51,9 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-query": "^5.101.1",
-    "@tanstack/react-router": "1.170.18",
+    "@tanstack/react-router": "1.170.45",
     "@tanstack/react-start": "^1.169.3",
-    "@tanstack/router-plugin": "1.168.23",
+    "@tanstack/router-plugin": "1.168.47",
     "@tanstack/zod-adapter": "^1.167.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -92,6 +94,6 @@
     "prettier": "^3.7.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
-    "vite": "8.1.5"
+    "vite": "8.3.6"
   }
 }

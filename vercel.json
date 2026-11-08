@@ -14,11 +14,20 @@
   ],
   "headers": [
     {
-      "source": "/((?!assets/|favicon|logo|robots.txt|site.webmanifest).*)",
+      "source": "/((?!assets/|favicon|logo|robots[.]txt|site[.]webmanifest|auth(?:/|$)|dashboard(?:/|$)|api(?:/|$)|_server(?:/|$)).*)",
       "headers": [
         {
           "key": "Cache-Control",
           "value": "public, s-maxage=600, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/(auth|dashboard|api|_server)(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store"
         }
       ]
     }
