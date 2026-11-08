@@ -53,7 +53,11 @@ export function publicImageUrl(value: string) {
   if (value.startsWith("/")) return value;
   try {
     const url = new URL(value);
-    if (PROXIED_IMAGE_HOSTS.has(url.hostname.toLowerCase())) {
+    if (
+      PROXIED_IMAGE_HOSTS.has(url.hostname.toLowerCase()) ||
+      (url.hostname === "s3-eu-west-1.amazonaws.com" &&
+        url.pathname.startsWith("/weddingdates-media/"))
+    ) {
       return `/image/${hexEncode(value)}`;
     }
   } catch {

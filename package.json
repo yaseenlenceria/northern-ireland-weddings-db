@@ -15,7 +15,8 @@
     "db:import:uk": "node scripts/import_directory_postgres.mjs --uk-only",
     "db:seed:uk-demo": "node scripts/seed_uk_demo.mjs",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test:site": "node --experimental-strip-types --test tests/site-review.test.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"

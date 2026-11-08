@@ -49,11 +49,13 @@ const FEATURED_UK_LOCATIONS = [
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const [explored, setExplored] = useState(false);
   const { user } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const fetchHighlights = useServerFn(getHeaderHighlights);
   const highlights = useQuery({
     queryKey: ["header-highlights"],
+    enabled: explored,
     queryFn: () => fetchHighlights(),
     staleTime: 1000 * 60 * 10,
   });
@@ -70,7 +72,11 @@ export function Header() {
         <BrandLink onClick={() => setOpen(false)} />
 
         <nav aria-label="Main" className="hidden flex-1 items-center gap-1 lg:flex">
-          <div className="group relative">
+          <div
+            className="group relative"
+            onMouseEnter={() => setExplored(true)}
+            onFocus={() => setExplored(true)}
+          >
             <button
               type="button"
               className="inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-accent hover:text-accent-foreground"

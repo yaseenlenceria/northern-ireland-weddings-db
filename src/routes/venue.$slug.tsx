@@ -20,7 +20,7 @@ import { ReviewList } from "@/components/site/Reviews";
 import { getVenue } from "@/lib/directory.functions";
 import { firstImage } from "@/lib/media";
 import { VENUE_SLUG, countySlug, listingLocationLabel } from "@/lib/taxonomy";
-import { canonical, clamp, pageMeta } from "@/lib/seo";
+import { absoluteUrl, canonical, clamp, pageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/venue/$slug")({
   loader: async ({ params }) => {
@@ -131,7 +131,9 @@ function VenueProfile() {
           "@type": "EventVenue",
           name: venue.name,
           description: venue.overview ?? venue.description ?? undefined,
-          image: hero ?? undefined,
+          image: [
+            ...new Set([hero, ...gallery].filter((image): image is string => Boolean(image))),
+          ].map((image) => (image.startsWith("/") ? absoluteUrl(image) : image)),
           telephone: venue.phone ?? undefined,
           url: venue.website ?? undefined,
           maximumAttendeeCapacity: venue.capacity_max ?? undefined,

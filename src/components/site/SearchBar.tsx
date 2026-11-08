@@ -76,9 +76,13 @@ export function SearchBar({ compact = false }: { compact?: boolean }) {
           : "sm:grid-cols-2 lg:grid-cols-[1.15fr_1fr_0.95fr_auto] lg:divide-x lg:divide-border/70"
       }`}
     >
-      <Field icon={<Sparkles className="size-4" />} label="What do you need?">
+      <Field
+        icon={<Sparkles className="size-4" />}
+        label="What do you need?"
+        htmlFor="search-category"
+      >
         <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger className={CONTROL}>
+          <SelectTrigger id="search-category" className={CONTROL}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="max-h-80">
@@ -92,7 +96,7 @@ export function SearchBar({ compact = false }: { compact?: boolean }) {
         </Select>
       </Field>
 
-      <Field icon={<MapPin className="size-4" />} label="Where?">
+      <Field icon={<MapPin className="size-4" />} label="Where?" htmlFor="search-location">
         <Select value={location} onValueChange={setLocation}>
           <SelectTrigger className={CONTROL}>
             <SelectValue />
@@ -127,7 +131,11 @@ export function SearchBar({ compact = false }: { compact?: boolean }) {
             value={date}
             onChange={(e) => setDate(e.target.value)}
             className={CONTROL}
+            aria-describedby="date-search-help"
           />
+          <p id="date-search-help" className="mt-1 text-xs text-muted-foreground">
+            Confirm availability directly with each business.
+          </p>
         </Field>
       )}
 
@@ -143,4 +151,3 @@ export function SearchBar({ compact = false }: { compact?: boolean }) {
     </form>
   );
 }
-

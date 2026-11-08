@@ -1,4 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { usePlannerRows } from "@/hooks/usePlannerRows";
+import { checklistRowsSchema } from "@/lib/planner-storage";
+import { PlannerStorageWarning } from "@/components/site/PlannerStorageWarning";
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus, RotateCcw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -63,22 +66,14 @@ export const Route = createFileRoute("/wedding-checklist")({
 });
 
 function ChecklistPage() {
-  const [rows, setRows] = useState<ChecklistItem[]>(STARTER);
+  const { rows, setRows, storageWarning } = usePlannerRows(
+    STORAGE_KEY,
+    LEGACY_STORAGE_KEYS,
+    STARTER,
+    checklistRowsSchema,
+  );
   const [title, setTitle] = useState("");
   const [phase, setPhase] = useState(PHASES[0]!);
-
-  useEffect(() => {
-    const saved =
-      window.localStorage.getItem(STORAGE_KEY) ??
-      LEGACY_STORAGE_KEYS.map((key) => window.localStorage.getItem(key)).find(
-        (value): value is string => Boolean(value),
-      );
-    if (saved) setRows(JSON.parse(saved));
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
-  }, [rows]);
 
   const done = rows.filter((row) => row.done).length;
   const pct = rows.length ? Math.round((done / rows.length) * 100) : 0;
@@ -129,6 +124,7 @@ function ChecklistPage() {
       </PageHeader>
 
       <Section>
+        <PlannerStorageWarning visible={storageWarning} />
         <div className="mx-auto max-w-3xl">
           <div className="rounded-xl border border-border bg-card p-6">
             <div className="flex items-center justify-between text-sm">

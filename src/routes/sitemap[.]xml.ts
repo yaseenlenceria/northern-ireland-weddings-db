@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { SITE_URL } from "@/lib/seo";
-import { cleanImageUrl, publicImageUrl } from "@/lib/media";
+import { imageCandidates, publicImageUrl } from "@/lib/media";
 import {
   CATEGORIES,
   LOCATIONS,
@@ -111,9 +111,7 @@ type ListingImageRow = {
 };
 
 const listingImages = (row: ListingImageRow, title: string): SitemapImage[] =>
-  [row.banner_image, row.logo_image, ...(row.gallery_images ?? [])]
-    .map((image) => cleanImageUrl(image ?? null))
-    .filter((image): image is string => Boolean(image))
+  imageCandidates(row.banner_image, row.logo_image, row.gallery_images)
     .slice(0, IMAGES_PER_LISTING)
     .map((image) => {
       const src = publicImageUrl(image);

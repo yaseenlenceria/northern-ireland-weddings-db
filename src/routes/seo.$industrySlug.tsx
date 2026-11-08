@@ -14,6 +14,7 @@ export const Route = createFileRoute("/seo/$industrySlug")({
   },
   head: ({ params }) => {
     const industry = INDUSTRY_DATA[params.industrySlug];
+    if (!industry) throw notFound();
     return {
       links: canonical(`/seo/${industry.slug}`),
       meta: [
@@ -31,6 +32,7 @@ export const Route = createFileRoute("/seo/$industrySlug")({
 function IndustryPage() {
   const { industrySlug } = Route.useParams();
   const industry = INDUSTRY_DATA[industrySlug];
+  if (!industry) throw notFound();
   const path = `/seo/${industry.slug}`;
   const otherIndustries = INDUSTRIES.filter((item) => item.slug !== industry.slug).slice(0, 5);
 
@@ -197,7 +199,8 @@ function IndustryPage() {
                 </li>
                 <li>
                   <Link
-                    to="/resources/local-seo-for-wedding-suppliers"
+                    to="/seo/resources/$slug"
+                    params={{ slug: "local-seo-for-wedding-suppliers" }}
                     className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                   >
                     Local SEO for wedding suppliers
@@ -205,7 +208,8 @@ function IndustryPage() {
                 </li>
                 <li>
                   <Link
-                    to="/resources/how-to-use-real-weddings-for-seo"
+                    to="/seo/resources/$slug"
+                    params={{ slug: "how-to-use-real-weddings-for-seo" }}
                     className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                   >
                     How to use real weddings for SEO
@@ -213,7 +217,8 @@ function IndustryPage() {
                 </li>
                 <li>
                   <Link
-                    to="/resources/google-business-profile-for-wedding-businesses"
+                    to="/seo/resources/$slug"
+                    params={{ slug: "google-business-profile-for-wedding-businesses" }}
                     className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                   >
                     Google Business Profile basics

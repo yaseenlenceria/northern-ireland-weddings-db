@@ -1,4 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { usePlannerRows } from "@/hooks/usePlannerRows";
+import { budgetRowsSchema } from "@/lib/planner-storage";
+import { PlannerStorageWarning } from "@/components/site/PlannerStorageWarning";
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus, RotateCcw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -96,23 +99,15 @@ export const Route = createFileRoute("/budget-calculator")({
 });
 
 function BudgetPage() {
-  const [rows, setRows] = useState<BudgetItem[]>(STARTER);
+  const { rows, setRows, storageWarning } = usePlannerRows(
+    STORAGE_KEY,
+    LEGACY_STORAGE_KEYS,
+    STARTER,
+    budgetRowsSchema,
+  );
   const [label, setLabel] = useState("");
   const [category, setCategory] = useState(CATEGORIES[0]!);
   const [estimated, setEstimated] = useState("");
-
-  useEffect(() => {
-    const saved =
-      window.localStorage.getItem(STORAGE_KEY) ??
-      LEGACY_STORAGE_KEYS.map((key) => window.localStorage.getItem(key)).find(
-        (value): value is string => Boolean(value),
-      );
-    if (saved) setRows(JSON.parse(saved));
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
-  }, [rows]);
 
   const totals = useMemo(() => {
     const estimate = rows.reduce((sum, row) => sum + row.estimated, 0);
@@ -165,6 +160,7 @@ function BudgetPage() {
       </PageHeader>
 
       <Section>
+        <PlannerStorageWarning visible={storageWarning} />
         <div className="mx-auto max-w-5xl">
           <div className="grid gap-4 sm:grid-cols-3">
             {[

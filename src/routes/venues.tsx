@@ -49,7 +49,7 @@ const searchSchema = z.object({
   q: fallback(z.coerce.string(), "").optional(),
   country: fallback(z.coerce.string(), "all").optional(),
   county: fallback(z.coerce.string(), "all").optional(),
-  capacity: fallback(z.coerce.string(), "all").optional(),
+  capacity: fallback(z.enum(["all", "min80", "min120", "min180", "min250"]), "all").optional(),
   page: fallback(z.coerce.number().int(), 1).optional(),
 });
 

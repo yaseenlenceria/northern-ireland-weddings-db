@@ -14,7 +14,7 @@
   ],
   "headers": [
     {
-      "source": "/((?!assets/|favicon|logo|robots[.]txt|site[.]webmanifest|auth(?:/|$)|dashboard(?:/|$)|api(?:/|$)|_server(?:/|$)).*)",
+      "source": "/((?!assets/|image/|favicon|logo|robots[.]txt|site[.]webmanifest|auth(?:/|$)|dashboard(?:/|$)|api(?:/|$)|_server(?:/|$)).*)",
       "headers": [
         {
           "key": "Cache-Control",

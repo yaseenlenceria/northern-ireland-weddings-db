@@ -191,7 +191,9 @@ function SupplierProfile() {
           "@type": "LocalBusiness",
           name: supplier.name,
           description: supplier.overview ?? supplier.description ?? undefined,
-          image: hero ?? undefined,
+          image: [
+            ...new Set([hero, ...gallery].filter((image): image is string => Boolean(image))),
+          ].map((image) => (image.startsWith("/") ? absoluteUrl(image) : image)),
           telephone: supplier.phone ?? undefined,
           email: supplier.email ?? undefined,
           url: supplier.website ?? undefined,
@@ -376,12 +378,14 @@ function SupplierProfile() {
           <section>
             <h2 className="text-3xl">About {supplier.name}</h2>
             <div className="mt-4 space-y-4 text-muted-foreground">
-              {(supplier.description ??
+              {(
+                supplier.description ??
                 supplier.overview ??
                 [
                   `${supplier.name} is a ${category?.label.toLowerCase() ?? "wedding supplier"} based in ${location}, listed on WedHQ.`,
                   `On this page you can see ${supplier.image_count ?? gallery.length} photos, their service areas and price guide, then send an enquiry directly — WedHQ passes your message to ${supplier.name} and never charges you a booking fee.`,
-                ].join("\n"))
+                ].join("\n")
+              )
                 .split(/\n+/)
                 .filter(Boolean)
                 .map((para: string, i: number) => (
@@ -392,18 +396,22 @@ function SupplierProfile() {
 
           {category && supplier.county ? (
             <section>
-              <h2 className="text-3xl">Planning {category.label.toLowerCase()} for a {location} wedding</h2>
+              <h2 className="text-3xl">
+                Planning {category.label.toLowerCase()} for a {location} wedding
+              </h2>
               <p className="mt-4 text-muted-foreground">
-                Compare {category.plural.toLowerCase()} serving {location} before you book: check who
-                covers your venue's county, what their price guide includes and how recent their work
-                looks. Shortlist two or three, send the same enquiry to each and compare replies on
-                price, availability and what happens if your date changes.
+                Compare {category.plural.toLowerCase()} serving {location} before you book: check
+                who covers your venue's county, what their price guide includes and how recent their
+                work looks. Shortlist two or three, send the same enquiry to each and compare
+                replies on price, availability and what happens if your date changes.
               </p>
               <ul className="mt-4 space-y-2 text-muted-foreground">
                 <li>
                   <Link
                     to="/$directorySlug"
-                    params={{ directorySlug: `${category.slug}-${countySlug(normalizeLocationName(supplier.county))}` }}
+                    params={{
+                      directorySlug: `${category.slug}-${countySlug(normalizeLocationName(supplier.county))}`,
+                    }}
                     className="font-medium text-primary hover:underline"
                   >
                     Browse all {category.plural.toLowerCase()} in {location}

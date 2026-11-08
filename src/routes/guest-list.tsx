@@ -1,4 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { usePlannerRows } from "@/hooks/usePlannerRows";
+import { guestRowsSchema } from "@/lib/planner-storage";
+import { PlannerStorageWarning } from "@/components/site/PlannerStorageWarning";
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,23 +38,15 @@ export const Route = createFileRoute("/guest-list")({
 });
 
 function GuestListPage() {
-  const [rows, setRows] = useState<Guest[]>([]);
+  const { rows, setRows, storageWarning } = usePlannerRows(
+    STORAGE_KEY,
+    LEGACY_STORAGE_KEYS,
+    [],
+    guestRowsSchema,
+  );
   const [name, setName] = useState("");
   const [side, setSide] = useState(SIDES[0]!);
   const [partySize, setPartySize] = useState("1");
-
-  useEffect(() => {
-    const saved =
-      window.localStorage.getItem(STORAGE_KEY) ??
-      LEGACY_STORAGE_KEYS.map((key) => window.localStorage.getItem(key)).find(
-        (value): value is string => Boolean(value),
-      );
-    if (saved) setRows(JSON.parse(saved));
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
-  }, [rows]);
 
   const stats = useMemo(() => {
     const invited = rows.reduce((sum, row) => sum + row.partySize, 0);
@@ -106,6 +101,7 @@ function GuestListPage() {
       </PageHeader>
 
       <Section>
+        <PlannerStorageWarning visible={storageWarning} />
         <div className="mx-auto max-w-4xl">
           <div className="grid gap-4 sm:grid-cols-4">
             {[

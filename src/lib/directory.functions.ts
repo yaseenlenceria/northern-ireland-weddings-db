@@ -1,3 +1,4 @@
+import { listingPreview } from "@/lib/listing-preview";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { publicImageUrl } from "@/lib/media";
@@ -201,7 +202,7 @@ export const listSuppliers = createServerFn({ method: "GET" })
           AND (${data.q ?? null}::text IS NULL OR name ILIKE ${`%${data.q ?? ""}%`})
       `,
       );
-      return { rows: rows.map(sanitizeImages), count, page, perPage };
+      return { rows: rows.map((row) => sanitizeImages(listingPreview(row))), count, page, perPage };
     } catch (error) {
       logPublicDataError("listSuppliers", error);
       return { ...emptyListResult, page, perPage };
@@ -252,7 +253,7 @@ export const listVenues = createServerFn({ method: "GET" })
           AND (${data.venueType ?? null}::text IS NULL OR venue_types @> ARRAY[${data.venueType ?? ""}]::text[])
       `,
       );
-      return { rows: rows.map(sanitizeImages), count, page, perPage };
+      return { rows: rows.map((row) => sanitizeImages(listingPreview(row))), count, page, perPage };
     } catch (error) {
       logPublicDataError("listVenues", error);
       return { ...emptyListResult, page, perPage };
@@ -300,7 +301,7 @@ export const getSupplier = createServerFn({ method: "GET" })
         supplier: sanitizeDetail(supplier),
         reviews: [] as ReviewRow[],
         sourcedReviews: sourced.map(sanitizeReview),
-        similar: similar.map(sanitizeImages),
+        similar: similar.map((row) => sanitizeImages(listingPreview(row))),
       };
     } catch (error) {
       logPublicDataError("getSupplier", error);
@@ -348,7 +349,7 @@ export const getVenue = createServerFn({ method: "GET" })
         venue: sanitizeDetail(venue),
         reviews: [] as ReviewRow[],
         sourcedReviews: sourced.map(sanitizeReview),
-        similar: similar.map(sanitizeImages),
+        similar: similar.map((row) => sanitizeImages(listingPreview(row))),
       };
     } catch (error) {
       logPublicDataError("getVenue", error);
@@ -422,8 +423,8 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
       ]);
 
     return {
-      suppliers: suppliers.map(sanitizeImages),
-      venues: venues.map(sanitizeImages),
+      suppliers: suppliers.map((row) => sanitizeImages(listingPreview(row))),
+      venues: venues.map((row) => sanitizeImages(listingPreview(row))),
       counts: {
         suppliers: countValue(supplierCount),
         venues: countValue(venueCount),
@@ -632,7 +633,9 @@ export const getDirectoryStats = createServerFn({ method: "GET" })
   });
 
 export const getCountyStats = createServerFn({ method: "GET" })
-  .validator((d: unknown) => z.object({ county: z.string(), country: z.string().optional() }).parse(d))
+  .validator((d: unknown) =>
+    z.object({ county: z.string(), country: z.string().optional() }).parse(d),
+  )
   .handler(async ({ data }) => {
     try {
       const sql = await db();
@@ -680,7 +683,15 @@ export const getHeaderHighlights = createServerFn({ method: "GET" }).handler(asy
   try {
     const sql = await db();
     const [venues, suppliers] = await Promise.all([
-      sql<{ slug: string; name: string; country: string | null; county: string | null; image: string | null }[]>`
+      sql<
+        {
+          slug: string;
+          name: string;
+          country: string | null;
+          county: string | null;
+          image: string | null;
+        }[]
+      >`
         SELECT slug, name, country, county, COALESCE(logo_image, gallery_images[1]) AS image
         FROM venues
         WHERE COALESCE(logo_image, gallery_images[1]) IS NOT NULL
@@ -709,7 +720,13 @@ export const getHeaderHighlights = createServerFn({ method: "GET" }).handler(asy
   } catch (error) {
     logPublicDataError("getHeaderHighlights", error);
     return {
-      venues: [] as { slug: string; name: string; country: string | null; county: string | null; image: string | null }[],
+      venues: [] as {
+        slug: string;
+        name: string;
+        country: string | null;
+        county: string | null;
+        image: string | null;
+      }[],
       suppliers: [] as {
         slug: string;
         name: string;
@@ -726,14 +743,30 @@ export const getGuideHighlights = createServerFn({ method: "GET" }).handler(asyn
   try {
     const sql = await db();
     const [venues, suppliers] = await Promise.all([
-      sql<{ slug: string; name: string; country: string | null; county: string | null; image: string | null }[]>`
+      sql<
+        {
+          slug: string;
+          name: string;
+          country: string | null;
+          county: string | null;
+          image: string | null;
+        }[]
+      >`
         SELECT slug, name, country, county, COALESCE(logo_image, gallery_images[1]) AS image
         FROM venues
         WHERE COALESCE(logo_image, gallery_images[1]) IS NOT NULL
         ORDER BY rating DESC NULLS LAST, image_count DESC NULLS LAST, name ASC
         LIMIT 3
       `,
-      sql<{ slug: string; name: string; country: string | null; county: string | null; image: string | null }[]>`
+      sql<
+        {
+          slug: string;
+          name: string;
+          country: string | null;
+          county: string | null;
+          image: string | null;
+        }[]
+      >`
         SELECT slug, name, country, county, COALESCE(banner_image, logo_image, gallery_images[1]) AS image
         FROM suppliers
         WHERE COALESCE(banner_image, logo_image, gallery_images[1]) IS NOT NULL
@@ -745,7 +778,13 @@ export const getGuideHighlights = createServerFn({ method: "GET" }).handler(asyn
   } catch (error) {
     logPublicDataError("getGuideHighlights", error);
     return {
-      venues: [] as { slug: string; name: string; country: string | null; county: string | null; image: string | null }[],
+      venues: [] as {
+        slug: string;
+        name: string;
+        country: string | null;
+        county: string | null;
+        image: string | null;
+      }[],
       suppliers: [] as {
         slug: string;
         name: string;
